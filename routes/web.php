@@ -93,6 +93,16 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/viewSumOfAllTransactionsOfEachStudent', 'FinanceQueriesController@viewSumOfAllTransactionsOfEachStudent')->name('viewSumOfAllTransactionsOfEachStudent');
             });
         });
+
+        Route::prefix('docket')->group(function () {
+            Route::get('/index', 'DocketController@index')->name('docket.index');
+            Route::get('/import', 'DocketController@import')->name('docket.import');
+            Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+
+            
+        });
+
+        
     });
             
 });

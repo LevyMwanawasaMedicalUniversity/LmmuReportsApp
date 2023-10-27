@@ -100,7 +100,32 @@
           <i class="now-ui-icons business_bank"></i>
           <p>{{ __('Finance') }}</p>
         </a>
-      </li>       
+      </li>
+      <li>
+        <a data-toggle="collapse" href="#docketExamples">
+          <i class="now-ui-icons education_paper"></i>
+          <p>
+            {{ __("Docket") }}
+            <b class="caret"></b>
+          </p>
+        </a>
+        <div class="collapse show" id="docketExamples">
+          <ul class="nav">
+            <li class="@if ($activePage == 'docket-import') active @endif">
+              <a href="{{ route('docket.import') }}">
+                <i class="now-ui-icons arrows-1_share-66"></i>
+                <p> {{ __("Import Students") }} </p>
+              </a>
+            </li>
+            <li class="@if ($activePage == 'docket-index') active @endif">
+              <a href="{{ route('docket.index') }}">
+                <i class="now-ui-icons text_align-left"></i>
+                <p> {{ __("View Students") }} </p>
+              </a>
+            </li>            
+          </ul>
+        </div>
+      </li>        
     </ul>
   </div>
 </div>
