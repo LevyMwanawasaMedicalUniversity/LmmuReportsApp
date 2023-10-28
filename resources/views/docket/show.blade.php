@@ -43,21 +43,25 @@
 						<div style="float: left; font-size: 18pt; color: #000; margin-top: 15px; width: 500px; ">
 								<span style="font-size: 22pt;">Levy Mwanawasa Medical University</span>
 								<div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2023 </div>
+                                <div style="font-size: 15pt; font-weight: bold;">UNREGISTERED STUDENT </div>
+                                <BR>
 						
 						</div>
 					</div>
-					<div style="width: 800px; margin-left: 20px; margin-top: 20px;"><div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> 
-                        {{-- <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png"> --}}
-                    </div>
+					<div style="width: 800px; margin-left: 20px; margin-top: 20px;">
+                        {{-- <div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> 
+                        <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png">
+                        </div> --}}
                         <div style="float: left; width: 300px; ">
 							Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}} </b> 
 							<br> StudentID No.: <b>{{$studentResults->StudentID}}</b>
 							<br> NRC No.: <b>{{$studentResults->GovernmentID}}</b>
-						</div>
-						<div style="float: left; width: 400px;">
                             <p>Printed: <b><span id="currentDate"></span></b></p>
 							Balance: <b>K {{$studentResults->Amount}}</b>
 							<br> Delivery: <b>{{$studentResults->StudyType}}</b>
+						</div>
+						<div style="float: left; width: 400px;">
+                            
 						</div>
 					</div>
 					
