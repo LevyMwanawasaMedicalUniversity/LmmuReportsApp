@@ -31,7 +31,7 @@
                 <div style="width: 850px; height: 700px; position: relative; margin-top: 50px;  margin-bottom: 30px; ">
 					<div style="float: left; width: 800px; position: relative; ">
 						<div style="position: absolute;  right: 10px; font-size: 10pt; top: 100px;">
-							<img src="/datastore/output/secure/230200632-2023-10-28-96653.png"><br>230200632-2023-10-28-297369
+							{{-- <img src="/datastore/output/secure/230200632-2023-10-28-96653.png"><br>230200632-2023-10-28-297369 --}}
 						</div>
 			
 						<div style="width: 155px; height: 150px;  padding-left: 30px; float: left;">
@@ -46,7 +46,10 @@
 						
 						</div>
 					</div>
-					<div style="width: 800px; margin-left: 20px; margin-top: 20px;"><div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png"></div><div style="float: left; width: 300px; ">
+					<div style="width: 800px; margin-left: 20px; margin-top: 20px;"><div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> 
+                        {{-- <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png"> --}}
+                    </div>
+                        <div style="float: left; width: 300px; ">
 							Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}} </b> 
 							<br> StudentID No.: <b>{{$studentResults->StudentID}}</b>
 							<br> NRC No.: <b>{{$studentResults->GovernmentID}}</b>
@@ -65,59 +68,84 @@
 					</div>
 					<div style="float: left; width: 400px;">
 					</div>
-					<div style="width: 600px; margin-left: 20px; margin-top: 20px;"><table style="border: 1px solid #ccc; padding: 5px;  width: 800px;">
-                    <hidden id='studentId' name='studentId' value ='{{$studentResults->StudentID}}'></hidden>
-                    <form id="myForm" action="" method="POST">
-                        
-                        @csrf
-
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Program</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($courses as $course)
-                                <tr>
-                                    <td>
-                                    <div class="course-pair">
-                                        <!-- <label for="field1">Course:</label> -->
-                                        <input type="text" name="courses[][Course]" value="{{$course->Course}}" required>
-                                        <!-- <label for="field2">Program:</label> -->
-                                        <input type="text" name="courses[][Program]" value="{{$course->Program}}" required>
-                                    </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="remove-row">Remove</button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                        <button type="button" id="add-row">Add</button>
-                        <button type="submit">Submit</button>
-                    </form>
+					<div style="width: 100%; margin-left: 20px; margin-top: 20px;"><table style="border: 1px solid #ccc; padding: 5px;  width: 800px;">
+                        <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                        <form id="myForm" action="" method="POST">
+                            @csrf
+                            <table id="myTable">
+                                <thead>
+                                    <tr>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Course</th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;"><b>DATE / TIME</b></th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;"><b>VENUE</b></th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;"><b>SIGNATURE INVIGILATOR</b></th>
+                                        <th style="border: 1px solid #ccc; padding: 5px;">Action
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($courses as $course)
+                                    <tr>
+                                        <td style="border: 1px solid #ccc; padding: 5px;">
+                                          <div class="course-pair">
+                                            <input style="width: 80px" type="text" name="courses[][Course]" value="{{$course->Course}}" required>
+                                            <input style="width: 200px" type="text" name="courses[][Program]" value="{{$course->Program}}" required>
+                                          </div>
+                                        </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; width: 180px; height: 35px;">&nbsp; </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp; </td>
+                                        <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp;</td>
+                                        <td>
+                                            <button type="button" onclick="removeRow(this)">Remove</button>
+                                        </td>
+                                      </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <button type="button" id="addRow">Add</button>
+                            <button type="submit">Submit</button>
+                        </form>
                     <div style="font-size: 10px; padding-top: 20px; float: left;"> 
                         Kindly cross check your courses on this slip against the separate examination timetable for the EXACT date and time of the examination.<br>
                         VERY IMPORTANT : Admission into the Examination Hall will be STRICTLY by STUDENT IDENTITY CARD, NRC OR PASSPORT, this EXAMINATION CONFIRMATION SLIP and clearance of all OUTSTANDING TUITION FEES.<br><center>
-                            <button class="block" style="background-color:green; border-color:blue;height: 40px; width: 150px" size="100" onclick="window.print()">Click To Print Docket</button></center>
+                            <button class="block" style="background-color: green; border-color: blue; height: 40px; width: 150px" size="100" onclick="printContent()">Click To Print Docket</button>
                         <div></div>
                     </div></div></div>
 
                         </div>
                         
                     </div>
+                    
         </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+
+function printContent() {
+    var contentToPrint = document.querySelector('.content').innerHTML;
+    var printWindow = window.open('', '', 'width=600,height=600');
+    
+    printWindow.document.open();
+    printWindow.document.write('<html><head><title>Print</title></head><body>' + contentToPrint + '</body></html>');
+    printWindow.document.close();
+
+    var images = printWindow.document.getElementsByTagName('img');
+    var imagesLoaded = 0;
+
+    for (var i = 0; i < images.length; i++) {
+        images[i].onload = function() {
+            imagesLoaded++;
+            if (imagesLoaded === images.length) {
+                // All images are loaded, now we can initiate the print
+                printWindow.print();
+                printWindow.close();
+            }
+        };
+    }
+}
     $('#myForm').on('submit', function(e) {
         e.preventDefault();
+        
 
         var coursePairs = $('.course-pair');
         var dataArray = [];
@@ -138,8 +166,11 @@
             }
         });
 
+        var studentId = $('#studentsId').val();
+        var url = '/docket/updateCourses/' + studentId;
+        console.log('Student ID:', studentId);
         $.ajax({
-            url: '/updateCourses/' + studentId, // Include studentId in the URL
+            url: url,
             method: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
@@ -148,25 +179,53 @@
             success: function(response) {
                 // Handle the success response from the server
                 console.log(response);
+                if (response.success) {
+                    // Display a success message to the user
+                    alert('Courses updated successfully.');
+                } else {
+                    // Display an error message to the user
+                    alert('Courses updated successfully.');
+                }
             },
             error: function(xhr, status, error) {
                 // Handle the error
                 console.log(error);
+                // Display an error message to the user
+                alert('Error: ' + error);
             }
         });
     });
 
     $(document).ready(function() {
-        $('#add-row').on('click', function() {
-            var coursePair = $('.course-pair:first').clone(true);
+      // Add Row
+      
 
-            // Clear input fields in the newly added row
-            coursePair.find('input').val('');
+      document.getElementById("addRow").addEventListener("click", function () {
+            var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];
+            var newRow = table.insertRow(table.rows.length);
+            var cell1 = newRow.insertCell(0);
+            var cell2 = newRow.insertCell(1);
+            var cell3 = newRow.insertCell(1);
+            var cell4 = newRow.insertCell(1);
+            var cell5 = newRow.insertCell(4);
 
-            $('#myForm table tbody').append(coursePair);
-            console.log('clicked');
+            cell1.innerHTML = '<div class="course-pair">' +
+                '<input type="text" name="courses[][Course]" placeholder="Course Code" required>' +
+                '<input type="text" name="courses[][Program]" placeholder="Course Name" required>' +
+                '</div>';
+            cell2.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
+            cell3.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
+            cell4.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
+            cell5.innerHTML = '<button type="button" onclick="removeRow(this)">Remove</button>';
         });
-    })
+
+        // Remove the clicked row from the table
+        
+    });
+    function removeRow(button) {
+            var row = button.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+        }
 </script>
 
 <script>
