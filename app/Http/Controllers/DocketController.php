@@ -82,84 +82,32 @@ class DocketController extends Controller
 
     public function updateCoursesForStudent(Request $request, $studentId) {
         try {
+            // First, delete all existing courses for the student
             Courses::where('Student', $studentId)->delete();
             
+            // Get the 'dataArray' from the request
+            $dataArray = $request->input('dataArray');
             
-            $newData = $request->input('courses');   
-            // Initialize variables to hold course and program
-            $course = null;
-            $program = null;
-            $newData;
-            
-            // Initialize an empty result array
-            $result = [];
-
-            // Iterate through the $newData array and build the result
-            $resultIndex = 0; // Initialize the index for the result array
-            foreach ($newData as $key => $value) {
-                if ($key === "Course") {
-                    // Create a new entry with Course and Program
-                    $result[$resultIndex] = [
-                        "Course" => $value,"Program" => $value,
-                    ];
-                    $resultIndex++;
-                } else {
-                    // Add the Program to the current entry
-                    $result[$resultIndex] = [
-                        "Program" => $value,
-                    ];
-                    // Move to the next result index
-                    
-                }
-            }
-
-            return $result;
-            if($newData){
-    
-                foreach ($newData as $data) {
-                    
-                    // Check if the data is for a course
-                    if ((isset($data['Course']))) {
-                        if(isset($data['Program'])){
-                            $course = $data['Course'];
-                            $program = $data['Program'];
-                        }
-                    }else{
-                        return back()->with('success', 'ISSET I FAILED.');
-                    }
-                    
-                    // Check if both course and program are available
-                    $existingCourse = Courses::where('Student', $studentId)
-                        ->where('Program', $program)
-                        ->where('Course', $course)
-                        ->get();
-                    if ($course !== null && $program !== null) {
+            if (!empty($dataArray)) {
+                foreach ($dataArray as $data) {
+                    // Check if both 'Course' and 'Program' are available in the data
+                    if (isset($data['Course']) && isset($data['Program'])) {
                         // Create a new record in the Courses table
-                        if (count($existingCourse) <= 0) {
-                            // Create a new record in the Courses table
-                            Courses::create([
-                                'Student' => $studentId,
-                                'Course' => $data['Course'],
-                                'Program' => $data['Program'],
-                                'Grade' => null
-                            ]);
-                        
-                        }else{
-                            return back()->with('error', 'WRONDDDD');
-                        }
-                        
-                    
-                    }else{
-                        return $data;
+                        Courses::create([
+                            'Student' => $studentId,
+                            'Course' => $data['Course'],
+                            'Program' => $data['Program'],
+                            'Grade' => null // You can set a default grade here if needed
+                        ]);
+                    } else {
+                        return back()->with('error', 'Invalid data format.');
                     }
                 }
-        
-                return $newData;
-            }else{
-                return back()->with('success', 'UPDATED grgrg COURSES.');
             }
+    
+            return back()->with('success', 'Courses updated successfully.');
         } catch (Exception $e) {
-            return back()->with('error', $e);
+            return back()->with('error', $e->getMessage());
         }
     }
 

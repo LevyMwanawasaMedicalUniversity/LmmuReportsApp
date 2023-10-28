@@ -66,7 +66,8 @@
 					<div style="float: left; width: 400px;">
 					</div>
 					<div style="width: 600px; margin-left: 20px; margin-top: 20px;"><table style="border: 1px solid #ccc; padding: 5px;  width: 800px;">
-                    <form action="{{ route('update.courses', ['studentId' => $studentResults->StudentID]) }}" method="POST">
+                    <form id="myForm" action="{{ route('update.courses', ['studentId' => $studentResults->StudentID]) }}" method="POST">
+                        <hidden id='studentId' name='studentId' value ='{{$studentResults->StudentID}}'></hidden>
                         @csrf
 
                         <table>
@@ -81,10 +82,12 @@
                                 @foreach($courses as $course)
                                 <tr>
                                     <td>
-                                        <input type="text" name="courses[][Course]" value="{{ $course->Course }}" required>
-                                    </td>
-                                    <td>
-                                        <input type="text" name="courses[][Program]" value="{{ $course->Program }}" required>
+                                    <div class="course-pair">
+                                        <!-- <label for="field1">Course:</label> -->
+                                        <input type="text" name="courses[][Course]" value="{{$course->Course}}" required>
+                                        <!-- <label for="field2">Program:</label> -->
+                                        <input type="text" name="courses[][Program]" value="{{$course->Program}}" required>
+                                    </div>
                                     </td>
                                     <td>
                                         <button type="button" class="remove-row">Remove</button>
@@ -112,30 +115,53 @@
 </div>
 
 <script>
-    // Add new row
-    document.getElementById('add-row').addEventListener('click', function () {
-        const table = document.querySelector('table tbody');
-        const newRow = document.querySelector('table tbody tr').cloneNode(true);
+    $('#myForm').on('submit', function(e) {
+        e.preventDefault();
 
-        // Clear input fields in the newly added row
-        const inputs = newRow.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.value = '';
-            if (input.name.includes('Course')) {
-                input.name = 'courses[][Course]';
-            } else if (input.name.includes('Program')) {
-                input.name = 'courses[][Program]';
+        var coursePairs = $('.course-pair');
+        var dataArray = [];
+        var studentId = $('#studentId').val(); // Get the studentId from the hidden input
+
+        coursePairs.each(function(index, pair) {
+            var courseInput = $(pair).find('input[name="courses[][Course]"]');
+            var programInput = $(pair).find('input[name="courses[][Program]"]');
+
+            var courseValue = courseInput.val();
+            var programValue = programInput.val();
+
+            if (courseValue && programValue) {
+                dataArray.push({
+                    Course: courseValue,
+                    Program: programValue
+                });
             }
         });
 
-        table.appendChild(newRow);
+        $.ajax({
+            url: '/updateCourses/' + studentId, // Include studentId in the URL
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                dataArray: dataArray
+            },
+            success: function(response) {
+                // Handle the success response from the server
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                // Handle the error
+                console.log(error);
+            }
+        });
     });
 
-    // Remove row
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('remove-row')) {
-            e.target.closest('tr').remove();
-        }
+    $('#add-row').on('click', function() {
+        var coursePair = $('.course-pair:first').clone(true);
+
+        // Clear input fields in the newly added row
+        coursePair.find('input').val('');
+
+        $('#myForm').append(coursePair);
     });
 </script>
 
