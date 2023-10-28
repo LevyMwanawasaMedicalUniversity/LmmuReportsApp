@@ -95,9 +95,11 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::prefix('docket')->group(function () {
-            Route::get('/index', 'DocketController@index')->name('docket.index');
+            Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
             Route::get('/import', 'DocketController@import')->name('docket.import');
+            Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
             Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+            Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
 
             
         });

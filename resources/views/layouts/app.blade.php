@@ -25,7 +25,9 @@
 </head>
 
 <body class="{{ $class ?? '' }}">
+
   <div class="wrapper">
+  
     @auth
       @include('layouts.page_template.auth')
     @endauth

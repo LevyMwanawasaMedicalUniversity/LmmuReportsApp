@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 
 use App\Models\BasicInformation;
+use App\Models\Grade;
 use App\Models\SagePostAR;
 use App\Models\Schools;
 use App\Models\Study;
@@ -76,6 +77,135 @@ class Controller extends BaseController
         $results= $this->queryRegisteredAndUnregisteredPerYear($academicYear);
         return $results;
     }
+
+    public function getAppealStudentDetails($academicYear,$studentNumbers){
+        $results= $this->queryAppealStudentDetails($academicYear,$studentNumbers);
+        return $results;
+    }
+
+    private function queryAppealStudentDetails($academicYear, $studentNumbers) {
+        $results = Schools::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.Sex',
+            'student-study-link.StudentID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            'programmes.ProgramName AS "Programme Code"',
+            'study.Name',
+            'schools.Description AS "School"',
+            'basic-information.StudyType',
+            'balances.Amount',
+            DB::raw("CASE
+                WHEN `course-electives`.StudentID IS NOT NULL THEN 'REGISTERED'
+                ELSE 'NO REGISTRATION'
+            END AS `RegistrationStatus`"),
+            DB::raw("CASE 
+                WHEN programmes.ProgramName LIKE '%1' THEN 'YEAR 1'
+                WHEN programmes.ProgramName LIKE '%2' THEN 'YEAR 2'
+                WHEN programmes.ProgramName LIKE '%3' THEN 'YEAR 3'
+                WHEN programmes.ProgramName LIKE '%4' THEN 'YEAR 4'
+                WHEN programmes.ProgramName LIKE '%5' THEN 'YEAR 5'
+                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'
+                WHEN programmes.ProgramName IS NULL THEN 'NO REGISTRATION'
+                ELSE 'NO REGISTRATION'
+            END AS `YearOfStudy`")
+        )
+        ->leftJoin('study', 'schools.ID', '=', 'study.ParentID')
+        ->leftJoin('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+        ->leftJoin('course-electives', function ($join) use ($academicYear) {
+            $join->on('student-study-link.StudentID', '=', 'course-electives.StudentID')
+                ->where('course-electives.Year', '=', $academicYear);
+        })
+        ->leftJoin('courses', 'course-electives.CourseID', '=', 'courses.ID')
+        ->leftJoin('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->leftJoin('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')
+        ->leftJoin('balances','balances.StudentID','=','basic-information.ID')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+        ->where(function ($query) use ($studentNumbers) {
+            $query->where('basic-information.StudyType', '=', 'Fulltime')
+                ->orWhere('basic-information.StudyType', '=', 'Distance');
+        })
+        ->where('basic-information.StudyType', '!=', 'Staff')
+        ->whereIn('student-study-link.StudentID', $studentNumbers)
+        ->groupBy('student-study-link.StudentID');
+    
+        return $results;
+    }
+
+    public function getCoursesForFailedStudents($studentId) {
+        $failedCourses = [];
+    
+        $failedStudents = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
+            ->whereIn('StudentNo', function ($query) {
+                $query->select('StudentNo')
+                    ->from('grades')
+                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG']);
+            })
+            ->where('StudentNo', $studentId)
+            ->orderBy('StudentNo')
+            ->get();
+    
+        foreach ($failedStudents as $row) {
+            $student = $row->StudentNo;
+            $program = $row->ProgramNo;
+            $course = $row->CourseNo;
+            $grade = $row->Grade;
+    
+            $repeatedCourses = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
+                ->where('CourseNo', $course)
+                ->where('StudentNo', $student)
+                ->get();
+    
+            $duplicateCount = count($repeatedCourses);
+    
+            if ($duplicateCount > 1) {
+                $cleared = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
+                    ->where('StudentNo', $student)
+                    ->where('CourseNo', $course)
+                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])
+                    ->orderBy('Grade')
+                    ->get();
+    
+                $ifCleared = count($cleared);
+    
+                if ($ifCleared === 0) {
+                    continue;
+                } else {
+                    foreach ($cleared as $row2) {
+                        $student2 = $row2->StudentNo;
+                        $program2 = $row2->ProgramNo;
+                        $course2 = $row2->CourseNo;
+                        $grade2 = $row2->Grade;
+    
+                        if (!in_array($grade2, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])) {
+                            $failedCourses[] = [
+                                'Student' => $student2,
+                                'Program' => $program2, // Replace with the program
+                                'Course' => $course2,
+                                'Grade' => $grade2,
+                            ];
+                        }
+                    }
+                }
+            } else {
+                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])) {
+                    $failedCourses[] = [
+                        'Student' => $student,
+                        'Program' => $program, // Replace with the program
+                        'Course' => $course,
+                        'Grade' => $grade,
+                    ];
+                }
+            }
+        }
+    
+        return $failedCourses;
+    }
+    
 
     private function queryRegisteredAndUnregisteredPerYear($academicYear) {
         $results = Schools::select(

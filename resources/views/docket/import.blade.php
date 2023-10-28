@@ -43,8 +43,8 @@
                             <div class="form-group">
                                 <label for="term" style="font-weight: bold; font-size: 16px;">Term</label>
                                 <select name="term" class="form-control" required>
-                                    <option value="Term-1">Term-1</option>
                                     <option value="Term-2">Term-2</option>
+                                    <option value="Term-1">Term-1</option>                                    
                                     <option value="Term-3">Term-3</option>
                                     <option value="Term-4">Term-4</option>
                                 </select>

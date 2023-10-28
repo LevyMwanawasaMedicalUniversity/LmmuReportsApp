@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Schools extends Model
+class Courses extends Model
 {
     use HasFactory;
 
-    protected $connection = 'edurole_database';
-    protected $table = 'schools';
-
-    
+    protected $fillable = [
+        'Student',
+        'Program',    
+        'Course', 
+        'Grade'   
+    ];
 }

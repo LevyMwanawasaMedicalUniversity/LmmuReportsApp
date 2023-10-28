@@ -5,12 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Schools extends Model
+class Grade extends Model
 {
     use HasFactory;
 
     protected $connection = 'edurole_database';
-    protected $table = 'schools';
-
-    
+    protected $table = 'grades';
 }
