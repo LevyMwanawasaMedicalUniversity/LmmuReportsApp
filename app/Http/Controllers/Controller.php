@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 
 use App\Models\BasicInformation;
 use App\Models\Grade;
+use App\Models\Grades;
 use App\Models\SagePostAR;
 use App\Models\Schools;
 use App\Models\Study;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
+use Exception;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller as BaseController;
@@ -205,6 +207,79 @@ class Controller extends BaseController
     
         return $failedCourses;
     }
+
+    public function getYearOfStudy($courseNos) {
+        $maxYear = [];
+    
+        foreach ($courseNos as $courseNo) {
+            // Use regular expression to find the first number after the letters
+            if (preg_match('/[a-zA-Z]+(\d+)/', $courseNo, $matches)) {
+                $year = $matches[1]; // Get the whole number as a string
+                $yearDigits = str_split($year); // Split the number into individual digits
+                $maxYear = array_merge($maxYear, $yearDigits); // Merge the digits into the maxYear array
+            }
+        }    
+        // Find the highest digit
+        if($maxYear){
+            $highestDigit = max($maxYear);
+            return $highestDigit + 1;
+        }else{   
+            $highestDigit = 1;
+            return $highestDigit;
+        }
+    }
+
+    
+    public function findUnregisteredStudentCourses($studentId)
+    {    
+        // Perform the query to get grades
+        $gradesCheck = Grades::query()
+            ->where('grades.StudentNo', $studentId)
+            ->get();
+
+        // Extract course numbers from the results
+        $courseNumbers = $gradesCheck->pluck('CourseNo')->toArray();
+
+        // Calculate the current year of study
+        $currentYearOfStudy = $this->getYearOfStudy($courseNumbers);        
+
+        
+        $level = '%' . $currentYearOfStudy;
+
+        $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
+            ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
+            ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
+            ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+            ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
+            ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+            ->where('p.ProgramName', 'like', $level)
+            ->where('basic-information.ID', $studentId)
+            ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            ->get();
+        
+        
+            if(count($courses) >0){
+                foreach ($courses as $course) {
+                    $studentCourses[] = [
+                        'Student' => $studentId,
+                        'Program' => $course->CourseDescription, // You mentioned to replace with the program
+                        'Course' => $course->Name,
+                        'Grade' => null, // You need to define $grade2 here
+                    ];
+                }
+
+                return $studentCourses;
+            }else{
+                $studentCourses[] = [
+                    'Student' => $studentId,
+                    'Program' => "NO VALUE", // You mentioned to replace with the program
+                    'Course' => "NO VALUE",
+                    'Grade' => "NO VALUE", // You need to define $grade2 here
+                ];
+                return $studentCourses;
+            }
+            
+        }
     
 
     private function queryRegisteredAndUnregisteredPerYear($academicYear) {

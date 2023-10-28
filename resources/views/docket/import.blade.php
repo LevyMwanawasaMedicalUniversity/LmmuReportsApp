@@ -15,6 +15,18 @@
           <div class="card">
               <div class="card-header">
                   <h4 class="card-title">Import Student</h4>
+
+                  @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
               </div>
               <div class="card-body">
                   <form action="{{ route('import.students') }}" method="POST" enctype="multipart/form-data">

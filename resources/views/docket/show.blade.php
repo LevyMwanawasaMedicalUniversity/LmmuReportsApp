@@ -66,8 +66,9 @@
 					<div style="float: left; width: 400px;">
 					</div>
 					<div style="width: 600px; margin-left: 20px; margin-top: 20px;"><table style="border: 1px solid #ccc; padding: 5px;  width: 800px;">
-                    <form id="myForm" action="{{ route('update.courses', ['studentId' => $studentResults->StudentID]) }}" method="POST">
-                        <hidden id='studentId' name='studentId' value ='{{$studentResults->StudentID}}'></hidden>
+                    <hidden id='studentId' name='studentId' value ='{{$studentResults->StudentID}}'></hidden>
+                    <form id="myForm" action="" method="POST">
+                        
                         @csrf
 
                         <table>
@@ -113,7 +114,7 @@
         </div>
     </div>
 </div>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $('#myForm').on('submit', function(e) {
         e.preventDefault();
@@ -155,14 +156,17 @@
         });
     });
 
-    $('#add-row').on('click', function() {
-        var coursePair = $('.course-pair:first').clone(true);
+    $(document).ready(function() {
+        $('#add-row').on('click', function() {
+            var coursePair = $('.course-pair:first').clone(true);
 
-        // Clear input fields in the newly added row
-        coursePair.find('input').val('');
+            // Clear input fields in the newly added row
+            coursePair.find('input').val('');
 
-        $('#myForm').append(coursePair);
-    });
+            $('#myForm table tbody').append(coursePair);
+            console.log('clicked');
+        });
+    })
 </script>
 
 <script>

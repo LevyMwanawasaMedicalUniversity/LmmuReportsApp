@@ -32,7 +32,15 @@ class DocketController extends Controller
     }
 
     public function showStudent($studentId){
-        $dataArray  = $this->getCoursesForFailedStudents($studentId);
+        // try{
+            $dataArray  = $this->getCoursesForFailedStudents($studentId);
+            if(!$dataArray){
+                $dataArray = $this->findUnregisteredStudentCourses($studentId);
+                         
+            }
+        // }catch(Exception $e){
+            
+        // }
         $academicYear= 2023;
         $student = Student::query()
                         ->where('student_number','=', $studentId)
@@ -48,7 +56,7 @@ class DocketController extends Controller
         $existingCourse = Courses::where('Student', $studentId)
                 ->get();
     
-        if (count($existingCourse) <= 0) {
+        if ((count($existingCourse) <= 0)) {
 
             foreach ($dataArray  as $item) {
                 $student = $item['Student'];
