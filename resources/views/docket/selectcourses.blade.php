@@ -37,8 +37,8 @@
                             @csrf  
                             <table class="table">
                                 <thead class="text-primary">
-                                    
-                                    <input type="text" id="filterInput"class="form-control" placeholder="Filter by course code or course name...">
+                                    <label for="filterInput">Filter Courses</label>
+                                    <input type="text" name="filterInput" id="filterInput"class="form-control" placeholder="Filter by course code or course name...">
                                 <tr>
                                     <th>Select</th>
                                     <th>Course Code</th>

@@ -29,16 +29,17 @@
                             {{ session('error') }}
                         </div>
                     @endif
-                    <form action="{{ route('courses.import') }}" method="GET">
-                        @csrf
+                    {{-- <form action="{{ route('courses.import') }}" method="GET">
+                        @csrf --}}
                         
                         <div class="form-group">
-                            <label for="search">Search Courses</label>
-                            <input type="text" name="course-code" class="form-control" id="course-code" placeholder="Enter cousrse code">
+                            <label for="filterInput">Filter Courses</label>
+                            {{-- <input type="text" name="course-code" class="form-control" id="course-code" placeholder="Enter cousrse code"> --}}
+                            <input type="text" name="filterInput" id="filterInput"class="form-control" placeholder="Filter by course code or course name...">
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Search</button>
-                      </form>
+                        {{-- <button type="submit" class="btn btn-primary">Search</button>
+                      </form> --}}
                 </div>
                 <div class="card-body">
                 
@@ -68,5 +69,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Get the input element and table
+    var filterInput = document.getElementById('filterInput');
+    var table = document.querySelector('.table');
+
+    // Add an input event listener to the filter input
+    filterInput.addEventListener('input', function () {
+        var filter = filterInput.value.toLowerCase(); // Convert input to lowercase for case-insensitive search
+
+        // Get all table rows (except the header row)
+        var rows = table.querySelectorAll('tbody tr');
+
+        // Loop through each row and hide/show based on the filter query
+        rows.forEach(function (row) {
+            var courseCode = row.querySelector('td:nth-child(2)').textContent.toLowerCase(); // Get the course code
+            var courseName = row.querySelector('td:nth-child(3)').textContent.toLowerCase(); // Get the course name
+
+            if (courseCode.includes(filter) || courseName.includes(filter)) {
+                row.style.display = 'table-row'; // Show the row
+            } else {
+                row.style.display = 'none'; // Hide the row
+            }
+        });
+    });
+</script>
 
 @endsection
