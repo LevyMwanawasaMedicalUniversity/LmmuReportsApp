@@ -99,17 +99,20 @@ class DocketController extends Controller
     public function updateCoursesForStudent(Request $request, $studentId) {
         try {
             // First, delete all existing courses for the student
-            Courses::where('Student', $studentId)->delete();
+            
             
             // Get the 'dataArray' from the request
             $dataArray = $request->input('dataArray');
+
+           $dataArray;
             
             if (!empty($dataArray)) {
+                Courses::where('Student', $studentId)->delete();
                 foreach ($dataArray as $data) {
                     // Check if both 'Course' and 'Program' are available in the data
                     if (isset($data['Course']) && isset($data['Program'])) {
                         // Create a new record in the Courses table
-                        Courses::create([
+                        Courses::firstOrCreate([
                             'Student' => $studentId,
                             'Course' => $data['Course'],
                             'Program' => $data['Program'],
@@ -121,7 +124,7 @@ class DocketController extends Controller
                 }
             }
     
-            return back()->with('success', 'Courses updated successfully.');
+            
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage());
         }
