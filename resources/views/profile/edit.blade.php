@@ -49,6 +49,7 @@
           </div>
           <div class="card-header">
             <h5 class="title">{{__("Password")}}</h5>
+            <p>The new password must contain at least one uppercase letter, one lowercase letter, one digit (0-9), and one special character (e.g., !@#$%^&*).</p>
           </div>
           <div class="card-body">
             <form method="post" action="{{ route('profile.password') }}" autocomplete="off">
