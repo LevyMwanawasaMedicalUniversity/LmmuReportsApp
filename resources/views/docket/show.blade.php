@@ -34,8 +34,8 @@
                         </div>
                     @endif
                 </div>
-                <div class="card-body" style="display: flex; justify-content: center; align-items: center;">
-                    <div style="width: 850px; height: 100%;">                
+                <div class="card-body">
+                    <div style="width: 850px; height: 700px; position: centre; margin-top: 50px; margin-bottom: 30px; ">
                         <div style="float: left; width: 800px; position: relative; ">
                             <div style="position: absolute; right: 10px; font-size: 10pt; top: 100px;">
                                 {{-- <img src="/datastore/output/secure/230200632-2023-10-28-96653.png"><br>230200632-2023-10-28-297369 --}}
@@ -80,7 +80,7 @@
                         </div>
                         <div style="width: 100%; margin-left: 20px; margin-top: 20px;">
                             <table style="border: 1px solid #ccc; padding: 5px; width: 800px;">
-                                <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                             <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
                                 <form id="myForm" action="" method="POST">
                                     @csrf
                                     <table id="myTable">
@@ -142,7 +142,7 @@ function printContent() {
     });
 
     var contentToPrint = document.querySelector('.content').innerHTML;
-    var printWindow = window.open('', '', 'width=900,height=900px');
+    var printWindow = window.open('', '', 'width=600,height=600');
     
     printWindow.document.open();
     printWindow.document.write('<html><head><title>Print</title></head><body>' + contentToPrint + '</body></html>');

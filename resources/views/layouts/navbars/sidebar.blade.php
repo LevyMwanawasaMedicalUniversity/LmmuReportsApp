@@ -20,87 +20,95 @@
           <p>{{ __('Dashboard') }}</p>
         </a>
       </li>
-      
-      <li>
-        <a data-toggle="collapse" href="#administrationExamples">
-          <i class="now-ui-icons objects_globe"></i>
-          <p>
-            {{ __("Administration") }}
-            <b class="caret"></b>
-          </p>
-        </a>
-        <div class="collapse show" id="administrationExamples">
-          <ul class="nav">
-            <li class="@if ($activePage == 'users') active @endif">
-              <a href="{{ route('users.index') }}">
-                <i class="now-ui-icons users_single-02"></i>
-                <p> {{ __("User Management") }} </p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'roles') active @endif">
-              <a href="{{ url('roles') }}">
-                <i class="now-ui-icons business_badge"></i>
-                <p> {{ __("Roles") }} </p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'permissions') active @endif">
-              <a href="{{ url('permissions') }}">
-                <i class="now-ui-icons objects_key-25"></i>
-                <p> {{ __("Permissions") }} </p>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </li>
-      <li>
-        <a data-toggle="collapse" href="#devToolsExamples">
-          <i class="fab fa-laravel"></i>
-          <p>
-            {{ __("Dev Tools") }}
-            <b class="caret"></b>
-          </p>
-        </a>
-        <div class="collapse" id="devToolsExamples">
-          <ul class="nav">              
-            <li class="@if ($activePage == 'notifications') active @endif">
-              <a href="{{ route('page.index','notifications') }}">
-                <i class="now-ui-icons ui-1_bell-53"></i>
-                <p>{{ __('Notifications') }}</p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'icons') active @endif">
-              <a href="{{ route('page.index','icons') }}">
-                <i class="now-ui-icons education_atom"></i>
-                <p>{{ __('Icons') }}</p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'table') active @endif">
-              <a href="{{ route('page.index','table') }}">
-                <i class="now-ui-icons design_bullet-list-67"></i>
-                <p>{{ __('Table List') }}</p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'typography') active @endif">
-              <a href="{{ route('page.index','typography') }}">
-                <i class="now-ui-icons text_caps-small"></i>
-                <p>{{ __('Typography') }}</p>
-              </a>
-            </li>         
-          </ul>
-        </div>
-      </li>
-      <li class = "@if ($activePage == 'academics') active @endif">
-        <a href="{{ route('academics.index') }}">
-          <i class="now-ui-icons education_hat"></i>
-          <p>{{ __('Academics') }}</p>
-        </a>
-      </li>
-      <li class = "@if ($activePage == 'finance') active @endif">
-        <a href="{{ route('finance.index') }}">
-          <i class="now-ui-icons business_bank"></i>
-          <p>{{ __('Finance') }}</p>
-        </a>
-      </li>
+      @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')) )
+        <li>
+          <a data-toggle="collapse" href="#administrationExamples">
+            <i class="now-ui-icons objects_globe"></i>
+            <p>
+              {{ __("Administration") }}
+              <b class="caret"></b>
+            </p>
+          </a>
+          <div class="collapse show" id="administrationExamples">
+            <ul class="nav">
+              <li class="@if ($activePage == 'users') active @endif">
+                <a href="{{ route('users.index') }}">
+                  <i class="now-ui-icons users_single-02"></i>
+                  <p> {{ __("User Management") }} </p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'roles') active @endif">
+                <a href="{{ url('roles') }}">
+                  <i class="now-ui-icons business_badge"></i>
+                  <p> {{ __("Roles") }} </p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'permissions') active @endif">
+                <a href="{{ url('permissions') }}">
+                  <i class="now-ui-icons objects_key-25"></i>
+                  <p> {{ __("Permissions") }} </p>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </li>
+      @endif
+      @if (auth()->user()->hasRole('Developer'))
+        <li>
+          <a data-toggle="collapse" href="#devToolsExamples">
+            <i class="fab fa-laravel"></i>
+            <p>
+              {{ __("Dev Tools") }}
+              <b class="caret"></b>
+            </p>
+          </a>
+          <div class="collapse" id="devToolsExamples">
+            <ul class="nav">              
+              <li class="@if ($activePage == 'notifications') active @endif">
+                <a href="{{ route('page.index','notifications') }}">
+                  <i class="now-ui-icons ui-1_bell-53"></i>
+                  <p>{{ __('Notifications') }}</p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'icons') active @endif">
+                <a href="{{ route('page.index','icons') }}">
+                  <i class="now-ui-icons education_atom"></i>
+                  <p>{{ __('Icons') }}</p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'table') active @endif">
+                <a href="{{ route('page.index','table') }}">
+                  <i class="now-ui-icons design_bullet-list-67"></i>
+                  <p>{{ __('Table List') }}</p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'typography') active @endif">
+                <a href="{{ route('page.index','typography') }}">
+                  <i class="now-ui-icons text_caps-small"></i>
+                  <p>{{ __('Typography') }}</p>
+                </a>
+              </li>         
+            </ul>
+          </div>
+        </li>
+      @endif
+      @if ((auth()->user()->hasRole('Academics')) || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
+        <li class = "@if ($activePage == 'academics') active @endif">
+          <a href="{{ route('academics.index') }}">
+            <i class="now-ui-icons education_hat"></i>
+            <p>{{ __('Academics') }}</p>
+          </a>
+        </li>
+      @endif
+      @if (auth()->user()->hasRole('Finance') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
+        <li class = "@if ($activePage == 'finance') active @endif">
+          <a href="{{ route('finance.index') }}">
+            <i class="now-ui-icons business_bank"></i>
+            <p>{{ __('Finance') }}</p>
+          </a>
+        </li>
+      @endif
+      @if (auth()->user()->hasRole('Academics') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
       <li>
         <a data-toggle="collapse" href="#docketExamples">
           <i class="now-ui-icons education_paper"></i>
@@ -131,7 +139,8 @@
             </li>         
           </ul>
         </div>
-      </li>        
+      </li>  
+      @endif      
     </ul>
   </div>
 </div>

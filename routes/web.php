@@ -52,6 +52,21 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
         Route::middleware('can:Academics')->group(function () {
+            Route::prefix('docket')->group(function () {
+                Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
+                Route::get('/import', 'DocketController@import')->name('docket.import');
+                Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
+                Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+                Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
+                Route::get('/importCourses', 'DocketController@importCourseFromSis')->name('courses.import');
+                Route::get('/addCourses/{studentId}', 'DocketController@selectCourses')->name('courses.select');
+                Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
+                Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
+                Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
+    
+    
+                
+            });
             Route::prefix('academics')->group(function () {
                 Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
 
@@ -79,6 +94,7 @@ Route::group(['middleware' => 'auth'], function () {
 
                 
                 Route::GET('/viewUnregisteredStudentsEligibleForRegistration',  'AcademicQueriesController@viewUnregisteredStudentsEligibleForRegistration')->name('viewUnregisteredStudentsEligibleForRegistration');
+                
 
 
                 //dynamic drop down view students specific intake taking programme
@@ -94,21 +110,7 @@ Route::group(['middleware' => 'auth'], function () {
             });
         });
 
-        Route::prefix('docket')->group(function () {
-            Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
-            Route::get('/import', 'DocketController@import')->name('docket.import');
-            Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
-            Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
-            Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
-            Route::get('/importCourses', 'DocketController@importCourseFromSis')->name('courses.import');
-            Route::get('/addCourses/{studentId}', 'DocketController@selectCourses')->name('courses.select');
-            Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
-            Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
-            Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
-
-
-            
-        });
+        
 
         
     });

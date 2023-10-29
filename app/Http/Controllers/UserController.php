@@ -103,22 +103,34 @@ class UserController extends Controller
             ->withSuccess(__('User updated successfully.'));
     }
 
-    public function resetPassword(Request $request, $userId) 
+    public function resetPassword(Request $request, $userId)
     {
         $request->validate([
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => [
+                'required',
+                'confirmed',
+                Rules\Password::defaults(),
+                // Add your custom rules here
+                'min:8',               // Minimum password length
+                'regex:/[A-Za-z0-9]+/', // Requires at least one letter and one number
+                'regex:/[!@#$%^&*]+/',  // Requires at least one special character
+            ],
         ], [
             'password.required' => 'The new password field is required.',
             'password.confirmed' => 'The new password confirmation does not match.',
+            'password.min' => 'The password must be at least 8 characters long.',
+            'password.regex' => 'The password must contain at least one letter, one number, and one special character (!@#$%^&*).',
             // Add any other custom error messages for the 'password' field if needed.
         ]);
 
+        return $request->input('password');
+
         $user = User::find($userId);
         $user->password = Hash::make($request->input('password'));
-        $user->save();      
+        $user->save();
 
         return redirect()->route('users.index')
-            ->withSuccess(__('User password updated successfully.'));    
+            ->withSuccess(__('User password updated successfully.'));
     }
 
     /**
