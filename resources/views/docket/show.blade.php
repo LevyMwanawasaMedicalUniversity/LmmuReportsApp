@@ -20,7 +20,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">View Student</h4>
+                    <h4 class="card-title no-print">View Student</h4>
 
                     @if (session('success'))
                         <div class="alert alert-success">
