@@ -14,7 +14,11 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Appealing Students</h4>
+                    @if($courseName)
+                    <h4 class="card-title">{{ $courseName }} Students </h4>
+                    @else
+                    <h4 class="card-title">Appealing Students </h4>
+                    @endif
                     @if (session('success'))
                         <div class="alert alert-success">
                             {{ session('success') }}
@@ -26,15 +30,25 @@
                             {{ session('error') }}
                         </div>
                     @endif
-
+                    @if(!$courseName)
                     <form action="{{ route('docket.index') }}" method="GET">
                       @csrf
+                      
                       <div class="form-group">
                           <label for="search">Search Students</label>
                           <input type="number" name="student-number" class="form-control" id="student-number" placeholder="Enter student name or ID">
                       </div>
+                      
                       <button type="submit" class="btn btn-primary">Search</button>
                     </form>
+
+                    
+                    @endif
+                    @if($courseName)
+                    <div class="col-md-6">                        
+                        <a class="btn btn-success mt-3 mr-2" href="{{ route('courses.exportListExamList',$courseId) }}">Export List</a>                      
+                    </div>
+                    @endif
                 </div>
                 <!-- <form action="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}" method="GET">
                       <div class="row">

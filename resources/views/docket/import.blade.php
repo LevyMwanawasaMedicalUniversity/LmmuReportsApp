@@ -38,6 +38,11 @@
                       <div class="form-group">
                           <div id="filePreview" style="display: none;"></div>
                       </div>
+                      <div class="loader" id="loader" style="display: none;">
+                        <div id="percentage">0%</div>
+                        <!-- You can add loading spinner or text here -->
+                        Loading...
+                    </div>
                       <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -74,6 +79,8 @@
 <script>
   const excelFileInput = document.getElementById('excelFileInput');
   const filePreview = document.getElementById('filePreview');
+  const loader = document.getElementById('loader');
+  const percentage = document.getElementById('percentage');
 
   excelFileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -108,6 +115,25 @@
 
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
+
+  document.querySelector('form').addEventListener('submit', (e) => {
+    loader.style.display = 'block';
+    const form = e.target;
+    const formData = new FormData(form);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', form.action);
+
+    // Progress event to update percentage
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        const percentComplete = (event.loaded / event.total) * 100;
+        percentage.textContent = percentComplete.toFixed(2) + '%';
+      }
+    });
+
+    xhr.send(formData);
+  });
 </script>
 
 @endsection

@@ -6,6 +6,13 @@
 ])
 
 @section('content')
+<style>
+@media print {
+    .no-print {
+        display: none;
+    }
+}
+</style>
 <div class="panel-header panel-header-sm">
 </div>
 <div class="content">
@@ -83,7 +90,7 @@
                                         <th style="border: 1px solid #ccc; padding: 5px;"><b>DATE / TIME</b></th>
                                         <th style="border: 1px solid #ccc; padding: 5px;"><b>VENUE</b></th>
                                         <th style="border: 1px solid #ccc; padding: 5px;"><b>SIGNATURE INVIGILATOR</b></th>
-                                        <th style="border: 1px solid #ccc; padding: 5px;">Action
+                                        <th style="border: 1px solid #ccc; padding: 5px;" class="no-print">Action
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -91,27 +98,30 @@
                                     <tr>
                                         <td style="border: 1px solid #ccc; padding: 5px;">
                                           <div class="course-pair">
-                                            <input style="width: 80px" type="text" name="courses[][Course]" value="{{$course->Course}}" required>
-                                            <input style="width: 200px" type="text" name="courses[][Program]" value="{{$course->Program}}" required>
+                                            {{$course->Course}} - {{$course->Program}} 
+                                            <input type="hidden" name="courses[][Course]" value="{{$course->Course}}">
+                                            <input type="hidden" name="courses[][Program]" value="{{$course->Program}}">
                                           </div>
                                         </td>
                                         <td style="border: 1px solid #ccc; padding: 5px; width: 180px; height: 35px;">&nbsp; </td>
                                         <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp; </td>
                                         <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp;</td>
                                         <td>
-                                            <button type="button" onclick="removeRow(this)">Remove</button>
+                                            <button class="no-print" type="button" onclick="removeRow(this)">Remove</button>
                                         </td>
                                       </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                            <button type="button" id="addRow">Add</button>
-                            <button type="submit">Submit</button>
+                            
+                            <button class="no-print" type="submit">Update</button>
                         </form>
+
+                        <a href="{{ route('courses.select',$studentResults->StudentID) }}"><button class="no-print" type="button">Add Course(s)</button></a>
                     <div style="font-size: 10px; padding-top: 20px; float: left;"> 
                         Kindly cross check your courses on this slip against the separate examination timetable for the EXACT date and time of the examination.<br>
                         VERY IMPORTANT : Admission into the Examination Hall will be STRICTLY by STUDENT IDENTITY CARD, NRC OR PASSPORT, this EXAMINATION CONFIRMATION SLIP and clearance of all OUTSTANDING TUITION FEES.<br><center>
-                            <button class="block" style="background-color: green; border-color: blue; height: 40px; width: 150px" size="100" onclick="printContent()">Click To Print Docket</button>
+                            <button class="block no-print" style="background-color: green; border-color: blue; height: 40px; width: 150px" size="100" onclick="printContent()">Click To Print Docket</button>
                         <div></div>
                     </div></div></div>
 
@@ -126,6 +136,12 @@
 <script>
 
 function printContent() {
+    // Hide elements with the "no-print" class
+    var noPrintElements = document.querySelectorAll('.no-print');
+    noPrintElements.forEach(function (element) {
+        element.style.display = 'none';
+    });
+
     var contentToPrint = document.querySelector('.content').innerHTML;
     var printWindow = window.open('', '', 'width=600,height=600');
     
@@ -146,6 +162,11 @@ function printContent() {
             }
         };
     }
+
+    // Restore the display of "no-print" elements after printing
+    noPrintElements.forEach(function (element) {
+        element.style.display = 'block';
+    });
 }
     $('#myForm').on('submit', function(e) {
         e.preventDefault();

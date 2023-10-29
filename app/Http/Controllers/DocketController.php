@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AllCourses;
 use App\Models\Courses;
 use App\Models\Student;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
@@ -12,7 +13,8 @@ class DocketController extends Controller
 {
     public function index(Request $request){
         $academicYear= 2023;
-
+        $courseName = null;
+        $courseId = null;
         if($request->input('student-number')){
             $student = Student::query()
                         ->where('student_number','=', $request->input('student-number'))
@@ -28,34 +30,18 @@ class DocketController extends Controller
             $studentNumbers = Student::pluck('student_number')->toArray();
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
         }
-        return view('docket.index', compact('results'));
+        return view('docket.index', compact('results','courseName','courseId'));
     }
 
-    public function showStudent($studentId){
-        // try{
-            $dataArray  = $this->getCoursesForFailedStudents($studentId);
-            if(!$dataArray){
-                $dataArray = $this->findUnregisteredStudentCourses($studentId);
-                         
-            }
-        // }catch(Exception $e){
-            
-        // }
-        $academicYear= 2023;
-        $student = Student::query()
-                        ->where('student_number','=', $studentId)
-                        ->first();
-        if($student){
-            $getStudentNumber = $student->student_number;
-            $studentNumbers = [$getStudentNumber];
-            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
-        }else{
-            return back()->with('error', 'NOT FOUND.');               
+    private function setAndSaveCourses($studentId){
+        $dataArray  = $this->getCoursesForFailedStudents($studentId);
+        if(!$dataArray){
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+                        
         }
-        
+
         $existingCourse = Courses::where('Student', $studentId)
                 ->get();
-    
         if ((count($existingCourse) <= 0)) {
 
             foreach ($dataArray  as $item) {
@@ -77,7 +63,29 @@ class DocketController extends Controller
                     // Keep track of inserted courses
             }
         }
+    }
 
+    public function showStudent($studentId){
+        // try{
+            
+        // }catch(Exception $e){
+            
+        // }
+        $academicYear= 2023;
+        $student = Student::query()
+                        ->where('student_number','=', $studentId)
+                        ->first();
+        if($student){
+            $getStudentNumber = $student->student_number;
+            $studentNumbers = [$getStudentNumber];
+            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
+        }else{
+            return back()->with('error', 'NOT FOUND.');               
+        }
+        
+               
+        
+        $this->setAndSaveCourses($studentId);
         // Retrieve all unique Student values from the Course model
         $courses = Courses::where('Student', $studentId)->get();
         // return $courses;
@@ -156,6 +164,7 @@ class DocketController extends Controller
 
                     // Assuming the student number is in the first column (index 1)
                     $studentNumber = $row->getCellAtIndex(0)->getValue();
+                    
 
                     // Check if the student number already exists within the same academic year and term
                     $isDuplicate = Student::where('student_number', $studentNumber)
@@ -165,11 +174,13 @@ class DocketController extends Controller
 
                     if (!$isDuplicate) {
                         // Insert a new student record into the database
-                        Student::create([
+                        
+                        Student::firstOrCreate([
                             'student_number' => $studentNumber,
                             'academic_year' => $academicYear,
                             'term' => $term,
                         ]);
+                        $this->setAndSaveCourses($studentNumber);
                     }
                 }
             }
@@ -183,4 +194,109 @@ class DocketController extends Controller
         // Handle errors or validation failures
         return redirect()->back()->with('error', 'Failed to upload students.');
     }
+    
+    public function importCourseFromSis(Request $request) {
+        $getCoursesFromSis = $this->getSisCourses();
+    
+        foreach ($getCoursesFromSis as $course) {
+            AllCourses::firstOrCreate(
+                [
+                    'course_code' => $course->Name,
+                ],
+                [
+                    'course_name' => $course->CourseDescription,
+                ]
+            );
+        }
+
+        if ($request->has('course-code')) {
+            $courseCode = $request->input('course-code');
+            $courses = AllCourses::where('course_code', 'like', '%' . $courseCode . '%')->get();
+        } else {
+            $courses = AllCourses::all();
+        }
+    
+        return view('docket.courses', compact('courses'));
+    }
+
+    public function selectCourses($studentId){
+
+        $courses = AllCourses::all();
+        return view('docket.selectcourses', compact('studentId','courses'));
+    }
+
+    public function storeCourses(Request $request, $studentId) {
+        $selectedCourses = $request->input('course');
+    
+        foreach ($selectedCourses as $course) {
+            $theCourse = AllCourses::find($course);
+    
+            Courses::firstOrCreate(
+                [
+                    'Student' => $studentId,
+                    'Program' => $theCourse->course_name,
+                    'Course' => $theCourse->course_code
+                ]
+            );
+        }
+    
+        return redirect()->route('docket.showStudent', $studentId)->with('success', 'Courses updated successfully.');
+    }
+
+    public function viewExaminationList($courseId){
+
+        $theCourse = AllCourses::find($courseId);
+        $academicYear = 2023;
+        $courseCode = $theCourse->course_code;
+        $courseName = $theCourse->course_name;
+
+        $studentNumbers = Courses::where('Course', $courseCode)->pluck('Student')->toArray();
+                
+        $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+
+
+        return view('docket.index', compact('results','courseName','courseId'));
+    }
+
+    public function exportListExamList($courseId){
+        $theCourse = AllCourses::find($courseId);
+        $academicYear = 2023;
+        $courseCode = $theCourse->course_code;
+        $courseName = $theCourse->course_name;
+
+        $studentNumbers = Courses::where('Course', $courseCode)->pluck('Student')->toArray();
+
+        $headers = [
+            'First Name',
+            'Middle Name',
+            'Surname',
+            'Gender',
+            'Student Number',
+            'Mode Of Study',
+            'Year of Study',
+            'NRC',
+            'Programme Code',
+            'Balance',
+            'Registration'
+        ];
+        
+        $rowData = [
+            'FirstName',
+            'MiddleName',
+            'Surname',
+            'Sex',
+            'StudentID',
+            'StudyType',
+            'YearOfStudy',
+            'GovernmentID',
+            'Programme Code',
+            'Amount',
+            'RegistrationStatus'
+        ];
+        $filename = 'ExaminationListFor' . $courseName;
+        $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+
+        return $this->exportData($headers, $rowData, $results, $filename);
+    }
+
 }

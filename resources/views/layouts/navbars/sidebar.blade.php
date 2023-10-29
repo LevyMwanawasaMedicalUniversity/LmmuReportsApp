@@ -122,7 +122,13 @@
                 <i class="now-ui-icons text_align-left"></i>
                 <p> {{ __("View Students") }} </p>
               </a>
-            </li>            
+            </li>
+            <li class="@if ($activePage == 'docket-courses') active @endif">
+              <a href="{{ route('courses.import') }}">
+                <i class="now-ui-icons arrows-1_cloud-upload-94"></i>
+                <p> {{ __("All Courses") }} </p>
+              </a>
+            </li>         
           </ul>
         </div>
       </li>        

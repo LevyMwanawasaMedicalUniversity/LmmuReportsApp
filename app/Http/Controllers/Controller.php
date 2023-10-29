@@ -8,6 +8,7 @@ use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\SagePostAR;
 use App\Models\Schools;
+use App\Models\SisCourses;
 use App\Models\Study;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
@@ -206,6 +207,12 @@ class Controller extends BaseController
         }
     
         return $failedCourses;
+    }
+
+    public function getSisCourses(){
+
+        $sisCourses = SisCourses::all();
+        return $sisCourses;
     }
 
     public function getYearOfStudy($courseNos) {

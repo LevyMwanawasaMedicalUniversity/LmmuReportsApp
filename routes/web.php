@@ -100,6 +100,12 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
             Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
             Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
+            Route::get('/importCourses', 'DocketController@importCourseFromSis')->name('courses.import');
+            Route::get('/addCourses/{studentId}', 'DocketController@selectCourses')->name('courses.select');
+            Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
+            Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
+            Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
+
 
             
         });
