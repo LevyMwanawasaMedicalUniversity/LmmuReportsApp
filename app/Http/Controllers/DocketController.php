@@ -33,35 +33,44 @@ class DocketController extends Controller
         return view('docket.index', compact('results','courseName','courseId'));
     }
 
-    private function setAndSaveCourses($studentId){
-        $dataArray  = $this->getCoursesForFailedStudents($studentId);
-        if(!$dataArray){
+    private function setAndSaveCourses($studentId) {
+        $dataArray = $this->getCoursesForFailedStudents($studentId);
+    
+        if (!$dataArray) {
             $dataArray = $this->findUnregisteredStudentCourses($studentId);
-                        
         }
-
-        $existingCourse = Courses::where('Student', $studentId)
-                ->get();
-        if ((count($existingCourse) <= 0)) {
-
-            foreach ($dataArray  as $item) {
-                $student = $item['Student'];
-                $program = $item['Program'];
-                $course = $item['Course'];
-                $grade = $item['Grade'];
-        
-                // Check if a record with the same Student, Program, and Grade exists
-                
-                    // If the record doesn't exist, insert it
-                    Courses::create([
-                        'Student' => $student,
-                        'Program' => $program,
-                        'Course' => $course,
-                        'Grade' => $grade,
-                    ]);
-        
-                    // Keep track of inserted courses
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get()
+            ->pluck('Course')
+            ->toArray();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            if (!in_array($course, $studentCourses)) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses[] = $course;
             }
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
         }
     }
 
@@ -136,6 +145,7 @@ class DocketController extends Controller
 
     public function uploadStudents(Request $request)
     {
+        set_time_limit(1200000);
         // Validate the form data
         $request->validate([
             'excelFile' => 'required|mimes:xls,xlsx,csv',
@@ -156,6 +166,7 @@ class DocketController extends Controller
             $reader->open($file->getPathname());
 
             $isHeaderRow = true; // Flag to identify the header row
+            $studentNumbers = [];
 
             foreach ($reader->getSheetIterator() as $sheet) {
                 foreach ($sheet->getRowIterator() as $row) {
@@ -167,31 +178,52 @@ class DocketController extends Controller
 
                     // Assuming the student number is in the first column (index 1)
                     $studentNumber = $row->getCellAtIndex(0)->getValue();
-                    
 
-                    // Check if the student number already exists within the same academic year and term
-                    $isDuplicate = Student::where('student_number', $studentNumber)
-                        ->where('academic_year', $academicYear)
-                        ->where('term', $term)
-                        ->exists();
-
-                    if (!$isDuplicate) {
-                        // Insert a new student record into the database
-                        
-                        Student::firstOrCreate([
-                            'student_number' => $studentNumber,
-                            'academic_year' => $academicYear,
-                            'term' => $term,
-                        ]);
-                        $this->setAndSaveCourses($studentNumber);
-                    }
+                    $studentNumbers[] = $studentNumber;
                 }
             }
 
             $reader->close();
 
-            // Provide a success message
-            return redirect()->back()->with('success', 'Students imported successfully.');
+            // Split studentNumbers into chunks
+            $chunkSize = 10; // Adjust this as needed
+            $chunks = array_chunk($studentNumbers, $chunkSize);
+
+            try {
+                // Process each chunk
+                foreach ($chunks as $chunk) {
+                    // Check for duplicate students in a single database query
+                    $existingStudents = Student::whereIn('student_number', $chunk)
+                        ->where('academic_year', $academicYear)
+                        ->where('term', $term)
+                        ->pluck('student_number')
+                        ->toArray();
+
+                    // Insert new students
+                    $newStudents = array_diff($chunk, $existingStudents);
+                    $studentsToInsert = [];
+                    foreach ($newStudents as $studentNumber) {
+                        $studentsToInsert[] = [
+                            'student_number' => $studentNumber,
+                            'academic_year' => $academicYear,
+                            'term' => $term,
+                        ];
+                    }
+
+                    Student::insert($studentsToInsert);
+
+                    // Trigger your setAndSaveCourses function for new students
+                    foreach ($newStudents as $studentNumber) {
+                        $this->setAndSaveCourses($studentNumber);
+                    }
+                }
+
+                // Provide a success message
+                return redirect()->back()->with('success', 'Students imported successfully.');
+            } catch (\Throwable $e) {
+                // Handle any unexpected errors during import
+                return redirect()->back()->with('error', 'Failed to upload students: ' . $e->getMessage());
+            }
         }
 
         // Handle errors or validation failures
