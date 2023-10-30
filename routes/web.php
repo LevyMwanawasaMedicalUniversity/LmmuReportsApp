@@ -51,7 +51,7 @@ Route::group(['middleware' => 'auth'], function () {
             });
         });
 
-        Route::middleware('can:Academics')->group(function () {
+        Route::middleware('can:Examination')->group(function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
@@ -67,6 +67,11 @@ Route::group(['middleware' => 'auth'], function () {
     
                 
             });
+
+        });
+
+        Route::middleware('can:Academics')->group(function () {
+            
             Route::prefix('academics')->group(function () {
                 Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
 

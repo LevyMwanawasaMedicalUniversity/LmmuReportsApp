@@ -21,6 +21,7 @@ class RolesAndPermissionsSeeder extends Seeder
         Permission::create(['name' => 'Administrator']);
         Permission::create(['name' => 'Developer']);
         Permission::create(['name' => 'Academics']);
+        Permission::create(['name' => 'Examination']);
         Permission::create(['name' => 'Finance']);
 
         // Create roles and assign permissions
@@ -28,6 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $administrator = Role::create(['name' => 'Administrator']);
         $academics = Role::create(['name' => 'Academics']);
         $finance = Role::create(['name' => 'Finance']);
+        $examination = Role::create(['name' => 'Examination']);
 
         $developer->givePermissionTo('Administrator');
         $developer->givePermissionTo('Developer');
@@ -37,6 +39,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $administrator->givePermissionTo('Academics');
         $administrator->givePermissionTo('Finance');
         $academics->givePermissionTo('Academics');
+        $examination->givePermissionTo('Examination');
         $finance->givePermissionTo('Finance');
     }
 }
