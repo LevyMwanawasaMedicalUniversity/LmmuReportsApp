@@ -235,3 +235,35 @@ WHERE
  	bi.ID LIKE '190%'
 GROUP BY
     bi.ID;
+    
+//////////ACCOUNTS qUERY///////////////////
+WITH LatestInvoiceDates AS (
+    SELECT 
+        pa.AccountLink,
+        MAX(pa.TxDate) AS LatestTxDate
+    FROM 
+        LMMU_Live.dbo.PostAR pa
+    WHERE 
+        pa.Description LIKE '%-%-%' AND pa.Debit > 0
+    GROUP BY 
+        pa.AccountLink
+)
+SELECT 
+    cl.DCLink, 
+    cl.Account, 
+    cl.Name,
+    SUM(CASE WHEN pa.Description NOT LIKE '%reversal%' THEN pa.Credit ELSE 0 END) AS TotalPayment,
+    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END AS "2023 Invoice Status",
+    CONVERT(VARCHAR, lid.LatestTxDate, 23) AS LatestInvoiceDate
+FROM 
+    LMMU_Live.dbo.Client cl 
+INNER JOIN 
+    LMMU_Live.dbo.PostAR pa ON pa.AccountLink = cl.DCLink
+LEFT JOIN 
+    LatestInvoiceDates lid ON pa.AccountLink = lid.AccountLink
+GROUP BY 
+    cl.DCLink, 
+    cl.Account, 
+    cl.Name,
+    CONVERT(VARCHAR, lid.LatestTxDate, 23),
+    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END; 
