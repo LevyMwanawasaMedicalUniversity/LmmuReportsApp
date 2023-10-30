@@ -13,7 +13,18 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
-            <h4 class="card-title">Update User </h4>
+            <h4 class="card-title">Update User </h4>\
+            @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
             <div class="col-12 mt-2">
             </div>
           </div>
@@ -65,7 +76,7 @@
 
               <button type="submit" class="btn btn-primary">Update user</button>
               <a href="{{ route('users.index') }}" class="btn btn-default">Cancel</a>
-          </form>
+            </form>
           </div>
           <!-- end content-->
         </div>

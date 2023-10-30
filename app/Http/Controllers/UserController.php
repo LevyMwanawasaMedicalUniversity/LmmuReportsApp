@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rules;
 use App\Http\Requests\ProfileRequest;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -65,7 +66,7 @@ class UserController extends Controller
         $user->syncRoles($request->get('role'));
 
         return redirect()->route('users.index')
-            ->withSuccess(__('User created successfully.'));
+        ->with('success', 'Created Successfully.');
     }
 
     /**
@@ -93,14 +94,37 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(User $user, ProfileRequest $request) 
-    {
-        $user->update($request->validated());
+    // public function update(User $user, ProfileRequest $request) 
+    // {
+    //     $user->update($request->validated());
 
+    //     $user->syncRoles($request->get('role'));
+
+    //     return redirect()->route('users.index')
+    //         ->withSuccess(__('User updated successfully.'));
+    // }
+
+    public function update(Request $request,$userId)
+    {
+        // Define your custom validation rules for the email and name fields
+        $request->validate([
+            'name' => ['required', 'min:3'],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique((new User)->getTable())->ignore($userId),
+            ],
+        ]);       
+
+        $user = User::find($userId);
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        $user->save();
+        
         $user->syncRoles($request->get('role'));
 
         return redirect()->route('users.index')
-            ->withSuccess(__('User updated successfully.'));
+        ->with('success', 'Updated Successfully.');
     }
 
     public function resetPassword(Request $request, $userId)
@@ -130,7 +154,7 @@ class UserController extends Controller
         $user->save();
 
         return redirect()->route('users.index')
-            ->withSuccess(__('User password updated successfully.'));
+        ->with('success', 'Updated Successfully.');
     }
 
     /**
@@ -141,6 +165,6 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.index')
-            ->withSuccess(__('User deleted successfully.'));
+        ->with('success', 'Updated Successfully.');
     }
 }

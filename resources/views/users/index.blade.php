@@ -13,8 +13,20 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
+            
               <a class="btn btn-primary btn-round text-white pull-right" href="{{ route('users.create') }}">Add user</a>
             <h4 class="card-title">Users</h4>
+            @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
             <div class="col-12 mt-2">
                                         </div>
           </div>

@@ -108,7 +108,7 @@
           </a>
         </li>
       @endif
-      @if (auth()->user()->hasRole('Academics') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
+      @if (auth()->user()->hasRole('Examination') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
       <li>
         <a data-toggle="collapse" href="#docketExamples">
           <i class="now-ui-icons education_paper"></i>
