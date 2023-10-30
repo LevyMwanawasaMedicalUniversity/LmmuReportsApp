@@ -29,7 +29,7 @@
               <b class="caret"></b>
             </p>
           </a>
-          <div class="collapse show" id="administrationExamples">
+          <div class="collapse" id="administrationExamples">
             <ul class="nav">
               <li class="@if ($activePage == 'users') active @endif">
                 <a href="{{ route('users.index') }}">
@@ -117,7 +117,7 @@
             <b class="caret"></b>
           </p>
         </a>
-        <div class="collapse show" id="docketExamples">
+        <div class="collapse" id="docketExamples">
           <ul class="nav">
             <li class="@if ($activePage == 'docket-import') active @endif">
               <a href="{{ route('docket.import') }}">
