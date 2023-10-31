@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\BasicInformation;
 use App\Models\Grade;
 use App\Models\Grades;
+use App\Models\SageClient;
 use App\Models\SagePostAR;
 use App\Models\Schools;
 use App\Models\SisCourses;
@@ -14,6 +15,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Exception;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller as BaseController;
 
@@ -478,12 +480,11 @@ class Controller extends BaseController
 
     private function querySumOfAllTransactionsOfEachStudent(){
 
-        // $results = $results = BasicInformation::join('sage_database.sage_clients', 'basic_informations.ID', '=', 'sage_database.sage_clients.Account')
-        // ->join('sage_post_ar', 'sage_clients.DCLink', '=', 'sage_post_ar.AccountLink')
-        // ->select('basic_informations.ID', 'sage_clients.Account', 'sage_post_ar.Credit');
+        $payments = SagePostAR::paginate(50);
+        $students = BasicInformation::paginate(50);
 
-        $results = SagePostAR::all();
+        return $students;
 
-        return $results;
+
     }
 }

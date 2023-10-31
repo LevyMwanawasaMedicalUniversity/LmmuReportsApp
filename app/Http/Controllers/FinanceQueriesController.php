@@ -11,7 +11,7 @@ class FinanceQueriesController extends Controller
     }
 
     public function viewSumOfAllTransactionsOfEachStudent(Request $request){
-        $results = $this->getSumOfAllTransactionsOfEachStudent()->paginate('20');
+        return $results = $this->getSumOfAllTransactionsOfEachStudent();
 
         return view('finance.reports.viewSumOfAllTransactionsOfEachStudent',compact('results'));
     }

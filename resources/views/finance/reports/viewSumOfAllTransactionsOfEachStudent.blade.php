@@ -18,7 +18,7 @@
           <div class="toolbar">
               <!--        Here you can write extra buttons/actions for the toolbar              -->
            
-          {{-- <form action="{{ route('viewAllProgrammesPerSchool') }}" method="GET">
+          <!-- {{-- <form action="{{ route('viewAllProgrammesPerSchool') }}" method="GET">
             <div class="row">
                 <div class="col-md-5 ml-3">
                     <div class="form-group">
@@ -48,7 +48,7 @@
                     @endif
                 </div>
             </div>
-        </form> --}}
+        </form> --}} -->
         </div>
             @if(!empty($results))
             
@@ -58,24 +58,19 @@
                     <table class="table">
                         <thead class="text-primary">
                         <tr>
-                            {{-- <th>Programme Name</th>
-                            <th>Programme Code</th> --}}
-                            <th>School Name</th>
-                            <th>Delivery Mode</th>
+                            
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($results as $result)
                         <tr>
-                            {{-- <td>{{$result->ID}}</td>
-                            <td>{{$result->Account}}</td> --}}
-                            <td>{{$result->Credit}}</td>
+                            
                         </tr>
                         @endforeach
                         </tbody>
                     </table>
                 </div>
-                {{ $results->appends(['schoolName' => $schoolName])->links('pagination::bootstrap-4') }}
+                
             </div>
             
             @else
