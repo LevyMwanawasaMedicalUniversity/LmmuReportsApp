@@ -480,11 +480,21 @@ class Controller extends BaseController
 
     private function querySumOfAllTransactionsOfEachStudent(){
 
-        $payments = SagePostAR::paginate(50);
+        // Perform the first query using get() to get a collection
+        $payments = SagePostAR::get();
+    
+        // Perform the second query
         $students = BasicInformation::paginate(50);
+    
+        // Use the join method to join the results based on the condition
+        $result = $payments->join('basic_informations', 'payments.Account', '=', 'basic_informations.ID')
+            ->select('payments.*', 'basic_informations.*')
+            ->paginate(50);
+    
+        return $result;
+    }
 
-        return $students;
-
-
+    public function importPayments(){
+        $payments = SagePostAR::get();
     }
 }

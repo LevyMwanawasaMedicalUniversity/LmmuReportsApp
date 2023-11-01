@@ -7,9 +7,14 @@ SELECT
     CASE
         WHEN (COUNT(CASE WHEN g.AcademicYear = 2023 THEN g.CAMarks END) = 0) THEN 'No Results'
         ELSE 'Results Found'
-    END AS "Results Status"
+    END AS "Unpublished Results",
+    CASE
+        WHEN (COUNT(CASE WHEN gp.AcademicYear  = 2023 THEN gp.CAMarks END) = 0) THEN 'No Results'
+        ELSE 'Results Found'
+    END AS "Published Status"
 FROM courses c
 LEFT JOIN edurole.grades g ON c.Name = g.CourseNo AND g.AcademicYear = 2023
+LEFT JOIN `grades-published` gp ON c.Name = gp.CourseNo AND gp.AcademicYear = 2023
 INNER JOIN `program-course-link` pcl ON c.ID = pcl.CourseID
 INNER JOIN programmes p ON pcl.ProgramID = p.ID
 INNER JOIN `study-program-link` spl  ON p.ID = spl.ProgramID 
