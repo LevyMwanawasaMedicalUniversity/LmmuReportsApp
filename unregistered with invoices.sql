@@ -91,7 +91,7 @@ INNER JOIN (
     UNION ALL SELECT 'DIPPO', 12570, 12350
 ) AS program ON s.ShortName = program.ProgrammeCode
 WHERE
-    bi.StudyType = 'Distance'
+    bi.StudyType = 'Fulltime'
     AND 
  	(bi.ID LIKE '210%'
 	OR bi.ID LIKE '220%'
