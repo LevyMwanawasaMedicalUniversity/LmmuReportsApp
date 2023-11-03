@@ -496,5 +496,6 @@ class Controller extends BaseController
 
     public function importPayments(){
         $payments = SagePostAR::get();
+        
     }
 }

@@ -219,7 +219,7 @@ SELECT
     WHEN p.ProgramName LIKE '%y5' THEN 'YEAR 5'
     WHEN p.ProgramName LIKE '%y6' THEN 'YEAR 6'
     ELSE 'NO REGISTRATION'
-END AS "Year Of Study"
+END AS "YearOfStudy"
 FROM
     edurole.`basic-information` bi
 LEFT JOIN (
