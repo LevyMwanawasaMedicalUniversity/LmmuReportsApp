@@ -21,6 +21,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTestEmail');
 Auth::routes();
 
 Route::get('/home', 'App\Http\Controllers\HomeController@index')->name('home');
@@ -49,6 +50,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
             });
+        
         });
 
         Route::middleware('can:Examination')->group(function () {
@@ -63,6 +65,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
                 Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
                 Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
+                
     
     
                 
@@ -103,7 +106,8 @@ Route::group(['middleware' => 'auth'], function () {
 
 
                 //dynamic drop down view students specific intake taking programme
-                Route::get('/getProgrammesBySchool',  'AcademicQueriesController@getProgrammesBySchoolDynamicForm')->name('getProgrammesBySchoolDynamicForm');            
+                Route::get('/getProgrammesBySchool',  'AcademicQueriesController@getProgrammesBySchoolDynamicForm')->name('getProgrammesBySchoolDynamicForm'); 
+                           
             });
         });
         Route::middleware('can:Finance')->group(function () {

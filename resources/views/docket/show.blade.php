@@ -51,6 +51,7 @@
                                 <span style="font-size: 22pt;">Levy Mwanawasa Medical University</span>
                                 <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2023 </div>
                                 <div style="font-size: 15pt; font-weight: bold;">UNREGISTERED STUDENT </div>
+                                <div style="font-size: 15pt; font-weight: bold;">PRINTED FROM ACADEMICS OFFICE</h2>
                                 <BR>
 
                             </div>

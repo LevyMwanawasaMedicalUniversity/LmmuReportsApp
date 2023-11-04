@@ -6,6 +6,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "barryvdh/laravel-dompdf": "^2.0",
+        "barryvdh/laravel-snappy": "^1.0",
         "box/spout": "3.3.*",
         "guzzlehttp/guzzle": "^7.2",
         "laravel-frontend-presets/now-ui-dashboard": "^1.0",

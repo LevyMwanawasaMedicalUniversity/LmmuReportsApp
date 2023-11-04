@@ -14,7 +14,7 @@
       <div class="col-md-12">
           <div class="card">
               <div class="card-header">
-                  <h4 class="card-title">Import Student</h4>
+                  <h4 class="card-title">Import Student and Send Dockets</h4>
 
                   @if (session('success'))
                         <div class="alert alert-success">

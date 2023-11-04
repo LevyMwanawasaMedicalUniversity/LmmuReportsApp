@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Mail\SendAnEmail;
 use App\Models\BasicInformation;
+use App\Models\Courses;
 use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\SageClient;
 use App\Models\SagePostAR;
 use App\Models\Schools;
 use App\Models\SisCourses;
+use App\Models\Student;
 use App\Models\Study;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
@@ -18,6 +20,12 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+// use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class Controller extends BaseController
 {
@@ -64,6 +72,47 @@ class Controller extends BaseController
     public function getRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeName, $programmeName){
         $results = $this->queryRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeName, $programmeName);
         return $results;
+    }
+
+    public function setAndSaveTheCourses($studentId) {
+        $dataArray = $this->getCoursesForFailedStudents($studentId);
+    
+        if (!$dataArray) {
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+        }
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get()
+            ->pluck('Course')
+            ->toArray();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            if (!in_array($course, $studentCourses)) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses[] = $course;
+            }
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
     }
 
     public function getRegisteredStudentsPerYearInYearOfStudy($yearOfStudy, $academicYear){
@@ -145,10 +194,11 @@ class Controller extends BaseController
         $failedCourses = [];
     
         $failedStudents = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
+            ->whereNotIn('AcademicYear', ['2023'])
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
                     ->from('grades')
-                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG']);
+                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE']);
             })
             ->where('StudentNo', $studentId)
             ->orderBy('StudentNo')
@@ -171,7 +221,8 @@ class Controller extends BaseController
                 $cleared = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
                     ->where('StudentNo', $student)
                     ->where('CourseNo', $course)
-                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])
+                    ->whereNotIn('AcademicYear', ['2023'])
+                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])
                     ->orderBy('Grade')
                     ->get();
     
@@ -186,7 +237,7 @@ class Controller extends BaseController
                         $course2 = $row2->CourseNo;
                         $grade2 = $row2->Grade;
     
-                        if (!in_array($grade2, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])) {
+                        if (!in_array($grade2, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])) {
                             $failedCourses[] = [
                                 'Student' => $student2,
                                 'Program' => $program2, // Replace with the program
@@ -197,7 +248,7 @@ class Controller extends BaseController
                     }
                 }
             } else {
-                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG'])) {
+                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])) {
                     $failedCourses[] = [
                         'Student' => $student,
                         'Program' => $program, // Replace with the program
@@ -209,6 +260,74 @@ class Controller extends BaseController
         }
     
         return $failedCourses;
+    }
+
+
+    public function sendTestEmail($studentID) {
+        $studentResults = $this->getStudentResults($studentID);
+        $courses = $this->getStudentCourses($studentID);
+    
+        // Define the PDF file name (e.g., using the studentID)
+        $fileName = $studentID . '.pdf';
+    
+        // Generate the PDF and save it to the "public" disk
+        $pdf = PDF::loadView('emails.pdf', compact('studentResults', 'courses'));
+        $pdfPath = storage_path('app/' . $fileName);
+        $pdf->save($pdfPath);
+
+        $privateEmail = BasicInformation::find($studentID);
+
+        $privateEmail->PrivateEmail;
+    
+        // Send the email with the PDF attachment
+        Mail::to($privateEmail)->send(new SendAnEmail($pdfPath));
+    
+        // Send the email with the PDF attachment
+        // Mail::to('azwel.simwinga@lmmu.ac.zm',
+        //         'serah.mbewe@lmmu.ac.zm',
+        //     'kabwenda.moonga@lmmu.ac.zm',)->send(new SendAnEmail($pdfPath));
+    
+        // Delete the temporary PDF file after sending the email
+        unlink($pdfPath);
+    
+        return "Test email sent successfully!";
+    }
+
+
+    public function getStudentResults($studentId){
+        // try{
+            
+        // }catch(Exception $e){
+            
+        // }
+        $academicYear= 2023;
+        $student = Student::query()
+                        ->where('student_number','=', $studentId)
+                        ->first();
+        if($student){
+            $getStudentNumber = $student->student_number;
+            $studentNumbers = [$getStudentNumber];
+            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
+        }else{
+            return back()->with('error', 'NOT FOUND.');               
+        }
+
+        return $studentResults;
+    }
+        
+        
+    public function getStudentCourses($studentId){
+               
+        
+        $this->setAndSaveTheCourses($studentId);
+        // Retrieve all unique Student values from the Course model
+        $courses = Courses::where('Student', $studentId)->get();
+        // return $courses;
+
+        // Pass the $students variable to the view
+        // return view('your.view.name', compact('students'));
+        
+        return $courses;
     }
 
     public function getSisCourses(){
@@ -244,6 +363,7 @@ class Controller extends BaseController
         // Perform the query to get grades
         $gradesCheck = Grades::query()
             ->where('grades.StudentNo', $studentId)
+            ->whereNotIn('AcademicYear', ['2023'])
             ->get();
 
         // Extract course numbers from the results

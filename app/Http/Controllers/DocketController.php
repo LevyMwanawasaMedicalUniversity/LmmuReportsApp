@@ -215,11 +215,13 @@ class DocketController extends Controller
                     // Trigger your setAndSaveCourses function for new students
                     foreach ($newStudents as $studentNumber) {
                         $this->setAndSaveCourses($studentNumber);
+                        $this->sendTestEmail($studentNumber);
+                        
                     }
                 }
 
                 // Provide a success message
-                return redirect()->back()->with('success', 'Students imported successfully.');
+                return redirect()->back()->with('success', 'Students imported successfully and the dockets have been sent.');
             } catch (\Throwable $e) {
                 // Handle any unexpected errors during import
                 return redirect()->back()->with('error', 'Failed to upload students: ' . $e->getMessage());
