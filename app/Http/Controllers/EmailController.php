@@ -29,10 +29,10 @@ class EmailController extends Controller
 
         $privateEmail = BasicInformation::find($studentID);
 
-        $privateEmail->PrivateEmail;
+        $email = $privateEmail->PrivateEmail;
     
         // Send the email with the PDF attachment
-        Mail::to($privateEmail)->send(new SendAnEmail($pdfPath));
+        Mail::to($email)->send(new SendAnEmail($pdfPath));
     
         // Send the email with the PDF attachment
         // Mail::to('azwel.simwinga@lmmu.ac.zm',
