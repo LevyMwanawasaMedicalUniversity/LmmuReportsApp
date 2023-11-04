@@ -283,9 +283,7 @@ class Controller extends BaseController
         // Mail::to($email)->send(new SendAnEmail($pdfPath));
     
         // Send the email with the PDF attachment
-        Mail::to('azwel.simwinga@lmmu.ac.zm',
-                'serah.mbewe@lmmu.ac.zm',
-            'kabwenda.moonga@lmmu.ac.zm',)->send(new SendAnEmail($pdfPath));
+        Mail::to('azwel.simwinga@lmmu.ac.zm')->send(new SendAnEmail($pdfPath));
     
         // Delete the temporary PDF file after sending the email
         unlink($pdfPath);
