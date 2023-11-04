@@ -19,6 +19,7 @@ Route::get('/', function () {
 });
 
 Auth::routes();
+Route::get('/verify/{studentNumber}', 'App\Http\Controllers\DocketController@verifyStudent')->name('docket.verify');
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTestEmail');

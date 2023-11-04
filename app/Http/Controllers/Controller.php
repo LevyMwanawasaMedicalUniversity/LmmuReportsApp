@@ -278,6 +278,7 @@ class Controller extends BaseController
         $privateEmail = BasicInformation::find($studentID);
 
         $email =$privateEmail->PrivateEmail;
+        return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
         // Mail::to($email)->send(new SendAnEmail($pdfPath));

@@ -23,7 +23,7 @@
         }
 
         .main-content {
-            margin-top: 20px;
+            margin-top: 7px;
         }
 
         .student-info {
@@ -38,7 +38,7 @@
         }
 
         .examination-slip {
-            margin-top: 20px;
+            margin-top: 7px;
             text-align: left;
         }
 
@@ -79,33 +79,71 @@
             text-align: center;
             margin-top: 20px;
         }
+
+        /* CSS for the QR code container */
+        .qr-code {
+            float: right; /* Float the QR code to the right */
+            margin-top: 20px; /* Adjust the top margin as needed */
+        }
+
+        /* CSS for the "QR CODE IMAGE" text */
+        .qr-code p {
+            font-weight: bold; /* Add bold styling to the text */
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Levy Mwanawasa Medical University</h1>
+        <div class="header">           
             <h2>FINAL EXAMINATION DOCKET 2023</h2>
-            <h2>UNREGISTERED STUDENT</h2>
-            <h2>SENT BY EMAIL</h2>
+            <h4>UNREGISTERED STUDENT</h4>
+            <h6>SENT BY EMAIL</h6>
+        </div>
+        <br>
+        @php
+        use SimpleSoftwareIO\QrCode\Facades\QrCode;
+        @endphp
+
+        {{-- Define the route or path you want to convert to a QR code --}}
+        @php
+            $route = '/verify/'.$studentResults->StudentID; // Replace with your desired route or path
+            $url = url($route); // This generates the complete URL including the base URL
+            $base64QRCode = base64_encode(QrCode::size(150)->generate($url));
+            $currentDate = (new DateTime())->format('Y-m-d');
+            $imagePath = public_path('assets/img/logo2.png'); // Replace with the correct path to your image
+            $base64Image = base64_encode(file_get_contents($imagePath));
+        @endphp
+
+        {{-- Generate a QR code using simplesoftwareio/simple-qrcode --}}
+        <div class="header">
+            <img src="data:image/png;base64, {{ $base64QRCode }}" style="margin-right: 40%;">
+            <img src="data:image/png;base64, {{ $base64Image }}" alt="Logo" height="150" style="margin-left: 40%px;">
         </div>
 
         <div class="main-content">
-            <div class="student-info">
-                <p>Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}}</b></p>
-                <p>StudentID No.: <b>{{$studentResults->StudentID}}</b></p>
-                <p>NRC No.: <b>{{$studentResults->GovernmentID}}</b></p>
+            <div class="row">
+            
+                <!-- Student Info Column -->
+                <div class="student-info">
+                    <p>Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}}</b></p>
+                    <p>StudentID No.: <b>{{$studentResults->StudentID}}</b></p>
+                    <p>NRC No.: <b>{{$studentResults->GovernmentID}}</b></p>
+                </div>
+                <div class="balance">
+                    <p>Balance: <b>K {{$studentResults->Amount}}</b></p>
+                    <p>Delivery: <b>{{$studentResults->StudyType}}</b></p>
+                    <p>Sent On: <b>{{ $currentDate }}</b></p>
+                </div>
+               
             </div>
-
-            <div class="balance">
-                <p>Balance: <b>K {{$studentResults->Amount}}</b></p>
-                <p>Delivery: <b>{{$studentResults->StudyType}}</b></p>
-            </div>
-
-            <div class="examination-slip">
+            <div class="row">
                 <p style="font-weight: bold">The Student is Studying: {{$studentResults->Name}}
                 
-                Candidate has been authorized to write FINAL EXAMINATION in the following courses:</p>
+                    Candidate has been authorized to write FINAL EXAMINATION in the following courses:</p>
+            </div>
+            
+            <div class="examination-slip">
+                
 
                 <div class="table-container">
                     <table>
@@ -120,14 +158,14 @@
                         <tbody>
                             @foreach($courses as $course)
                             <tr>
-                            <td style="width: 15%;">
+                            <td style="max-width: 30%;">
                                 <div class="course-pair">
                                     {{$course->Course}} - {{$course->Program}}
                                 </div>
                             </td>
-                            <td style="width: 28%;">&nbsp;</td>
-                            <td style="width: 28%;">&nbsp;</td>
-                            <td style="width: 28%;">&nbsp;</td>
+                            <td style="width: 30%;">&nbsp;</td>
+                            <td style="width: 30%;">&nbsp;</td>
+                            <td style="width: 20%;">&nbsp;</td>
                             
                             </tr>
                             @endforeach

@@ -8,6 +8,7 @@ use App\Models\Student;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Exception;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class DocketController extends Controller
 {
@@ -103,6 +104,38 @@ class DocketController extends Controller
         // return view('your.view.name', compact('students'));
         
         return view('docket.show',compact('courses','studentResults'));
+    }
+
+    public function verifyStudent($studentId){
+
+        $academicYear= 2023;
+        if(is_numeric($studentId)){
+            $student = Student::query()
+                            ->where('student_number','=', $studentId)
+                            ->first();
+        }else{
+            $student = []; 
+        }
+        if($student){
+
+            // $route = '/docket/showStudent/'.$studentId;
+            // $url = url($route);
+            // $qrCode = QrCode::size(100)->generate($url);
+
+            
+            $getStudentNumber = $student->student_number;
+            $studentNumbers = [$getStudentNumber];
+            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
+            $this->setAndSaveCourses($studentId);
+        // Retrieve all unique Student values from the Course model
+            $courses = Courses::where('Student', $studentId)->get();
+        }else{
+            $studentResults = []; 
+            $courses = [];
+            $qrCode = [];   
+            $url = [];          
+        }        
+        return view('docket.verify',compact('courses','studentResults','url'));
     }
 
     public function updateCoursesForStudent(Request $request, $studentId) {

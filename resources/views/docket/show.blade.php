@@ -12,6 +12,8 @@
         display: none;
     }
 }
+
+
 </style>
 <div class="panel-header panel-header-sm">
 </div>
@@ -41,34 +43,62 @@
                                 {{-- <img src="/datastore/output/secure/230200632-2023-10-28-96653.png"><br>230200632-2023-10-28-297369 --}}
                             </div>
 
+                            {{-- Include the QR code generator --}}
+                           {{-- Include the QR code generator --}}
+                            @php
+                            use SimpleSoftwareIO\QrCode\Facades\QrCode;
+                            @endphp
+
+                            {{-- Define the route or path you want to convert to a QR code --}}
+                            @php
+                                $route = '/verify/'.$studentResults->StudentID; // Replace with your desired route or path
+                                $url = url($route); // This generates the complete URL including the base URL
+                            @endphp
+
+                            {{-- Generate a QR code using simplesoftwareio/simple-qrcode --}}
+                            
+
+                            {{-- Display the QR code image --}}
+                            
+                            
                             <div style="width: 155px; height: 150px; padding-left: 30px; float: left;">
                                 <a href="//edurole.lmmu.ac.zm">
                                     <img height="100px" src="//edurole.lmmu.ac.zm/templates/mobile/images/header.png">
                                 </a>
                             </div>
+                            
 
                             <div style="float: left; font-size: 18pt; color: #000; margin-top: 15px; width: 500px; ">
                                 <span style="font-size: 22pt;">Levy Mwanawasa Medical University</span>
                                 <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2023 </div>
                                 <div style="font-size: 15pt; font-weight: bold;">UNREGISTERED STUDENT </div>
-                                <div style="font-size: 15pt; font-weight: bold;">PRINTED FROM ACADEMICS OFFICE</h2>
+                                <div style="font-size: 10pt; font-weight: bold;">PRINTED OUT</h2>
                                 <BR>
+                                    <BR>
 
                             </div>
+
+                            
                         </div>
-                        <div style="width: 800px; margin-left: 20px; margin-top: 20px;">
-                            {{-- <div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> 
-                            <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png">
-                            </div> --}}
-                            <div style="float: left; width: 300px; ">
-                                Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}} </b> 
-                                <br> StudentID No.: <b>{{$studentResults->StudentID}}</b>
-                                <br> NRC No.: <b>{{$studentResults->GovernmentID}}</b>
-                                <p>Printed: <b><span id="currentDate"></span></b></p>
-                                Balance: <b>K {{$studentResults->Amount}}</b>
-                                <br> Delivery: <b>{{$studentResults->StudyType}}</b>
+                        <div class="row justify-content-between">
+                            <div style="width: 800px; margin-left: 20px; margin-top: 20px;">
+                                {{-- <div style="width: 107px; float: left; margin-right: 20px; border: 1px solid #000;"> 
+                                <img width="100%" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/230200632.png">
+                                </div> --}}
+                                <div style="float: left; width: 300px; ">
+                                    Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}} </b> 
+                                    <br> StudentID No.: <b>{{$studentResults->StudentID}}</b>
+                                    <br> NRC No.: <b>{{$studentResults->GovernmentID}}</b>
+                                    <p>Printed: <b><span id="currentDate"></span></b></p>
+                                    Balance: <b>K {{$studentResults->Amount}}</b>
+                                    <br> Delivery: <b>{{$studentResults->StudyType}}</b>
+                                </div>
+                                
                             </div>
-                            <div style="float: left; width: 400px;">
+
+                            <div style="width: 155px; height: 150px; padding-left: 30px; float: left;">
+                                {!! QrCode::size(150)->generate($url ) !!}
+
                             </div>
                         </div>
 
