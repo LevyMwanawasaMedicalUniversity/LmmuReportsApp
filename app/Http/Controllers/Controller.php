@@ -597,21 +597,21 @@ class Controller extends BaseController
         return $results;
     }
 
-    private function querySumOfAllTransactionsOfEachStudent(){
+    // private function querySumOfAllTransactionsOfEachStudent(){
 
-        // Perform the first query using get() to get a collection
-        $payments = SagePostAR::get();
+    //     // Perform the first query using get() to get a collection
+    //     $payments = SagePostAR::get();
     
-        // Perform the second query
-        $students = BasicInformation::paginate(50);
+    //     // Perform the second query
+    //     $students = BasicInformation::paginate(50);
     
-        // Use the join method to join the results based on the condition
-        $result = $payments->join('basic_informations', 'payments.Account', '=', 'basic_informations.ID')
-            ->select('payments.*', 'basic_informations.*')
-            ->paginate(50);
+    //     // Use the join method to join the results based on the condition
+    //     $result = $payments->join('basic_informations', 'payments.Account', '=', 'basic_informations.ID')
+    //         ->select('payments.*', 'basic_informations.*')
+    //         ->paginate(50);
     
-        return $result;
-    }
+    //     return $result;
+    // }
 
     public function importPayments(){
         $payments = SagePostAR::get();
