@@ -267,7 +267,7 @@ class DocketController extends Controller
                         $studentRole = Role::firstOrCreate(['name' => 'Student']);
                         
                         // Assign the "Student" role to the user
-                        $student->assignRole($studentRole);
+                        $student->assignRole($studentRole); 
                         
                         // Find or create the "Student" permission
                         $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
