@@ -147,7 +147,7 @@ class UserController extends Controller
             // Add any other custom error messages for the 'password' field if needed.
         ]);
 
-        return $request->input('password');
+        // return $request->input('password');
 
         $user = User::find($userId);
         $user->password = Hash::make($request->input('password'));
