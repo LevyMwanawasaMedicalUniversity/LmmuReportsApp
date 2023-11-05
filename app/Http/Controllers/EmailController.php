@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use PhpParser\Node\Stmt\Return_;
 
 class EmailController extends Controller
 {
@@ -30,6 +31,7 @@ class EmailController extends Controller
         $privateEmail = BasicInformation::find($studentID);
 
         $email = $privateEmail->PrivateEmail;
+        return $privateEmail->GovernmentID;
 
         return response()->download($pdfPath, $fileName);
     

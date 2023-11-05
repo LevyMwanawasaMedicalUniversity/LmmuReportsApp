@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\AllCourses;
+use App\Models\BasicInformation;
 use App\Models\Courses;
 use App\Models\Student;
+use App\Models\User;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Exception;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DocketController extends Controller
 {
@@ -249,7 +253,27 @@ class DocketController extends Controller
                     foreach ($newStudents as $studentNumber) {
                         $this->setAndSaveCourses($studentNumber);
                         $this->sendTestEmail($studentNumber);
+
+                        $getNrc = BasicInformation::find($studentNumber);
+
+                        $nrc = $getNrc->GovernmentID;
+                        $student = User::create([
+                            'name' => $studentNumber,
+                            'email' => $studentNumber . '@lmmu.ac.zm',
+                            'password' => bcrypt($nrc),
+                        ]);
                         
+                        // Create the "Student" role if it doesn't exist
+                        $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" role to the user
+                        $student->assignRole($studentRole);
+                        
+                        // Find or create the "Student" permission
+                        $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" permission to the user
+                        $student->givePermissionTo($studentPermission);
                     }
                 }
 

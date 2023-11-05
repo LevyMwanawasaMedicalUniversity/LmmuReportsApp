@@ -1,12 +1,5 @@
 @extends('layouts.appVerify')
-
-
 @section('content')
-
-
-
-
-
 @if($studentResults)
 <div class="content">
     <div class="row justify-content-center"> <!-- Center the content horizontally -->
@@ -48,7 +41,6 @@
                             Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}}</b><br>
                             StudentID No.: <b>{{$studentResults->StudentID}}</b><br>
                             NRC No.: <b>{{$studentResults->GovernmentID}}</b><br>
-                            Printed: <b><span id="currentDate"></span></b><br>
                             Balance: <b>K {{$studentResults->Amount}}</b><br>
                             Delivery: <b>{{$studentResults->StudyType}}</b>
                             <table id="myTable">
