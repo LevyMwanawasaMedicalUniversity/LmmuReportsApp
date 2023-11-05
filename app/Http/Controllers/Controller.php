@@ -289,7 +289,7 @@ class Controller extends BaseController
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
-        Mail::to($email)->send(new SendAnEmail($pdfPath));
+        Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath));
     
         // Send the email with the PDF attachment
         // Mail::to('azwel.simwinga@lmmu.ac.zm')->send(new SendAnEmail($pdfPath));
