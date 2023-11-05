@@ -278,6 +278,14 @@ class Controller extends BaseController
         $privateEmail = BasicInformation::find($studentID);
 
         $email =$privateEmail->PrivateEmail;
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // $email is a valid email address
+            $sendingEmail = $email;
+        } else {
+            // $email is not a valid email address
+            $sendingEmail = 'azwel.simwinga@gmail.com';
+        }
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
