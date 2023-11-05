@@ -118,9 +118,9 @@ class DocketController extends Controller
         }
         if($student){
 
-            // $route = '/docket/showStudent/'.$studentId;
+            //  $route = '/docket/showStudent/'.$studentId;
             // $url = url($route);
-            // $qrCode = QrCode::size(100)->generate($url);
+            //  $qrCode = QrCode::size(100)->generate($url);
 
             
             $getStudentNumber = $student->student_number;
@@ -132,10 +132,10 @@ class DocketController extends Controller
         }else{
             $studentResults = []; 
             $courses = [];
-            $qrCode = [];   
-            $url = [];          
+            // $qrCode = [];   
+            // $url = [];          
         }        
-        return view('docket.verify',compact('courses','studentResults','url'));
+        return view('docket.verify',compact('courses','studentResults'));
     }
 
     public function updateCoursesForStudent(Request $request, $studentId) {
