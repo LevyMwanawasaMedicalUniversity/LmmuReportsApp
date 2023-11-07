@@ -4,6 +4,7 @@ SELECT
     bi.Surname,
     bi.PrivateEmail,
     bi.ID,
+    bi.GovernmentID,
     bi.StudyType,
     s.Name,
     CASE
@@ -110,6 +111,7 @@ SELECT
     bi.Surname,
     bi.PrivateEmail,
     bi.ID,
+    bi.GovernmentID,
     bi.StudyType,
     s.Name,
     CASE
@@ -180,6 +182,7 @@ SELECT
     bi.Surname,
     bi.PrivateEmail,
     bi.ID,
+    bi.GovernmentID,
     bi.StudyType,
     s.Name,
     CASE
@@ -271,6 +274,7 @@ SELECT
     bi.Surname,
     bi.PrivateEmail,
     bi.ID,
+    bi.GovernmentID,
     bi.StudyType,
     s.Name,
     CASE
