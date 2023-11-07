@@ -18,7 +18,8 @@
                 <centre><h4 class="card-title">Welcome To The Reports Dashboard</h4></centre>
               </div>
               <div class="card-body">
-                <img src="{{ asset('images/DJI_0097.jpg') }}" alt="Description of your image">
+                <img src="{{ asset('assets') }}/img/DJI_0097.JPG" alt="LMMU">
+                {{-- <img src="{{ asset('images/DJI_0097.jpg') }}" alt="Description of your image"> --}}
               </div>
             </div>
           </div>
