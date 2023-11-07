@@ -13,20 +13,21 @@ SELECT
     CASE 
     	WHEN bi.ID LIKE "230%" then program.YEAR1
     	ELSE program.YEAR2
-    END as "2023 Invoice"
-    
+    END as "2023 Invoice",
+    CASE 
+        WHEN g.StudentNo IS NOT NULL THEN
+            CASE 
+			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    ELSE
+			        'No Year Found'
+			END
+        ELSE 'NO Year Reported'
+    END AS "Year Reported"    
 FROM
     edurole.`basic-information` bi
-INNER JOIN (
-    SELECT
-        StudentID, 
-        COUNT(TransactionID) AS NumberOfPayments,
-        SUM(Amount) AS TotalPayments
-    FROM
-        transactions
-    GROUP BY
-        StudentID
-) AS t ON t.StudentID = bi.ID
+left join balances b on b.StudentID = bi.ID 
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -118,20 +119,21 @@ SELECT
     CASE 
     	WHEN bi.ID LIKE "230%" then program.YEAR1
     	ELSE program.YEAR2
-    END as "2023 Invoice"
-    
+    END as "2023 Invoice",
+    CASE 
+        WHEN g.StudentNo IS NOT NULL THEN
+            CASE 
+			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    ELSE
+			        'No Year Found'
+			END
+        ELSE 'NO Year Reported'
+    END AS "Year Reported"    
 FROM
     edurole.`basic-information` bi
-INNER JOIN (
-    SELECT
-        StudentID, 
-        COUNT(TransactionID) AS NumberOfPayments,
-        SUM(Amount) AS TotalPayments
-    FROM
-        transactions
-    GROUP BY
-        StudentID
-) AS t ON t.StudentID = bi.ID
+left join balances b on b.StudentID = bi.ID 
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -187,20 +189,22 @@ SELECT
     CASE 
     	WHEN bi.ID LIKE "230%" then program.YEAR1
     	ELSE program.YEAR2
-    END as "2023 Invoice"
+    END as "2023 Invoice",
+    CASE 
+        WHEN g.StudentNo IS NOT NULL THEN
+            CASE 
+			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    ELSE
+			        'No Year Found'
+			END
+        ELSE 'NO Year Reported'
+    END AS "Year Reported"
     
 FROM
     edurole.`basic-information` bi
-INNER JOIN (
-    SELECT
-        StudentID, 
-        COUNT(TransactionID) AS NumberOfPayments,
-        SUM(Amount) AS TotalPayments
-    FROM
-        transactions
-    GROUP BY
-        StudentID
-) AS t ON t.StudentID = bi.ID
+left join balances b on b.StudentID = bi.ID 
+    LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -276,20 +280,22 @@ SELECT
     CASE 
     	WHEN bi.ID LIKE "230%" then program.YEAR1
     	ELSE program.YEAR2
-    END as "2023 Invoice"
+    END as "2023 Invoice",
+    CASE 
+        WHEN g.StudentNo IS NOT NULL THEN
+            CASE 
+			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    ELSE
+			        'No Year Found'
+			END
+        ELSE 'NO Year Reported'
+    END AS "Year Reported"
     
 FROM
     edurole.`basic-information` bi
-INNER JOIN (
-    SELECT
-        StudentID, 
-        COUNT(TransactionID) AS NumberOfPayments,
-        SUM(Amount) AS TotalPayments
-    FROM
-        transactions
-    GROUP BY
-        StudentID
-) AS t ON t.StudentID = bi.ID
+left join balances b on b.StudentID = bi.ID 
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
