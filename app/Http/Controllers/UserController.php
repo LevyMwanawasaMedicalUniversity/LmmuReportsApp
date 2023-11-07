@@ -19,12 +19,19 @@ class UserController extends Controller
      * @param  \App\Models\User  $model
      * @return \Illuminate\View\View
      */
-    public function index(User $model)
+    public function index(Request $request, User $model)
     {
-        //return view('users.index', ['users' => $model->paginate(15)]);
-        $users = User::latest()
-        // ->whereNull('users.deleted_at')
-            ->paginate(15);
+        $users = User::latest();
+
+        if ($request->has('email')) {
+            $email = $request->input('email');
+            if (!empty($email)) {
+                $users->where('email', $email);
+            }
+        }
+
+        $users = $users->paginate(15);
+
         return view('users.index', compact('users'));
     }
 

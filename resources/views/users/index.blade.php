@@ -27,8 +27,16 @@
                             {{ session('error') }}
                         </div>
                     @endif
-            <div class="col-12 mt-2">
-                                        </div>
+                    <form action="{{ route('users.index') }}" method="GET">
+                      @csrf
+                      
+                      <div class="form-group">
+                          <label for="search">Search Users</label>
+                          <input type="email" name="email" class="form-control" id="email" placeholder="Enter user email address">
+                      </div>
+                      
+                      <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
           </div>
           <div class="card-body">
             <div class="toolbar">
