@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Mail\SendAnEmail;
+use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\Courses;
+use App\Models\EduroleCourses;
 use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\SageClient;
@@ -289,7 +291,7 @@ class Controller extends BaseController
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
-        Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath));
+        // Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath));
     
         // Send the email with the PDF attachment
         // Mail::to('azwel.simwinga@lmmu.ac.zm')->send(new SendAnEmail($pdfPath));
@@ -356,7 +358,7 @@ class Controller extends BaseController
         }    
         // Find the highest digit
         if($maxYear){
-            $highestDigit = max($maxYear);
+            $highestDigit = $maxYear[0];
             return $highestDigit + 1;
         }else{   
             $highestDigit = 1;
@@ -382,16 +384,26 @@ class Controller extends BaseController
         
         $level = '%' . $currentYearOfStudy;
 
-        $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
-            ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
-            ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
-            ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
-            ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
-            ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+        $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+            ->join('study as s', 'spl.StudyID', '=', 's.ID')
+            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
             ->where('p.ProgramName', 'like', $level)
-            ->where('basic-information.ID', $studentId)
-            ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            ->where('ssl2.StudentID', $studentId)
+            ->select('courses.Name','courses.CourseDescription')
             ->get();
+
+            // $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
+            // ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
+            // ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
+            // ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+            // ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
+            // ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+            // ->where('p.ProgramName', 'like', $level)
+            // ->where('basic-information.ID', $studentId)
+            // ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            // ->get();
         
         
             if(count($courses) >0){

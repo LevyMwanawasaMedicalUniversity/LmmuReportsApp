@@ -46,10 +46,10 @@ class HomeController extends Controller
                 $studentNumbers = [$getStudentNumber];
                 $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
             }else{
-                return back()->with('error', 'NOT FOUND.');               
+                return back()->with('error', 'NOT STUDENT.');               
             }             
             
-            $this->setAndSaveCourses($studentId);
+            $this->setAndUpdateCourses($studentId);
             // Retrieve all unique Student values from the Course model
             $courses = Courses::where('Student', $studentId)->get();
             return view('docket.studentViewDocket',compact('studentResults','courses'));
@@ -60,7 +60,7 @@ class HomeController extends Controller
        
     }
 
-    private function setAndSaveCourses($studentId) {
+    private function setAndUpdateCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
     
         if (!$dataArray) {
@@ -71,18 +71,27 @@ class HomeController extends Controller
             return; // No data to insert, so exit early
         }
     
+        // Check if there are rows with "No Value" for the specific 'Student'
+        $hasNoValueCourses = Courses::where('Student', $studentId)
+            ->where('Course', 'No Value')
+            ->exists();
+    
         $studentCourses = Courses::where('Student', $studentId)
             ->whereIn('Course', array_column($dataArray, 'Course'))
-            ->get()
-            ->pluck('Course')
-            ->toArray();
+            ->get();
     
         $coursesToInsert = [];
     
         foreach ($dataArray as $item) {
             $course = $item['Course'];
     
-            if (!in_array($course, $studentCourses)) {
+            // Check if Grade is "No Value" and Course is "No Value"
+            if ($item['Course'] === "No Value" && $course === "No Value") {
+                // If Grade and Course are both "No Value", don't insert these rows
+                continue;
+            }
+    
+            if (!in_array($course, $studentCourses->pluck('Course')->toArray())) {
                 $coursesToInsert[] = [
                     'Student' => $item['Student'],
                     'Program' => $item['Program'],
@@ -91,11 +100,16 @@ class HomeController extends Controller
                 ];
     
                 // Update the list of existing courses for the student
-                $studentCourses[] = $course;
+                $studentCourses->push(['Course' => $course]);
             }
         }
     
-        if (!empty($coursesToInsert)) {
+        if (!empty($coursesToInsert) && $hasNoValueCourses) {
+            // Delete rows with "No Value" entries
+            Courses::where('Student', $studentId)
+                ->where('Course', 'No Value')
+                ->delete();
+            
             // Batch insert the new courses
             Courses::insert($coursesToInsert);
         }
