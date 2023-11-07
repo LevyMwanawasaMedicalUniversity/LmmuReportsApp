@@ -267,3 +267,42 @@ GROUP BY
     cl.Name,
     CONVERT(VARCHAR, lid.LatestTxDate, 23),
     CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END; 
+
+    
+///////////////////////2023 payments only
+
+   
+   WITH LatestInvoiceDates AS (
+    SELECT 
+        pa.AccountLink,
+        MAX(pa.TxDate) AS LatestTxDate
+    FROM 
+        LMMU_Live.dbo.PostAR pa
+    WHERE 
+        pa.Description LIKE '%-%-%' AND pa.Debit > 0
+    GROUP BY 
+        pa.AccountLink
+)
+SELECT 
+    cl.DCLink, 
+    cl.Account, 
+    cl.Name,
+    SUM(CASE 
+	    WHEN pa.Description  LIKE '%reversal%' THEN 0 
+	    WHEN pa.TxDate < '2023-01-01' THEN 0 
+	    ELSE pa.Credit 
+	    END) AS TotalPayment2023,
+    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END AS "2023 Invoice Status",
+    CONVERT(VARCHAR, lid.LatestTxDate, 23) AS LatestInvoiceDate
+FROM 
+    LMMU_Live.dbo.Client cl 
+INNER JOIN 
+    LMMU_Live.dbo.PostAR pa ON pa.AccountLink = cl.DCLink
+LEFT JOIN 
+    LatestInvoiceDates lid ON pa.AccountLink = lid.AccountLink
+GROUP BY 
+    cl.DCLink, 
+    cl.Account, 
+    cl.Name,
+    CONVERT(VARCHAR, lid.LatestTxDate, 23),
+    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END; 
