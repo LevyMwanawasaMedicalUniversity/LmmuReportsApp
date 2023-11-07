@@ -384,26 +384,26 @@ class Controller extends BaseController
         
         $level = '%' . $currentYearOfStudy;
 
-        // $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
-        //     ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
-        //     ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
-        //     ->join('study as s', 'spl.StudyID', '=', 's.ID')
-        //     ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-        //     ->where('p.ProgramName', 'like', $level)
-        //     ->where('ssl2.StudentID', $studentId)
-        //     ->select('courses.Name','courses.CourseDescription')
-        //     ->get();
-
-            $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
-            ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
-            ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
-            ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
-            ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
-            ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+        $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+            ->join('study as s', 'spl.StudyID', '=', 's.ID')
+            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
             ->where('p.ProgramName', 'like', $level)
-            ->where('basic-information.ID', $studentId)
-            ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            ->where('ssl2.StudentID', $studentId)
+            ->select('courses.Name','courses.CourseDescription')
             ->get();
+
+            // $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
+            // ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
+            // ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
+            // ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+            // ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
+            // ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+            // ->where('p.ProgramName', 'like', $level)
+            // ->where('basic-information.ID', $studentId)
+            // ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            // ->get();
         
         
             if(count($courses) >0){
