@@ -126,7 +126,6 @@ class DocketController extends Controller
         if (!empty($coursesToInsert) && $hasNoValueCourses) {
             // Delete rows with "No Value" entries
             Courses::where('Student', $studentId)
-                ->where('Course', 'No Value')
                 ->delete();
             
             // Batch insert the new courses
