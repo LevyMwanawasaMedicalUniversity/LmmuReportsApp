@@ -180,7 +180,7 @@ class Controller extends BaseController
         ->leftJoin('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
         ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')
         ->leftJoin('balances','balances.StudentID','=','basic-information.ID')
-        ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
         ->where(function ($query) use ($studentNumbers) {
             $query->where('basic-information.StudyType', '=', 'Fulltime')
                 ->orWhere('basic-information.StudyType', '=', 'Distance');
@@ -384,26 +384,26 @@ class Controller extends BaseController
         
         $level = '%' . $currentYearOfStudy;
 
-        // $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
-        //     ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
-        //     ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
-        //     ->join('study as s', 'spl.StudyID', '=', 's.ID')
-        //     ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-        //     ->where('p.ProgramName', 'like', $level)
-        //     ->where('ssl2.StudentID', $studentId)
-        //     ->select('courses.Name','courses.CourseDescription')
-        //     ->get();
-
-            $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
-            ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
-            ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
-            ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
-            ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
-            ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+        $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+            ->join('study as s', 'spl.StudyID', '=', 's.ID')
+            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
             ->where('p.ProgramName', 'like', $level)
-            ->where('basic-information.ID', $studentId)
-            ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            ->where('ssl2.StudentID', $studentId)
+            ->select('courses.Name','courses.CourseDescription')
             ->get();
+
+            // $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
+            // ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
+            // ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
+            // ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+            // ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
+            // ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
+            // ->where('p.ProgramName', 'like', $level)
+            // ->where('basic-information.ID', $studentId)
+            // ->select('basic-information.ID', 'c.Name','c.CourseDescription')
+            // ->get();
         
         
             if(count($courses) >0){
@@ -469,7 +469,7 @@ class Controller extends BaseController
         ->leftJoin('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
         ->leftJoin('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
         ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')
-        ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
         ->where(function ($query) {
             $query->where('basic-information.StudyType', '=', 'Fulltime')
                 ->orWhere('basic-information.StudyType', '=', 'Distance');
@@ -516,7 +516,7 @@ class Controller extends BaseController
         ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
         ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
         ->join('basic-information', 'basic-information.ID', '=', 'course-electives.StudentID')
-        ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
         ->where(function ($query) {
             $query->where('basic-information.StudyType', '=', 'Fulltime')
                 ->orWhere('basic-information.StudyType', '=', 'Distance');
@@ -535,7 +535,7 @@ class Controller extends BaseController
                     'basic-information.ID'
                 )
                 ->join('course-electives AS ce', 'ce.StudentID', '=', 'basic-information.ID')
-                ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+                ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
                 ->where(function ($query) {
                     $query->where('basic-information.StudyType', '=', 'Fulltime')
                         ->orWhere('basic-information.StudyType', '=', 'Distance');
@@ -570,7 +570,7 @@ class Controller extends BaseController
             )
             ->join('student-study-link AS ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
             ->leftJoin('study AS s', 'ssl2.StudyID', '=', 's.ID')
-            ->whereRaw('LENGTH(`basic-information`.`ID`) = 9')
+            ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
             ->where(function ($query) {
                 $query->where('basic-information.StudyType', '=', 'Fulltime')
                     ->orWhere('basic-information.StudyType', '=', 'Distance');
