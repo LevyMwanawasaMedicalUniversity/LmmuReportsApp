@@ -6,7 +6,8 @@ SELECT
     bi.ID,
     bi.GovernmentID,
     bi.StudyType,
-    s.Name,
+    s.Name as "Programme",
+    s2.Name as "School",
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
@@ -32,6 +33,7 @@ LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
+inner join schools s2 ON s.ParentID  = s2.ID
 INNER JOIN (
     SELECT
         'AdvDipCA' AS ProgrammeCode, 14570 AS YEAR1, 14350 AS YEAR2
@@ -113,7 +115,8 @@ SELECT
     bi.ID,
     bi.GovernmentID,
     bi.StudyType,
-    s.Name,
+    s.Name as "Programme",
+    s2.Name as "School",
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
@@ -139,6 +142,7 @@ LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
+inner join schools s2 ON s.ParentID  = s2.ID
 INNER JOIN (
     SELECT
         'BScEH' AS ProgrammeCode, 12400 AS YEAR1, 12150 AS YEAR2
@@ -184,7 +188,8 @@ SELECT
     bi.ID,
     bi.GovernmentID,
     bi.StudyType,
-    s.Name,
+    s.Name as "Programme",
+    s2.Name as "School",
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
@@ -211,6 +216,7 @@ left join balances b on b.StudentID = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
+inner join schools s2 ON s.ParentID  = s2.ID
 INNER JOIN (
     SELECT
         'BScEH' AS ProgrammeCode, 15770 AS YEAR1, 15225 AS YEAR2
@@ -276,7 +282,8 @@ SELECT
     bi.ID,
     bi.GovernmentID,
     bi.StudyType,
-    s.Name,
+    s.Name as "Programme",
+    s2.Name as "School",
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
@@ -303,6 +310,7 @@ LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
+INNER JOIN schools s2 ON s.ParentID  = s2.ID 
 INNER JOIN (
     SELECT
         'BScEH' AS ProgrammeCode, 13470 AS YEAR1, 10925 AS YEAR2
@@ -322,4 +330,14 @@ HAVING
 	(`Registration Status` = 'NO REGISTRATION' OR `Registration Status` IS NULL);
 	
 
-
+////////////////////inactive filter/////////////////////////////
+ INNER JOIN (
+    SELECT
+        StudentID, 
+        COUNT(TransactionID) AS NumberOfPayments,
+        SUM(Amount) AS TotalPayments
+    FROM
+        transactions
+    GROUP BY
+        StudentID
+) AS t ON t.StudentID = bi.ID

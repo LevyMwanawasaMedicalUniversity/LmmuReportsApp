@@ -305,7 +305,7 @@ class DocketController extends Controller
                     // Trigger your setAndSaveCourses function for new students
                     foreach ($newStudents as $studentNumber) {
                         $this->setAndSaveCourses($studentNumber);
-                        // $this->sendTestEmail($studentNumber);
+                        $this->sendTestEmail($studentNumber);
 
                         $getNrc = BasicInformation::find($studentNumber);
 
