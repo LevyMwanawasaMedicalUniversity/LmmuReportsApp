@@ -300,6 +300,8 @@ INNER JOIN
     LMMU_Live.dbo.PostAR pa ON pa.AccountLink = cl.DCLink
 LEFT JOIN 
     LatestInvoiceDates lid ON pa.AccountLink = lid.AccountLink
+WHERE 
+    pa.TxDate > '2023-11-06'  -- Add this condition to filter TxDate
 GROUP BY 
     cl.DCLink, 
     cl.Account, 
