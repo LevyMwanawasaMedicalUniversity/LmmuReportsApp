@@ -22,7 +22,7 @@
                 <p>Please accept our apologies if you have already graduated or withdrawn from the university and should not be receiving this email. In such cases, please disregard this notification.</p>
                 <p>Best Regards,</p>
                 <p>Registrar</p>
-                <p>Levy Mwanawasa Medical University, LUSAKA.</p                             
+                <p>Levy Mwanawasa Medical University, LUSAKA.</p>                             
             </b>
         </b>
     </div>
