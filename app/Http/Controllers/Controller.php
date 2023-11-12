@@ -291,10 +291,10 @@ class Controller extends BaseController
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
-        // Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath));
+        Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
     
         // Send the email with the PDF attachment
-        Mail::to('azwelsimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
+        // Mail::to('azwelsimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
     
         // Delete the temporary PDF file after sending the email
         unlink($pdfPath);
