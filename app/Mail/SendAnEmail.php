@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\BasicInformation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -20,56 +21,26 @@ class SendAnEmail extends Mailable
      */
 
      public $pdfPath;
+     public $studentId;
 
-     public function __construct($pdfPath)
-     {
-         $this->pdfPath = $pdfPath;
-     }
- 
-     public function build()
-     {
-         return $this
-             ->from('ictlmmu@gmail.com')
-             ->subject('Exam Docket For Unregistered Student')
-             ->view('emails.email-view') // Replace with your email view
-             ->attach($this->pdfPath, [
-                 'as' => 'exam_docket.pdf', // Specify the name of the attachment
-                 'mime' => 'application/pdf' // Specify the MIME type
-             ]);
-     }
-
-    // public function __construct()
-    // {
-    //     //
-    // }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+     public function __construct($pdfPath, $studentId)
     {
-        return new Envelope(
-            subject: 'Exam Docket For Unregistered Student',
-        );
+        $this->pdfPath = $pdfPath;
+        $this->studentId = $studentId;
+    }
+    public function build()
+    {
+        $studentDetails = BasicInformation::find($this->studentId);
+        
+        return $this
+            ->from('registrar@lmmu.ac.zm')
+            ->subject('Exam Docket For Unregistered Student')
+            ->view('emails.test', compact('studentDetails'))
+            ->attach($this->pdfPath, [
+                'as' => 'exam_docket.pdf',
+                'mime' => 'application/pdf'
+            ]);
     }
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'emails.test',
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
-    }
+    
 }
