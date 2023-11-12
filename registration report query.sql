@@ -310,7 +310,7 @@ GROUP BY
     CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END; 
 
     //////////////////////LATES TRANSACTION DATE//////////////////////////
-    WITH LatestInvoiceDates AS (
+WITH LatestInvoiceDates AS (
     SELECT 
         pa.AccountLink,
         MAX(pa.TxDate) AS LatestTxDate
@@ -345,4 +345,6 @@ GROUP BY
     cl.Account, 
     cl.Name,
     CONVERT(VARCHAR, lid.LatestTxDate, 23),
-    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END;
+    CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END
+HAVING 
+    MAX(CASE WHEN pa.Credit > 0 THEN pa.TxDate END) > '2023-11-08';
