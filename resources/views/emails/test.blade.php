@@ -19,10 +19,9 @@
                 <p>Do not forget to add the "@lmmu.ac.zm" at the end of your student number when logging in</p>
                 <p>Please accept our apologies if you have already graduated or withdrawn from the university and should not be receiving this email. In such cases, please disregard this notification.</p>
                 <p>Best Regards,</p>
-                <h6>Registrar</h6>
-
-                <h6>Levy Mwanawasa Medical University,</h6>
-                <h6>LUSAKA.</h6>                   
+                <p>Registrar</p>
+                <p>Levy Mwanawasa Medical University,</p>
+                <p>LUSAKA.</p>                             
             </b>
         </b>
     </div>
