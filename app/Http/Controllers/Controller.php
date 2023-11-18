@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\SendAnEmail;
+use App\Mail\SendMailNmcz;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\Courses;
@@ -273,9 +274,17 @@ class Controller extends BaseController
         $fileName = $studentID . '.pdf';
     
         // Generate the PDF and save it to the "public" disk
-        $pdf = PDF::loadView('emails.pdf', compact('studentResults', 'courses'));
-        $pdfPath = storage_path('app/' . $fileName);
-        $pdf->save($pdfPath);
+        $student = Student::where('student_number', $studentID)->first();
+        $status = $student->status;
+        if($status == 1){
+            $pdf = PDF::loadView('emails.pdf', compact('studentResults', 'courses'));
+            $pdfPath = storage_path('app/' . $fileName);
+            $pdf->save($pdfPath);
+        }elseif($status == 2){
+            $pdf = PDF::loadView('emailsNmcz.pdf', compact('studentResults', 'courses'));
+            $pdfPath = storage_path('app/' . $fileName);
+            $pdf->save($pdfPath);
+        }
 
         $privateEmail = BasicInformation::find($studentID);
 
@@ -291,11 +300,11 @@ class Controller extends BaseController
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
-        Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
+        // Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
     
         // Send the email with the PDF attachment
-        // Mail::to('mulumbesimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
-        // Mail::to('honest.phiri@lmmu.ac.zm')->send(new SendAnEmail($pdfPath,$studentID));
+        Mail::to('mulumbesimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
+        Mail::to('honest.phiri@lmmu.ac.zm')->send(new SendMailNmcz($pdfPath,$studentID));
     
     
         // Delete the temporary PDF file after sending the email

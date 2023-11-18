@@ -52,7 +52,12 @@ class HomeController extends Controller
             $this->setAndUpdateCourses($studentId);
             // Retrieve all unique Student values from the Course model
             $courses = Courses::where('Student', $studentId)->get();
-            return view('docket.studentViewDocket',compact('studentResults','courses'));
+            $status = $student->status;
+            if($status ==1){
+                return view('docket.studentViewDocket',compact('studentResults','courses'));
+            }elseif($status ==2){
+                return view('docketNmcz.studentViewDocket',compact('studentResults','courses'));
+            }
         }else{
             return view('home');
         }

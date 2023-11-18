@@ -23,6 +23,7 @@ class DocketController extends Controller
         if($request->input('student-number')){
             $student = Student::query()
                         ->where('student_number','=', $request->input('student-number'))
+                        ->where('status','=', 1)
                         ->first();
             if($student){
                 $getStudentNumber = $student->student_number;
@@ -32,10 +33,33 @@ class DocketController extends Controller
                 return back()->with('error', 'NOT FOUND.');               
             }
         }else{
-            $studentNumbers = Student::pluck('student_number')->toArray();
+            $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
         }
         return view('docket.index', compact('results','courseName','courseId'));
+    }
+
+    public function indexNmcz(Request $request){
+        $academicYear= 2023;
+        $courseName = null;
+        $courseId = null;
+        if($request->input('student-number')){
+            $student = Student::query()
+                        ->where('student_number','=', $request->input('student-number'))
+                        ->where('status','=', 2)
+                        ->first();
+            if($student){
+                $getStudentNumber = $student->student_number;
+                $studentNumbers = [$getStudentNumber];
+                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+            }else{
+                return back()->with('error', 'NOT FOUND.');               
+            }
+        }else{
+            $studentNumbers = Student::where('status', 2)->pluck('student_number')->toArray();
+            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+        }
+        return view('docketNmcz.index', compact('results','courseName','courseId'));
     }
 
     private function setAndSaveCourses($studentId) {
@@ -163,6 +187,37 @@ class DocketController extends Controller
         return view('docket.show',compact('courses','studentResults'));
     }
 
+    public function showStudentNmcz($studentId){
+        // try{
+            
+        // }catch(Exception $e){
+            
+        // }
+        $academicYear= 2023;
+        $student = Student::query()
+                        ->where('student_number','=', $studentId)
+                        ->first();
+        if($student){
+            $getStudentNumber = $student->student_number;
+            $studentNumbers = [$getStudentNumber];
+            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
+        }else{
+            return back()->with('error', 'NOT FOUND.');               
+        }
+        
+               
+        
+        $this->setAndUpdateCourses($studentId);
+        // Retrieve all unique Student values from the Course model
+        $courses = Courses::where('Student', $studentId)->get();
+        // return $courses;
+
+        // Pass the $students variable to the view
+        // return view('your.view.name', compact('students'));
+        
+        return view('docketNmcz.show',compact('courses','studentResults'));
+    }
+
     public function verifyStudent($studentId){
 
         $academicYear= 2023;
@@ -193,6 +248,38 @@ class DocketController extends Controller
             // $url = [];          
         }        
         return view('docket.verify',compact('courses','studentResults'));
+    }
+
+    public function verifyStudentNmcz($studentId){
+
+        $academicYear= 2023;
+        if(is_numeric($studentId)){
+            $student = Student::query()
+                            ->where('student_number','=', $studentId)
+                            ->first();
+        }else{
+            $student = []; 
+        }
+        if($student){
+
+            //  $route = '/docket/showStudent/'.$studentId;
+            // $url = url($route);
+            //  $qrCode = QrCode::size(100)->generate($url);
+
+            
+            $getStudentNumber = $student->student_number;
+            $studentNumbers = [$getStudentNumber];
+            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
+            $this->setAndSaveCourses($studentId);
+        // Retrieve all unique Student values from the Course model
+            $courses = Courses::where('Student', $studentId)->get();
+        }else{
+            $studentResults = []; 
+            $courses = [];
+            // $qrCode = [];   
+            // $url = [];          
+        }        
+        return view('docketNmcz.verify',compact('courses','studentResults'));
     }
 
     public function updateCoursesForStudent(Request $request, $studentId) {
@@ -232,6 +319,9 @@ class DocketController extends Controller
     public function import(){
         return view('docket.import');
     }
+    public function importNmcz(){
+        return view('docketNmcz.import');
+    }
 
     public function uploadStudents(Request $request)
     {
@@ -241,11 +331,15 @@ class DocketController extends Controller
             'excelFile' => 'required|mimes:xls,xlsx,csv',
             'academicYear' => 'required',
             'term' => 'required',
+            'status' => 'required',
         ]);
 
         // Get the academic year and term from the form
         $academicYear = $request->input('academicYear');
         $term = $request->input('term');
+        $status = $request->input('status');
+
+        // return $status;
 
         // Process the uploaded file
         if ($request->hasFile('excelFile')) {
@@ -297,6 +391,7 @@ class DocketController extends Controller
                             'student_number' => $studentNumber,
                             'academic_year' => $academicYear,
                             'term' => $term,
+                            'status' => $status
                         ];
                     }
 
@@ -310,11 +405,13 @@ class DocketController extends Controller
                         $getNrc = BasicInformation::find($studentNumber);
 
                         $nrc = $getNrc->GovernmentID;
-                        $student = User::create([
-                            'name' => $studentNumber,
-                            'email' => $studentNumber . '@lmmu.ac.zm',
-                            'password' => bcrypt($nrc),
-                        ]);
+                        
+                            $student = User::create([
+                                'name' => $studentNumber,
+                                'email' => $studentNumber . '@lmmu.ac.zm',
+                                'password' => bcrypt($nrc),                                
+                            ]);
+                       
                         
                         // Create the "Student" role if it doesn't exist
                         $studentRole = Role::firstOrCreate(['name' => 'Student']);

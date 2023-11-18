@@ -44,7 +44,7 @@
                         Loading...
                     </div>
                       <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="academicYear" style="font-weight: bold; font-size: 16px;">Academic Year</label>
                                 <select name="academicYear" class="form-control" required>
@@ -56,7 +56,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="term" style="font-weight: bold; font-size: 16px;">Term</label>
                                 <select name="term" class="form-control" required>
@@ -64,6 +64,15 @@
                                     <option value="Term-1">Term-1</option>                                    
                                     <option value="Term-3">Term-3</option>
                                     <option value="Term-4">Term-4</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="status" style="font-weight: bold; font-size: 16px;">Type</label>
+                                <select name="status" class="form-control" required>
+                                    <option value="1">LMMU Exam</option>   
+                                    <option value="2">NMCZ Exam</option>                                 
                                 </select>
                             </div>
                         </div>

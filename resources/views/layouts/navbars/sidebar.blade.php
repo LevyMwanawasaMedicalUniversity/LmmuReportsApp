@@ -139,6 +139,25 @@
             </li>         
           </ul>
         </div>
+      </li>
+      <li>
+        <a data-toggle="collapse" href="#docketNmczExamples">
+          <i class="now-ui-icons education_paper"></i>
+          <p>
+            {{ __("NMCZ Docket") }}
+            <b class="caret"></b>
+          </p>
+        </a>
+        <div class="collapse" id="docketNmczExamples">
+          <ul class="nav">
+            <li class="@if ($activePage == 'docket-indexNmcz') active @endif">
+              <a href="{{ route('docket.indexNmcz') }}">
+                <i class="now-ui-icons text_align-left"></i>
+                <p> {{ __("View Students") }} </p>
+              </a>
+            </li>                    
+          </ul>
+        </div>
       </li>  
       @endif      
     </ul>

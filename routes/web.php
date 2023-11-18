@@ -20,7 +20,7 @@ Route::get('/', function () {
 
 Auth::routes();
 Route::get('/verify/{studentNumber}', 'App\Http\Controllers\DocketController@verifyStudent')->name('docket.verify');
-
+Route::get('/verifyNmcz/{studentNumber}', 'App\Http\Controllers\DocketController@verifyStudentNmcz')->name('docket.verifyNmcz');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTestEmail');
 Auth::routes();
@@ -57,9 +57,13 @@ Route::group(['middleware' => 'auth'], function () {
         Route::middleware('can:Examination')->group(function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
+                Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
+                Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
                 Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
+                Route::get('/showStudentNmcz/{studentNumber}', 'DocketController@showStudentNmcz')->name('docket.showStudentNmcz');
                 Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+                Route::post('/uploadNmcz', 'DocketController@uploadStudentsNmcz')->name('import.studentsNmcz');
                 Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
                 Route::get('/importCourses', 'DocketController@importCourseFromSis')->name('courses.import');
                 Route::get('/addCourses/{studentId}', 'DocketController@selectCourses')->name('courses.select');
