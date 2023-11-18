@@ -96,6 +96,7 @@
     <div class="container">
         <div class="header">           
             <h2>FINAL EXAMINATION DOCKET 2023</h2>
+            <h4>PART-TIME STUDENT</h4>
             <h6>SENT BY EMAIL</h6>
         </div>
         <br>
