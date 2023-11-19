@@ -1,0 +1,83 @@
+SELECT
+    bi.FirstName,
+    bi.MiddleName,
+    bi.Surname,
+    bi.Sex,
+    bi.ID,
+    bi.GovernmentID,   
+    bi.PrivateEmail,
+    bi.StudyType,
+    s.Name AS "Programme",
+    s2.Name AS "School",
+    CASE
+        WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
+        ELSE 'NO REGISTRATION'
+    END AS "Registration Status"
+FROM
+    edurole.`basic-information` bi
+    INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
+	LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
+	INNER JOIN study s ON s.ID = ssl2.StudyID
+	INNER JOIN schools s2 ON s.ParentID = s2.ID
+WHERE
+    bi.ID IN (
+        190301891,
+        190301889,
+        190301234,
+        190301895,
+        190301290,
+        190302003,
+        190302127,
+        190301187,
+        190301189,
+        190301203,
+        190301206,
+        190301217,
+        190301222,
+        190301229,
+        190301241,
+        190301249,
+        190301261,
+        190301271,
+        190301274,
+        190301287,
+        190301300,
+        190301785,
+        190301792,
+        190301793,
+        190301797,
+        190301803,
+        190301806,
+        190301807,
+        190301841,
+        190301848,
+        190301851,
+        190301860,
+        190301861,
+        190301864,
+        190301867,
+        190301871,
+        190301873,
+        190301894,
+        190301899,
+        190301903,
+        190301907,
+        190301908,
+        190301922,
+        190301925,
+        190301926,
+        190301996,
+        190301998,
+        190302004,
+        190302010,
+        190302026,
+        190302030,
+        190302041,
+        190302059,
+        190302067,
+        190302084,
+        190302095,
+        190302096,
+        190302142,
+        190302143
+    );
