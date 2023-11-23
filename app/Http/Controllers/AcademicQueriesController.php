@@ -117,7 +117,7 @@ class AcademicQueriesController extends Controller
             'Programme',            
             'School',
             'First Name',
-            'Last NameE',
+            'Last Name',
             'Results Status'            
         ];
         
@@ -128,7 +128,7 @@ class AcademicQueriesController extends Controller
             'Programme',
             'School',                        
             'FirstName',
-            'LastName',
+            'Surname',
             'UnpublishedResults'
         ];
         

@@ -58,7 +58,7 @@
                             <td>{{$result->Programme}}</td>
                             <td>{{$result->School}}</td>
                             <td>{{$result->FirstName}}</td>
-                            <td>{{$result->LastName}}</td>
+                            <td>{{$result->Surname}}</td>
                             <td>{{$result->UnpublishedResults}}</td>                            
                         </tr>
                         @endforeach
