@@ -140,6 +140,36 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getCoursesWithResults(){
+        $results = $this->queryCoursesWithResults();
+        return $results;
+    }
+    private function queryCoursesWithResults(){
+        $results = SisCourses::select(
+            'courses.Name AS CourseCode',
+            'courses.CourseDescription AS CourseName',
+            'p.ProgramName',
+            's.Name AS Programme',
+            's2.Name AS School',
+            'bi.FirstName',
+            'bi.Surname',
+            DB::raw("(CASE WHEN COUNT(CASE WHEN g.AcademicYear = 2023 THEN g.CAMarks END) = 0 THEN 'No Results' ELSE 'Results Found' END) AS UnpublishedResults")
+        )
+        ->leftJoin('grades as g', function ($join) {
+            $join->on('courses.Name', '=', 'g.CourseNo')
+                ->where('g.AcademicYear', '=', 2023);
+        })
+        ->join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+        ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+        ->join('study-program-link as spl', 'p.ID', '=', 'spl.ProgramID')
+        ->join('study as s', 'spl.StudyID', '=', 's.ID')
+        ->join('schools as s2', 's.ParentID', '=', 's2.ID')
+        ->join('basic-information as bi', 'bi.ID', '=', 's.ProgrammesAvailable')
+        ->groupBy('p.ProgramName', 'courses.Name');
+    
+        return $results;
+    }
+
     private function queryAppealStudentDetails($academicYear, $studentNumbers) {
         $results = Schools::select(
             'basic-information.FirstName',

@@ -47,6 +47,12 @@ class AcademicQueriesController extends Controller
         
         return $this->exportData($headers, $rowData, $results, $filename);
     }
+
+    public function viewAllCoursesWithResults(Request $request){
+
+        $results = $this->getCoursesWithResults()->paginate('20');
+        return view('academics.reports.viewAllCoursesWithResults',compact('results'));
+    }
     
 
     //All programmes in a specific school
@@ -102,6 +108,35 @@ class AcademicQueriesController extends Controller
         }        
         return view('academics.reports.viewStudentsFromSpecificIntakeYearTakingAProgramme',compact('results','intakeName','programmeName','schoolName'));
     } 
+
+    public function exportAllCoursesWithResults(){
+        $headers = [
+            'Course Code',
+            'Course Name',
+            'Programme Code',
+            'Programme',            
+            'School',
+            'First Name',
+            'Last NameE',
+            'Results Status'            
+        ];
+        
+        $rowData = [
+            'CourseCode',
+            'CourseName',
+            'ProgramName',
+            'Programme',
+            'School',                        
+            'FirstName',
+            'LastName',
+            'UnpublishedResults'
+        ];
+        
+        $results = $this->getCoursesWithResults()->get();        
+        $filename = 'CoursesWithResults';
+        
+        return $this->exportData($headers, $rowData, $results, $filename);
+    }
 
     public function exportStudentsFromSpecificIntakeYearTakingAProgramme($intakeNumber, $programmeName){
 

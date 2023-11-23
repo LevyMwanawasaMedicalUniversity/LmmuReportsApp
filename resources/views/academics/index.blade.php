@@ -27,6 +27,10 @@
                     </thead>
                     <tbody>
                       <tr>
+                        <td><a href="{{ route('viewAllCoursesWithResults') }}">Course With Results 2023</a></td>
+                        <td>View All Courses With 2023 Results</td>
+                      </tr>
+                      <tr>
                         <td><a href="{{ route('viewAllStudentsRegisteredInASpecificAcademicYear') }}">Students Registered Year</a></td>
                         <td>All students registered in a specific academic Year, regardless of programme</td>
                       </tr>

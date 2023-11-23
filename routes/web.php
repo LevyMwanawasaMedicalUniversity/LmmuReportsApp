@@ -83,6 +83,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('academics')->group(function () {
                 Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
 
+                
+                Route::GET('/viewAllCoursesWithResults',  'AcademicQueriesController@viewAllCoursesWithResults')->name('viewAllCoursesWithResults');
+                Route::get('/exportAllCoursesWithResults', 'AcademicQueriesController@exportAllCoursesWithResults')->name('exportAllCoursesWithResults');
+
                 Route::GET('/viewAllStudentsRegisteredInASpecificAcademicYear',  'AcademicQueriesController@viewAllStudentsRegisteredInASpecificAcademicYear')->name('viewAllStudentsRegisteredInASpecificAcademicYear');
                 Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear/{academicYear}', 'AcademicQueriesController@exportAllStudentsRegisteredInASpecificAcademicYear')->name('exportAllStudentsRegisteredInASpecificAcademicYear');
 
