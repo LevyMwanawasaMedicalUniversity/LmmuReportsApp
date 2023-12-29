@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NotificationEmail;
 use App\Mail\SendAnEmail;
 use App\Mail\SendMailNmcz;
 use App\Models\AllCourses;
@@ -29,6 +30,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
 
 class Controller extends BaseController
 {
@@ -307,6 +309,31 @@ class Controller extends BaseController
         }
     
         return $failedCourses;
+    }
+
+    public function sendEmailNotification($studentID) {               
+
+        $privateEmail = BasicInformation::find($studentID);
+    
+        if ($privateEmail) {
+            $email = $privateEmail->PrivateEmail;
+        } else {
+            // Handle the case where there's no BasicInformation record with the provided $studentID
+            // For example, you might want to log an error message and return
+            Log::error("No BasicInformation record found for student ID: $studentID");
+            return "No BasicInformation record found for student ID: $studentID";
+        }
+    
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // $email is a valid email address
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        } else {
+            // $email is not a valid email address
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        }
+        Mail::to($sendingEmail)->send(new NotificationEmail($studentID));        
+    
+        return "Test email sent successfully!";
     }
 
 

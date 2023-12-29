@@ -51,7 +51,9 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::patch('/{user}/update', 'UserController@update')->name('users.update');
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
+                
             });
+            
         
         });
 
@@ -59,7 +61,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
                 Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
-                
+                Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
                 Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
                 Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');

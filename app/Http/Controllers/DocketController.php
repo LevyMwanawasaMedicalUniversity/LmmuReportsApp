@@ -16,6 +16,137 @@ use Spatie\Permission\Models\Role;
 
 class DocketController extends Controller
 {
+
+    public function sendEmailNotice(){
+        $academicYear = 2023;
+        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        
+        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
+                    ->get()
+                    ->filter(function ($student) {
+                        return $student->RegistrationStatus == 'NO REGISTRATION';
+                    });
+        foreach ($studentsDetails as $student) {
+            $studentNumber = $student->StudentID;
+            $this->sendEmailNotification($studentNumber);            
+        }
+        return back()->with('success', 'Emails sent successfully.');
+    }
+
+    public function uploadStudents(Request $request)
+    {
+        set_time_limit(1200000);
+        // Validate the form data
+        $request->validate([
+            'excelFile' => 'required|mimes:xls,xlsx,csv',
+            'academicYear' => 'required',
+            'term' => 'required',
+            'status' => 'required',
+        ]);
+
+        // Get the academic year and term from the form
+        $academicYear = $request->input('academicYear');
+        $term = $request->input('term');
+        $status = $request->input('status');
+
+        // return $status;
+
+        // Process the uploaded file
+        if ($request->hasFile('excelFile')) {
+            $file = $request->file('excelFile');
+
+            // Initialize the Box/Spout reader
+            $reader = ReaderEntityFactory::createXLSXReader();
+            $reader->open($file->getPathname());
+
+            $isHeaderRow = true; // Flag to identify the header row
+            $studentNumbers = [];
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $row) {
+                    // Skip the header row
+                    if ($isHeaderRow) {
+                        $isHeaderRow = false;
+                        continue;
+                    }
+
+                    // Assuming the student number is in the first column (index 1)
+                    $studentNumber = $row->getCellAtIndex(0)->getValue();
+
+                    $studentNumbers[] = $studentNumber;
+                }
+            }
+
+            $reader->close();
+
+            // Split studentNumbers into chunks
+            $chunkSize = 10; // Adjust this as needed
+            $chunks = array_chunk($studentNumbers, $chunkSize);
+
+            try {
+                // Process each chunk
+                foreach ($chunks as $chunk) {
+                    // Check for duplicate students in a single database query
+                    $existingStudents = Student::whereIn('student_number', $chunk)
+                        ->where('academic_year', $academicYear)
+                        ->where('term', $term)
+                        ->pluck('student_number')
+                        ->toArray();
+
+                    // Insert new students
+                    $newStudents = array_diff($chunk, $existingStudents);
+                    $studentsToInsert = [];
+                    foreach ($newStudents as $studentNumber) {
+                        $studentsToInsert[] = [
+                            'student_number' => $studentNumber,
+                            'academic_year' => $academicYear,
+                            'term' => $term,
+                            'status' => $status
+                        ];
+                    }
+
+                    Student::insert($studentsToInsert);
+
+                    // Trigger your setAndSaveCourses function for new students
+                    foreach ($newStudents as $studentNumber) {
+                        $this->setAndSaveCourses($studentNumber);
+                        $this->sendTestEmail($studentNumber);
+
+                        $getNrc = BasicInformation::find($studentNumber);
+
+                        $nrc = $getNrc->GovernmentID;
+                        
+                            $student = User::create([
+                                'name' => $studentNumber,
+                                'email' => $studentNumber . '@lmmu.ac.zm',
+                                'password' => bcrypt($nrc),                                
+                            ]);
+                                                    
+                        // Create the "Student" role if it doesn't exist
+                        $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" role to the user
+                        $student->assignRole($studentRole); 
+                        
+                        // Find or create the "Student" permission
+                        $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" permission to the user
+                        $student->givePermissionTo($studentPermission);
+                    }
+                }
+
+                // Provide a success message
+                return redirect()->back()->with('success', 'Students imported successfully and the dockets have been sent.');
+            } catch (\Throwable $e) {
+                // Handle any unexpected errors during import
+                return redirect()->back()->with('error', 'Failed to upload students: ' . $e->getMessage());
+            }
+        }
+
+        // Handle errors or validation failures
+        return redirect()->back()->with('error', 'Failed to upload students.');
+    }
     public function index(Request $request){
         $academicYear= 2023;
         $courseName = null;
@@ -229,7 +360,7 @@ class DocketController extends Controller
             return back()->with('error', 'NOT FOUND.');               
         }
         
-               
+        
         
         $this->setAndUpdateCourses($studentId);
         // Retrieve all unique Student values from the Course model
