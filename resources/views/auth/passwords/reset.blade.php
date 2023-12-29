@@ -2,7 +2,7 @@
     'namePage' => 'Reset Password',
     'class' => 'login-page sidebar-mini ',
     'activePage' => '',
-    'backgroundImage' => asset('assets') . "/img/bg14.jpg"
+    'backgroundImage' => asset('assets') . "/img/DJI_0096.JPG"
 ])
 
 @section('content')
@@ -15,8 +15,8 @@
           <div class="card card-login card-plain">
             <div class="card-header ">
               <div class="logo-container">
-                <img src="{{ asset('assets/img/now-logo.png') }}" alt="">
-              </div>
+                <img src="{{ asset('assets/imgDJI_0096.jpg') }}" alt="">
+            </div>
             </div>
             <div class="card-body ">
               <div class="card-body">
