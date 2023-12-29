@@ -22,19 +22,20 @@ SELECT
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
+        WHEN gp.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    WHEN MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
 			    ELSE
 			        'No Year Found'
 			END
         ELSE 'NO Year Reported'
-    END AS "Year Reported"    
+    END AS "Year Reported",
+    gp.Grade 
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+inner JOIN `grades-published` gp on bi.ID = gp.StudentNo
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -105,6 +106,8 @@ WHERE
 	OR bi.ID LIKE '220%'
     OR bi.ID LIKE '230%')
     AND LENGTH(bi.ID) >= 4
+    AND gp.AcademicYear = 2023
+    AND gp.Grade = "NE"
 GROUP BY
     bi.ID
 HAVING
@@ -136,19 +139,20 @@ SELECT
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
+        WHEN gp.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    WHEN MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
 			    ELSE
 			        'No Year Found'
 			END
         ELSE 'NO Year Reported'
-    END AS "Year Reported"    
+    END AS "Year Reported",
+    gp.Grade    
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+inner JOIN `grades-published` gp on bi.ID = gp.StudentNo
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -181,6 +185,8 @@ WHERE
 	OR bi.ID LIKE '220%'
     OR bi.ID LIKE '230%')
     AND LENGTH(bi.ID) >= 4
+    AND gp.AcademicYear = 2023
+    AND gp.Grade = "NE"
 GROUP BY
     bi.ID
 HAVING
@@ -213,20 +219,21 @@ SELECT
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
+        WHEN gp.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+			    WHEN MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
 			    ELSE
 			        'No Year Found'
 			END
         ELSE 'NO Year Reported'
-    END AS "Year Reported"
+    END AS "Year Reported",
+    gp.Grade
     
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+inner JOIN `grades-published` gp on bi.ID = gp.StudentNo
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -280,6 +287,8 @@ WHERE
     AND 
     (bi.ID LIKE '190%')
     AND LENGTH(bi.ID) >= 4
+    AND gp.AcademicYear = 2023
+    AND gp.Grade = "NE"
 GROUP BY
     bi.ID
 HAVING
@@ -311,20 +320,21 @@ SELECT
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
+        WHEN gp.StudentNo IS NOT NULL THEN
             CASE 
-                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+                WHEN MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(gp.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
 			    ELSE
 			        'No Year Found'
 			END
         ELSE 'NO Year Reported'
-    END AS "Year Reported"
+    END AS "Year Reported",
+    gp.Grade
     
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+inner JOIN `grades-published` gp on bi.ID = gp.StudentNo
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -341,31 +351,9 @@ WHERE
     AND 
  	(bi.ID LIKE '190%')
     AND LENGTH(bi.ID) >= 4
+    AND gp.AcademicYear = 2023
+    AND gp.Grade = "NE"
 GROUP BY
     bi.ID
 HAVING
 	(`Registration Status` = 'NO REGISTRATION' OR `Registration Status` IS NULL);
-	
-
-
-SELECT bi.FirstName,
-	bi.Surname,	 
-	bi.ID, 
-	s.Name as "Programme",
-	s.ShortName,
-	s2.Name as "School",
-	sg.StudentID as "NRC",
-	bi.PrivateEmail,
-	bi.MobilePhone,
-	sg.Grade, 
-	sg.GradePoints,
-	a.`DateTime`
-FROM edurole.`subject-grades` sg
-INNER JOIN `basic-information` bi ON bi.GovernmentID = sg.StudentID
-inner JOIN  `student-study-link` ssl2 on bi.ID  = ssl2.StudentID 
-INNER JOIN applicants a on bi.ID = a.StudentID 
-inner join study s on ssl2.StudyID = s.ID 
-inner join schools s2 on s2.ID = s.ParentID 
-WHERE s.ShortName in ('BSCMHCP','BSCCS','DIPCMSG','DIPCMSP','BSCMHN','DIPMHN','BSCMHN')
-GROUP BY sg.StudentID;
-

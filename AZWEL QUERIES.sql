@@ -1,34 +1,34 @@
 #SAGE QUERY 
 SELECT [DCLink]
-      ,[Account]
-      ,[Name]
-      ,[Title]      
-      ,[Contact_Person]
-      ,[Physical1]
-      ,[Physical2]
-      ,[DCBalance]
-      
+    ,[Account]
+    ,[Name]
+    ,[Title]      
+    ,[Contact_Person]
+    ,[Physical1]
+    ,[Physical2]
+    ,[DCBalance]
+    
 FROM [LMMU_Live].[dbo].[Client]
 
 WHERE [DCBalance] IS NULL
-      AND ([Account] LIKE '190%'
-      OR [Account] LIKE '210%'
-      OR [Account] LIKE '220%'
-      OR [Account] LIKE '230%')
-      AND LEN([Account]) = 9
+    AND ([Account] LIKE '190%'
+    OR [Account] LIKE '210%'
+    OR [Account] LIKE '220%'
+    OR [Account] LIKE '230%')
+    AND LEN([Account]) = 9
 SELECT *
-  FROM [dbo].[_btblInvoiceLines];
+    FROM [dbo].[_btblInvoiceLines];
 SELECT *
-  FROM [LMMU].[dbo].[_etblARAPBatches];
-
-  SELECT *
-  FROM [LMMU].[dbo].[_etblARAPBatchHistoryLines];
-
-  SELECT *
-   FROM [LMMU].[dbo].[_etblARAPBatchLines];
+    FROM [LMMU].[dbo].[_etblARAPBatches];
 
 SELECT *
-  FROM [LMMU].[dbo].[_rtblAgents];
+    FROM [LMMU].[dbo].[_etblARAPBatchHistoryLines];
+
+SELECT *
+    FROM [LMMU].[dbo].[_etblARAPBatchLines];
+
+SELECT *
+    FROM [LMMU].[dbo].[_rtblAgents];
 SELECT idInvoiceLines, iInvoiceID, iOrigLineID, iGrvLineID, iLineDocketMode, cDescription, iUnitsOfMeasureStockingID, iUnitsOfMeasureCategoryID, iUnitsOfMeasureID, fQuantity, fQtyChange, fQtyToProcess, fQtyLastProcess, fQtyProcessed, fQtyReserved, fQtyReservedChange, cLineNotes, fUnitPriceExcl, fUnitPriceIncl, iUnitPriceOverrideReasonID, fUnitCost, fLineDiscount, iLineDiscountReasonID, iReturnReasonID, fTaxRate, bIsSerialItem, bIsWhseItem, fAddCost, cTradeinItem, iStockCodeID, iJobID, iWarehouseID, iTaxTypeID, iPriceListNameID, fQuantityLineTotIncl, fQuantityLineTotExcl, fQuantityLineTotInclNoDisc, fQuantityLineTotExclNoDisc, fQuantityLineTaxAmount, fQuantityLineTaxAmountNoDisc, fQtyChangeLineTotIncl, fQtyChangeLineTotExcl, fQtyChangeLineTotInclNoDisc, fQtyChangeLineTotExclNoDisc, fQtyChangeLineTaxAmount, fQtyChangeLineTaxAmountNoDisc, fQtyToProcessLineTotIncl, fQtyToProcessLineTotExcl, fQtyToProcessLineTotInclNoDisc, fQtyToProcessLineTotExclNoDisc, fQtyToProcessLineTaxAmount, fQtyToProcessLineTaxAmountNoDisc, fQtyLastProcessLineTotIncl, fQtyLastProcessLineTotExcl, fQtyLastProcessLineTotInclNoDisc, fQtyLastProcessLineTotExclNoDisc, fQtyLastProcessLineTaxAmount, fQtyLastProcessLineTaxAmountNoDisc, fQtyProcessedLineTotIncl, fQtyProcessedLineTotExcl, fQtyProcessedLineTotInclNoDisc, fQtyProcessedLineTotExclNoDisc, fQtyProcessedLineTaxAmount, fQtyProcessedLineTaxAmountNoDisc, fUnitPriceExclForeign, fUnitPriceInclForeign, fUnitCostForeign, fAddCostForeign, fQuantityLineTotInclForeign, fQuantityLineTotExclForeign, fQuantityLineTotInclNoDiscForeign, fQuantityLineTotExclNoDiscForeign, fQuantityLineTaxAmountForeign, fQuantityLineTaxAmountNoDiscForeign, fQtyChangeLineTotInclForeign, fQtyChangeLineTotExclForeign, fQtyChangeLineTotInclNoDiscForeign, fQtyChangeLineTotExclNoDiscForeign, fQtyChangeLineTaxAmountForeign, fQtyChangeLineTaxAmountNoDiscForeign, fQtyToProcessLineTotInclForeign, fQtyToProcessLineTotExclForeign, fQtyToProcessLineTotInclNoDiscForeign, fQtyToProcessLineTotExclNoDiscForeign, fQtyToProcessLineTaxAmountForeign, fQtyToProcessLineTaxAmountNoDiscForeign, fQtyLastProcessLineTotInclForeign, fQtyLastProcessLineTotExclForeign, fQtyLastProcessLineTotInclNoDiscForeign, fQtyLastProcessLineTotExclNoDiscForeign, fQtyLastProcessLineTaxAmountForeign, fQtyLastProcessLineTaxAmountNoDiscForeign, fQtyProcessedLineTotInclForeign, fQtyProcessedLineTotExclForeign, fQtyProcessedLineTotInclNoDiscForeign, fQtyProcessedLineTotExclNoDiscForeign, fQtyProcessedLineTaxAmountForeign, fQtyProcessedLineTaxAmountNoDiscForeign, iLineRepID, iLineProjectID, iLedgerAccountID, iModule, bChargeCom, bIsLotItem, iMFPID, iLineID, iLinkedLineID, fQtyLinkedUsed, fUnitPriceInclOrig, fUnitPriceExclOrig, fUnitPriceInclForeignOrig, fUnitPriceExclForeignOrig, iDeliveryMethodID, fQtyDeliver, dDeliveryDate, iDeliveryStatus, fQtyForDelivery, bPromotionApplied, fPromotionPriceExcl, fPromotionPriceIncl, cPromotionCode, iSOLinkedPOLineID, fLength, fWidth, fHeight, iPieces, iPiecesToProcess, iPiecesLastProcess, iPiecesProcessed, iPiecesReserved, iPiecesDeliver, iPiecesForDelivery, fQuantityUR, fQtyChangeUR, fQtyToProcessUR, fQtyLastProcessUR, fQtyProcessedUR, fQtyReservedUR, fQtyReservedChangeUR, fQtyDeliverUR, fQtyForDeliveryUR, fQtyLinkedUsedUR, iPiecesLinkedUsed, iSalesWhseID, [_btblInvoiceLines_iBranchID], [_btblInvoiceLines_dCreatedDate], [_btblInvoiceLines_dModifiedDate], [_btblInvoiceLines_iCreatedBranchID], [_btblInvoiceLines_iModifiedBranchID], [_btblInvoiceLines_iCreatedAgentID], [_btblInvoiceLines_iModifiedAgentID], [_btblInvoiceLines_iChangeSetID], [_btblInvoiceLines_Checksum], iMajorIndustryCodeID, iCancellationReasonID, bReverseChargeApplied, fRecommendedRetailPrice, iSelectedBarcodeID
 FROM LMMU_Live.dbo.[_btblInvoiceLines];
 
@@ -194,17 +194,17 @@ SELECT
     NumberOfPayments,
     TotalPayments AS 'Total Payments',
     CASE 
-	    WHEN 
-	    	p.ProgramName LIKE '%y1' OR p.ProgramName IS NULL THEN 
+        WHEN 
+            p.ProgramName LIKE '%y1' OR p.ProgramName IS NULL THEN 
 	    		ROUND((TotalPayments * 100)/(program.YEAR1),2)    
-	    	ELSE 
+            ELSE 
 				ROUND((TotalPayments * 100)/(program.YEAR2),2)
     END AS "Percentage Paid",
     CASE 
-	    WHEN 
-	    	p.ProgramName LIKE '%y1' OR p.ProgramName IS NULL THEN 
-	    		(program.YEAR1)    
-	    	ELSE 
+        WHEN 
+            p.ProgramName LIKE '%y1' OR p.ProgramName IS NULL THEN 
+                (program.YEAR1)    
+            ELSE 
 				(program.YEAR2)
     END AS "Invoice", 
     CASE

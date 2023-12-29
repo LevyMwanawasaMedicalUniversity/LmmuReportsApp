@@ -97,6 +97,6 @@ INNER JOIN (
     UNION ALL SELECT 'DipEH-DE', 9670 , 9125  
 ) AS program ON SUBSTRING_INDEX(p.ProgramName, '-', 2) = program.ProgrammeCode
 WHERE
- 	bi.ID LIKE '190%'
+    bi.ID LIKE '190%'
 GROUP BY
     bi.ID;

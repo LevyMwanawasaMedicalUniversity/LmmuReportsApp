@@ -272,7 +272,7 @@ GROUP BY
 ///////////////////////2023 payments only
 
    
-   WITH LatestInvoiceDates AS (
+WITH LatestInvoiceDates AS (
     SELECT 
         pa.AccountLink,
         MAX(pa.TxDate) AS LatestTxDate
@@ -288,10 +288,10 @@ SELECT
     cl.Account, 
     cl.Name,
     SUM(CASE 
-	    WHEN pa.Description  LIKE '%reversal%' THEN 0 
-	    WHEN pa.TxDate < '2023-01-01' THEN 0 
-	    ELSE pa.Credit 
-	    END) AS TotalPayment2023,
+            WHEN pa.Description  LIKE '%reversal%' THEN 0 
+            WHEN pa.TxDate < '2023-01-01' THEN 0 
+            ELSE pa.Credit 
+            END) AS TotalPayment2023,
     CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN 'Invoiced' ELSE 'Not Invoiced' END AS "2023 Invoice Status",
     CONVERT(VARCHAR, lid.LatestTxDate, 23) AS LatestInvoiceDate
 FROM 
