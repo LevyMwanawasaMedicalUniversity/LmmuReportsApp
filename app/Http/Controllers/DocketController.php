@@ -89,7 +89,7 @@ class DocketController extends Controller
         ];
         
         $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();        
-        $filename = 'CoursesWithResults';
+        $filename = 'StudentsOnSisReports';
         
         return $this->exportData($headers, $rowData, $results, $filename);
     }
