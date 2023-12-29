@@ -31,17 +31,22 @@
                         </div>
                     @endif
                     @if(!$courseName)
-                    <form action="{{ route('docket.index') }}" method="GET">
-                      @csrf
-                      
-                      <div class="form-group">
-                          <label for="search">Search Students</label>
-                          <input type="number" name="student-number" class="form-control" id="student-number" placeholder="Enter student name or ID">
-                      </div>
-                      
-                      <button type="submit" class="btn btn-primary">Search</button>
-                    </form>
-
+                    
+                        <form action="{{ route('docket.index') }}" method="GET">
+                            @csrf
+                            
+                            <div class="form-group">
+                                <label for="search">Search Students</label>
+                                <input type="number" name="student-number" class="form-control" id="student-number" placeholder="Enter student name or ID">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                        
+                        <div class="">
+                            <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('docket.exportAppealStudents') }}">Export Appeal List</a>
+                            
+                        </div>
                     
                     @endif
                     @if($courseName)

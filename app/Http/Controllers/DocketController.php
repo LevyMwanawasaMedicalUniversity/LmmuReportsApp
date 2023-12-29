@@ -39,6 +39,47 @@ class DocketController extends Controller
         return view('docket.index', compact('results','courseName','courseId'));
     }
 
+    public function exportAppealStudents(){
+        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        $academicYear= 2023;
+        $headers = [
+            'First Name',
+            'Middle Name',
+            'Surname',
+            'Email',
+            'Balance',            
+            'Gender',
+            'Student Number',
+            'NRC',
+            'Programme',
+            'School',
+            'Study Mode',
+            'Year Of Study',
+            'Registration Status'          
+        ];
+        
+        $rowData = [
+            'FirstName',
+            'MiddleName',
+            'Surname',
+            'PrivateEmail',
+            'Amount',
+            'Sex',
+            'StudentID',                        
+            'GovernmentID',
+            'Name',
+            'Description',
+            'StudyType',
+            'YearOfStudy',
+            'RegistrationStatus'
+        ];
+        
+        $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();        
+        $filename = 'CoursesWithResults';
+        
+        return $this->exportData($headers, $rowData, $results, $filename);
+    }
+
     public function indexNmcz(Request $request){
         $academicYear= 2023;
         $courseName = null;

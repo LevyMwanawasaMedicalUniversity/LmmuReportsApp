@@ -182,7 +182,7 @@ class Controller extends BaseController
             'basic-information.MobilePhone',
             'programmes.ProgramName AS "Programme Code"',
             'study.Name',
-            'schools.Description AS "School"',
+            'schools.Description',
             'basic-information.StudyType',
             'balances.Amount',
             DB::raw("CASE

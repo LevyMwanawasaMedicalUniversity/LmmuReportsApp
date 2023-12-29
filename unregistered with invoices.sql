@@ -12,22 +12,22 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	ELSE program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        ELSE program.YEAR2
     END as "2023 Invoice",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
     	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-			    ELSE
-			        'No Year Found'
+                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+                ELSE
+                    'No Year Found'
 			END
         ELSE 'NO Year Reported'
     END AS "Year Reported"    
@@ -101,7 +101,7 @@ INNER JOIN (
 WHERE
     bi.StudyType = 'Fulltime'
     AND 
- 	(bi.ID LIKE '210%'
+    (bi.ID LIKE '210%'
 	OR bi.ID LIKE '220%'
     OR bi.ID LIKE '230%')
     AND LENGTH(bi.ID) >= 4
@@ -126,22 +126,22 @@ SELECT
     END AS "Registration Status",
     
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	ELSE program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        ELSE program.YEAR2
     END as "2023 Invoice",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
     	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-			    ELSE
-			        'No Year Found'
+                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+                ELSE
+                    'No Year Found'
 			END
         ELSE 'NO Year Reported'
     END AS "Year Reported"    
@@ -177,7 +177,7 @@ INNER JOIN (
 WHERE
     bi.StudyType = 'Distance'
     AND 
- 	(bi.ID LIKE '210%'
+    (bi.ID LIKE '210%'
 	OR bi.ID LIKE '220%'
     OR bi.ID LIKE '230%')
     AND LENGTH(bi.ID) >= 4
@@ -203,22 +203,22 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	ELSE program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        ELSE program.YEAR2
     END as "2023 Invoice",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
     	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
             CASE 
-			    WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-			    ELSE
-			        'No Year Found'
+                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
+                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+                ELSE
+                    'No Year Found'
 			END
         ELSE 'NO Year Reported'
     END AS "Year Reported"
@@ -305,8 +305,8 @@ SELECT
         ELSE program.YEAR2
     END as "2023 Invoice",
     CASE 
-    	WHEN bi.ID LIKE "230%" then program.YEAR1
-    	WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
     	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
     	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
     END as "Total Invoice",
@@ -314,9 +314,9 @@ SELECT
         WHEN g.StudentNo IS NOT NULL THEN
             CASE 
                 WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-			        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-			    ELSE
-			        'No Year Found'
+                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
+                ELSE
+                    'No Year Found'
 			END
         ELSE 'NO Year Reported'
     END AS "Year Reported"
@@ -339,7 +339,7 @@ INNER JOIN (
 WHERE
     bi.StudyType = 'Distance'
     AND 
- 	(bi.ID LIKE '190%')
+    (bi.ID LIKE '190%')
     AND LENGTH(bi.ID) >= 4
 GROUP BY
     bi.ID
