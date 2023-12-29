@@ -56,7 +56,7 @@
                     @endif
                 </div>
                 <!-- <form action="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}" method="GET">
-                      <div class="row">
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="academicYear" style="font-weight: bold; font-size: 16px;">Academic Year</label>
