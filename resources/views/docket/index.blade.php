@@ -80,7 +80,7 @@
                                 </select>
                             </div>
                         </div>
-                      </div>
+                    </div>
                     <div class="row align-items-center">
                         <div class="col-md-5 ml-3">
                             <button class="btn btn-primary -mt3" id="viewResultsBtn" type="submit">
@@ -88,7 +88,7 @@
                             </button>
                         </div>
                         <div class="col-md-6">
-                           
+                        
                         </div>
                     </div>
                 </form> -->
@@ -135,7 +135,7 @@
                     </div>
                     {{ $results->links('pagination::bootstrap-4') }}
                 </div>
-                 @else
+                @else
                 <div class="card-body text-center">
                     <h3>Please Select An Option To Generate A Report.</h3>
                 </div>
