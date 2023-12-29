@@ -35,6 +35,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::put('profile', ['as' => 'profile.update', 'uses' => 'App\Http\Controllers\ProfileController@update']);
 	Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'App\Http\Controllers\ProfileController@password']);
     Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
+    Route::get('/students/exam/results/{studentNumber}', 'App\Http\Controllers\DocketController@students2023ExamResults')->name('docket.students2023ExamResults');
 
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
 	Route::get('/report', 'ReportController@registeredStudents')->name('registered.students');
@@ -58,6 +59,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
                 Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
+                
                 Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
                 Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');

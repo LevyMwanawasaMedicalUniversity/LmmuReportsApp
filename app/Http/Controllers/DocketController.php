@@ -39,6 +39,20 @@ class DocketController extends Controller
         return view('docket.index', compact('results','courseName','courseId'));
     }
 
+    public function students2023ExamResults($studentNumber){
+        $academicYear= 2023;
+        $studentNumbers = [$studentNumber];
+        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+        $student = $studentsDetails->first();
+
+        if($student->RegistrationStatus == 'NO REGISTRATION'){
+            $results = $this->getStudent2023ExamResults($studentNumber,$academicYear);
+            return view('docket.examinationResults', compact('results','studentNumber'));
+        }else{
+            return back()->with('error', 'UNAUTHORIZED ACCESS');
+        }
+    }
+
     public function exportAppealStudents(){
         $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
         $academicYear= 2023;

@@ -140,6 +140,20 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudent2023ExamResults($studentNumber,$academicYear){
+        $results = $this->queryStudentResults($studentNumber,$academicYear);
+        return $results;
+    }
+
+    private function queryStudentResults($studentNumber, $academicYear){
+        $results = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
+            ->where('StudentNo', $studentNumber)
+            ->where('AcademicYear', $academicYear)
+            ->get();
+    
+        return $results;
+    }
+
     public function getCoursesWithResults(){
         $results = $this->queryCoursesWithResults();
         return $results;

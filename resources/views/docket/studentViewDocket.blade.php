@@ -67,7 +67,9 @@
                                 <div style="font-size: 10pt; font-weight: bold;">PRINTED OUT</h2>
                                 <BR>
                                     <BR>
-
+                                @if ($studentResults->RegistrationStatus == 'NO REGISTRATION')
+                                    <a href="students/exam/results/{{$studentResults->StudentID}}" class="btn btn-primary">EXAM RESULTS</a>
+                                @endif
                             </div>
 
                             
@@ -84,6 +86,8 @@
                                     <p>Printed: <b><span id="currentDate"></span></b></p>
                                     Balance: <b>K {{$studentResults->Amount}}</b>
                                     <br> Delivery: <b>{{$studentResults->StudyType}}</b>
+                                    
+                                    
                                 </div>
                                 
                             </div>
