@@ -76,7 +76,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
                 Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
                 Route::get('/resetAllStudentsPasswords', 'DocketController@resetAllStudentsPasswords')->name('docket.resetAllStudentsPassword');
-                Route::get('createAccountsForStudentsNotInUsersTableAndSendEmails', 'DocketController@createAccountsForStudentsNotInUsersTableAndSendEmails')->name('docket.createAccountsForStudentsNotInUsersTableAndSendEmails');
+                Route::get('/createAccountsForStudentsNotInUsersTableAndSendEmails', 'DocketController@createAccountsForStudentsNotInUsersTableAndSendEmails')->name('docket.createAccountsForStudentsNotInUsersTableAndSendEmails');
     
     
                 
