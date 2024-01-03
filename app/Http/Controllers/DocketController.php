@@ -219,6 +219,38 @@ class DocketController extends Controller
         }
     }
 
+    public function createAccountsForStudentsNotInUsersTableAndSendEmails(){
+        $academicYear = 2023;
+        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        
+        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
+                    ->get()
+                    ->filter(function ($student) {
+                        return $student->RegistrationStatus == 'NO REGISTRATION';
+                    });
+        foreach ($studentsDetails as $student) {
+            $studentNumber = $student->StudentID;
+            $getNrc = BasicInformation::find($studentNumber);
+            $nrc = trim($getNrc->GovernmentID);
+            // Check if the student_number exists in the users table and create the account if it doesn't
+            $user = User::where('name', $studentNumber)->first();
+
+            if (!$user) {
+                User::create([
+                    'name' => $studentNumber,
+                    'email' => $studentNumber . '@lmmu.ac.zm',
+                    'password' => bcrypt($nrc),
+                ]);
+
+                $this->sendEmailNotification($studentNumber);
+            }
+                        
+        }
+        return back()->with('success', 'Emails sent successfully.');
+    }
+
+    
+
     public function exportAppealStudents(){
         $studentNumbers = Student::where('status', 1)
             ->whereHas('user', function ($query) {

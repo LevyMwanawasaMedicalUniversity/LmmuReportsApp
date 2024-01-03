@@ -1,15 +1,15 @@
 SELECT bi.FirstName,
-	bi.Surname,	 
-	bi.ID, 
+	bi.MiddleName,
+	bi.Surname,	
+	bi.Sex,
+	bi.ID,
+	bi.GovernmentID,
 	s.Name as "Programme",
 	s.ShortName,
 	s2.Name as "School",
-	sg.StudentID as "NRC",
 	bi.PrivateEmail,
-	bi.MobilePhone,
-	sg.Grade, 
-	sg.GradePoints,
-	a.`DateTime`
+	bi.MobilePhone,	
+	a.`DateTime` as "Date Submitted"
 FROM edurole.`subject-grades` sg
 INNER JOIN `basic-information` bi ON bi.GovernmentID = sg.StudentID
 inner JOIN  `student-study-link` ssl2 on bi.ID  = ssl2.StudentID 
