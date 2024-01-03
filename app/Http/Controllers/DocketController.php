@@ -207,7 +207,7 @@ class DocketController extends Controller
                     // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
                     // // Assign the "Student" permission to the user
                     // $student->givePermissionTo($studentPermission);
-                    $this->sendEmailNotification($student->name);
+                    // $this->sendEmailNotification($student->name);
                 }
             });
 
