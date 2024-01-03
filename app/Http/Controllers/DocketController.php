@@ -220,7 +220,12 @@ class DocketController extends Controller
     }
 
     public function exportAppealStudents(){
-        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        $studentNumbers = Student::where('status', 1)
+            ->whereHas('user', function ($query) {
+                $query->where('created_at', '<=', '2023-12-06');
+            })
+            ->pluck('student_number')
+            ->toArray();
         $academicYear= 2023;
         $headers = [
             'First Name',

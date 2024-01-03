@@ -14,4 +14,10 @@ class Student extends Model
         'term', 
         'status'   
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'student_number', 'name');
+    }
 }
+
