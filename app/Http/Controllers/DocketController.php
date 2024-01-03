@@ -176,8 +176,7 @@ class DocketController extends Controller
 
         $academicYear = 2023;
 
-        User::role('Student')
-            ->join('students', 'students.student_number', '=', 'users.name')
+        User::join('students', 'students.student_number', '=', 'users.name')
             ->where('students.status', 1)
             ->chunk(200, function ($students) use ($academicYear) {
                 foreach ($students as $student) {
@@ -200,7 +199,14 @@ class DocketController extends Controller
 
                     $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
                     $student->update(['password' => bcrypt($nrc)]);
-                    $student->assignRole('Student');
+                    // Create the "Student" role if it doesn't exist
+                    $studentRole = Role::firstOrCreate(['name' => 'Student']);                        
+                    // Assign the "Student" role to the user
+                    $student->assignRole($studentRole);                    
+                    // Find or create the "Student" permission
+                    $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
+                    // Assign the "Student" permission to the user
+                    $student->givePermissionTo($studentPermission);
                     $this->sendEmailNotification($student->name);
                 }
             });
