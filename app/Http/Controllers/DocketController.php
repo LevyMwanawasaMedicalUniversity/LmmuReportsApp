@@ -232,19 +232,22 @@ class DocketController extends Controller
             $studentNumber = $student->StudentID;
             $getNrc = BasicInformation::find($studentNumber);
             $nrc = trim($getNrc->GovernmentID);
-            // Check if the student_number exists in the users table and create the account if it doesn't
-            $user = User::where('name', $studentNumber)->first();
-
+            $email = $studentNumber . '@lmmu.ac.zm';
+        
+            // Check if the student_number or email exists in the users table
+            $user = User::where('name', $studentNumber)
+                        ->orWhere('email', $email)
+                        ->first();
+        
             if (!$user) {
                 User::create([
                     'name' => $studentNumber,
-                    'email' => $studentNumber . '@lmmu.ac.zm',
+                    'email' => $email,
                     'password' => bcrypt($nrc),
                 ]);
-
+        
                 $this->sendEmailNotification($studentNumber);
             }
-                        
         }
         return back()->with('success', 'Emails sent successfully.');
     }
