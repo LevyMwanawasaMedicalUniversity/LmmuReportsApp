@@ -200,13 +200,13 @@ class DocketController extends Controller
                     $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
                     $student->update(['password' => bcrypt($nrc)]);
                     // Create the "Student" role if it doesn't exist
-                    $studentRole = Role::firstOrCreate(['name' => 'Student']);                        
-                    // Assign the "Student" role to the user
-                    $student->assignRole($studentRole);                    
-                    // Find or create the "Student" permission
-                    $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
-                    // Assign the "Student" permission to the user
-                    $student->givePermissionTo($studentPermission);
+                    // $studentRole = Role::firstOrCreate(['name' => 'Student']);                        
+                    // // Assign the "Student" role to the user
+                    // $student->assignRole($studentRole);                    
+                    // // Find or create the "Student" permission
+                    // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
+                    // // Assign the "Student" permission to the user
+                    // $student->givePermissionTo($studentPermission);
                     $this->sendEmailNotification($student->name);
                 }
             });
@@ -232,6 +232,8 @@ class DocketController extends Controller
             // Assign the "Student" permission to the user
             $user->givePermissionTo($studentPermission);
         }
+
+        return back()->with('success', 'Roles Updated successfully.');
     }
 
     public function students2023ExamResults($studentNumber){
