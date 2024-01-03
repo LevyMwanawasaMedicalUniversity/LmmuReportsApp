@@ -172,6 +172,7 @@ class DocketController extends Controller
 
     public function resetAllStudentsPasswords()
     {
+        set_time_limit(1200000);
         $students = User::role('Student')
             ->join('students', 'students.student_number', '=', 'users.name')
             ->where('students.status', 1)
@@ -199,7 +200,7 @@ class DocketController extends Controller
             $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
             $student->password = bcrypt($nrc);
             $student->save();
-            $this->sendEmailNotification($student->name);            
+            // $this->sendEmailNotification($student->name);            
         }
 
         return back()->with('success', 'Passwords reset successfully.');
