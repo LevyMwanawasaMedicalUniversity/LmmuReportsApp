@@ -198,8 +198,8 @@ class DocketController extends Controller
 
             $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
             $student->password = bcrypt($nrc);
-            $this->sendEmailNotification($student->name);
             $student->save();
+            $this->sendEmailNotification($student->name);            
         }
 
         return back()->with('success', 'Passwords reset successfully.');
