@@ -173,35 +173,36 @@ class DocketController extends Controller
     public function resetAllStudentsPasswords()
     {
         set_time_limit(1200000);
-        $students = User::role('Student')
+
+        $academicYear = 2023;
+
+        User::role('Student')
             ->join('students', 'students.student_number', '=', 'users.name')
             ->where('students.status', 1)
-            ->get();
+            ->chunk(200, function ($students) use ($academicYear) {
+                foreach ($students as $student) {
+                    $studentNumbers = [$student->name];
+                    $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
+                        ->get()
+                        ->filter(function ($studentDetail) {
+                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
+                        });
 
-        foreach ($students as $student) {
-            $studentNumbers = [$student->name];
-            $academicYear = 2023;
-            $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
-                ->get()
-                ->filter(function ($studentDetail) {
-                    return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
-                });
+                    if ($studentsDetails->isEmpty()) {
+                        continue; // Skip the iteration if no student details found
+                    }
 
-            if ($studentsDetails->isEmpty()) {
-                continue; // Skip the iteration if no student details found
-            }
+                    $studentDetail = $studentsDetails->first();
 
-            $studentDetail = $studentsDetails->first();
+                    if ($studentDetail->GovernmentID === null) {
+                        continue; // Skip the iteration if GovernmentID is null
+                    }
 
-            if ($studentDetail->GovernmentID === null) {
-                continue; // Skip the iteration if GovernmentID is null
-            }
-
-            $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
-            $student->password = bcrypt($nrc);
-            $student->save();
-            // $this->sendEmailNotification($student->name);            
-        }
+                    $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
+                    $student->update(['password' => bcrypt($nrc)]);
+                    $this->sendEmailNotification($student->name);
+                }
+            });
 
         return back()->with('success', 'Passwords reset successfully.');
     }
