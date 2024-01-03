@@ -16,7 +16,7 @@
 
                 <p>Login using '{{ $studentDetails->ID }}@lmmu.ac.zm' as your username and your National Registration Card number 
                     '{{ $studentDetails->GovernmentID }}' as your password. Don't forget to add "@lmmu.ac.zm" to your student number.</p>
-
+                <p>Kindly note that your password has been reset to your NRC number</p>
                 
                 <p>Best Regards,</p>
                 <p>Registrar</p>

@@ -326,7 +326,7 @@ class Controller extends BaseController
     
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = $email;
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';

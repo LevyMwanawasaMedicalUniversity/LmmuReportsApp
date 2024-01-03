@@ -61,7 +61,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
                 Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
-                Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
+                // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
                 Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
                 Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
@@ -75,6 +75,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
                 Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
                 Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
+                Route::get('/resetAllStudentsPasswords', 'DocketController@resetAllStudentsPasswords')->name('docket.resetAllStudentsPassword');
                 
     
     

@@ -114,7 +114,7 @@ class DocketController extends Controller
 
                         $getNrc = BasicInformation::find($studentNumber);
 
-                        $nrc = $getNrc->GovernmentID;
+                        $nrc = trim($getNrc->GovernmentID);
                         
                             $student = User::create([
                                 'name' => $studentNumber,
@@ -168,6 +168,41 @@ class DocketController extends Controller
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
         }
         return view('docket.index', compact('results','courseName','courseId'));
+    }
+
+    public function resetAllStudentsPasswords()
+    {
+        $students = User::role('Student')
+            ->join('students', 'students.student_number', '=', 'users.name')
+            ->where('students.status', 1)
+            ->get();
+
+        foreach ($students as $student) {
+            $studentNumbers = [$student->name];
+            $academicYear = 2023;
+            $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
+                ->get()
+                ->filter(function ($studentDetail) {
+                    return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
+                });
+
+            if ($studentsDetails->isEmpty()) {
+                continue; // Skip the iteration if no student details found
+            }
+
+            $studentDetail = $studentsDetails->first();
+
+            if ($studentDetail->GovernmentID === null) {
+                continue; // Skip the iteration if GovernmentID is null
+            }
+
+            $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
+            $student->password = bcrypt($nrc);
+            $this->sendEmailNotification($student->name);
+            $student->save();
+        }
+
+        return back()->with('success', 'Passwords reset successfully.');
     }
 
     public function students2023ExamResults($studentNumber){
