@@ -75,6 +75,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/storeCourses/{studentId}', 'DocketController@storeCourses')->name('courses.store');
                 Route::get('/viewExaminationList/{coursedId}', 'DocketController@viewExaminationList')->name('courses.examlist');
                 Route::get('/exportListExamList/{coursedId}', 'DocketController@exportListExamList')->name('courses.exportListExamList');
+                Route::get('/assignStudentsRoles', 'DocketController@assignStudentsRoles')->name('docket.assignStudentsRoles');
                 Route::get('/resetAllStudentsPasswords', 'DocketController@resetAllStudentsPasswords')->name('docket.resetAllStudentsPassword');
                 Route::get('/createAccountsForStudentsNotInUsersTableAndSendEmails', 'DocketController@createAccountsForStudentsNotInUsersTableAndSendEmails')->name('docket.createAccountsForStudentsNotInUsersTableAndSendEmails');
     

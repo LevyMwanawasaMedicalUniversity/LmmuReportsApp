@@ -214,6 +214,26 @@ class DocketController extends Controller
         return back()->with('success', 'Passwords reset successfully.');
     }
 
+    public function assignStudentsRoles(){
+        set_time_limit(1200000);
+        $users = User::join('students', 'students.student_number', '=', 'users.name')
+            ->where('students.status', 1)
+            ->doesntHave('roles')
+            ->get();
+
+        // Loop through the users
+        foreach ($users as $user) {
+            // Create the "Student" role if it doesn't exist
+            $studentRole = Role::firstOrCreate(['name' => 'Student']);                        
+            // Assign the "Student" role to the user
+            $user->assignRole($studentRole);                    
+            // Find or create the "Student" permission
+            $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
+            // Assign the "Student" permission to the user
+            $user->givePermissionTo($studentPermission);
+        }
+    }
+
     public function students2023ExamResults($studentNumber){
         $academicYear= 2023;
         $studentNumbers = [$studentNumber];
