@@ -43,10 +43,10 @@
                             <button type="submit" class="btn btn-primary">Search</button>
                         </form>
                         
-                        <div class="">
+                        {{-- <div class="">
                             <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('docket.exportAppealStudents') }}">Export Appeal List</a>
                             
-                        </div>
+                        </div> --}}
                     
                     @endif
                     @if($courseName)

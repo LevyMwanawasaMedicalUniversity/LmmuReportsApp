@@ -32,14 +32,14 @@
                     @endif
                     @if(!$courseName)
                     <form action="{{ route('docket.indexNmcz') }}" method="GET">
-                      @csrf
-                      
-                      <div class="form-group">
-                          <label for="search">Search Students</label>
-                          <input type="number" name="student-number" class="form-control" id="student-number" placeholder="Enter student name or ID">
-                      </div>
-                      
-                      <button type="submit" class="btn btn-primary">Search</button>
+                        @csrf
+                        
+                        <div class="form-group">
+                            <label for="search">Search Students</label>
+                            <input type="number" name="student-number" class="form-control" id="student-number" placeholder="Enter student name or ID">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Search</button>
                     </form>
 
                     
