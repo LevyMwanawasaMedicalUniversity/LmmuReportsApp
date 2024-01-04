@@ -99,6 +99,7 @@ class DocketController extends Controller
 
                         foreach ($existingStudents as $studentId) {
                             $this->setAndUpdateCoursesForCurrentYear($studentId);
+                            $this->sendTestEmail($studentId); 
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);

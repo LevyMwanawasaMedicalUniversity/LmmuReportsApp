@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\DefSupDocket;
 use App\Mail\NotificationEmail;
 use App\Mail\SendAnEmail;
 use App\Mail\SendMailNmcz;
@@ -362,7 +363,7 @@ class Controller extends BaseController
 
     public function sendTestEmail($studentID) {
         $studentResults = $this->getStudentResults($studentID);
-        $courses = $this->getStudentCourses($studentID);
+        
     
         // Define the PDF file name (e.g., using the studentID)
         $fileName = $studentID . '.pdf';
@@ -371,11 +372,18 @@ class Controller extends BaseController
         $student = Student::where('student_number', $studentID)->first();
         $status = $student->status;
         if($status == 1){
+            $courses = $this->getStudentCourses($studentID);
             $pdf = PDF::loadView('emails.pdf', compact('studentResults', 'courses'));
             $pdfPath = storage_path('app/' . $fileName);
             $pdf->save($pdfPath);
         }elseif($status == 2){
+            $courses = $this->getStudentCourses($studentID);
             $pdf = PDF::loadView('emailsNmcz.pdf', compact('studentResults', 'courses'));
+            $pdfPath = storage_path('app/' . $fileName);
+            $pdf->save($pdfPath);
+        }elseif($status == 3){
+            $courses = Courses::where('Student', $studentID)->get();
+            $pdf = PDF::loadView('emails.pdfSudAndDef', compact('studentResults', 'courses'));
             $pdfPath = storage_path('app/' . $fileName);
             $pdf->save($pdfPath);
         }
@@ -394,7 +402,11 @@ class Controller extends BaseController
         // return response()->download($pdfPath, $fileName);
     
         // Send the email with the PDF attachment
-        Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
+        if($status == 3){
+            Mail::to($sendingEmail)->send(new DefSupDocket($pdfPath,$studentID));
+        }else{
+            Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
+        }       
     
         // Send the email with the PDF attachment
         // Mail::to('mulumbesimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
