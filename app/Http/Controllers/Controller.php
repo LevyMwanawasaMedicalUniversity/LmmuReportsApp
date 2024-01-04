@@ -360,6 +360,83 @@ class Controller extends BaseController
         return "Test email sent successfully!";
     }
 
+    public function setAndUpdateCoursesForCurrentYear($studentId) {
+
+        $dataArray = $this->getCoursesForFailedStudentsForCurrentAcademicYear($studentId);
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        // Delete all existing courses for the student
+        Courses::where('Student', $studentId)->delete();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            // Check if Grade is "No Value" and Course is "No Value"
+            if ($item['Course'] === "No Value" && $course === "No Value") {
+                // If Grade and Course are both "No Value", don't insert these rows
+                continue;
+            }
+    
+            $coursesToInsert[] = [
+                'Student' => $item['Student'],
+                'Program' => $item['Program'],
+                'Course' => $course,
+                'Grade' => $item['Grade'],
+            ];
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+    }
+
+    public function setAndSaveCoursesForCurrentYear($studentId) {
+        $dataArray = $this->getCoursesForFailedStudentsForCurrentAcademicYear($studentId);
+    
+        if (!$dataArray) {
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+        }
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get()
+            ->pluck('Course')
+            ->toArray();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            if (!in_array($course, $studentCourses)) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses[] = $course;
+            }
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+    }
+
 
     public function sendTestEmail($studentID) {
         $studentResults = $this->getStudentResults($studentID);

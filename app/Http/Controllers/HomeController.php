@@ -48,9 +48,8 @@ class HomeController extends Controller
             }else{
                 return back()->with('error', 'NOT STUDENT.');               
             }             
-            $studentDetails = Student::find($studentId);
-
-            if($studentDetails->status == 3){
+            
+            if($student->status == 3){
                 $this->setAndSaveCoursesForCurrentYear($studentId);
             }else{
                 $this->setAndUpdateCourses($studentId);
