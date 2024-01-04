@@ -32,7 +32,7 @@
                     @endif
                     @if(!$courseName)
                     
-                        <form action="{{ route('docket.index') }}" method="GET">
+                        <form action="{{ route('docket.indexSupsAndDef') }}" method="GET">
                             @csrf
                             
                             <div class="form-group">
