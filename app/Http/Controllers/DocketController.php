@@ -92,8 +92,15 @@ class DocketController extends Controller
                         ->where('term', $term)
                         ->pluck('student_number')
                         ->toArray();
+                    if($status == 3){
+                        // Update existing students
+                        Student::whereIn('student_number', $existingStudents)
+                            ->update(['status' => 3]);
 
-                    // Insert new students
+                        foreach ($existingStudents as $studentId) {
+                            $this->setAndUpdateCoursesForCurrentYear($studentId);
+                        }
+                    }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
                     $studentsToInsert = [];
                     foreach ($newStudents as $studentNumber) {
@@ -109,8 +116,12 @@ class DocketController extends Controller
 
                     // Trigger your setAndSaveCourses function for new students
                     foreach ($newStudents as $studentNumber) {
-                        $this->setAndSaveCourses($studentNumber);
-                        $this->sendTestEmail($studentNumber);
+                        if($status == 3){
+                            $this->setAndSaveCoursesForCurrentYear($studentNumber);
+                        }else{
+                            $this->setAndSaveCourses($studentNumber);
+                        }
+                        $this->sendTestEmail($studentNumber);                        
 
                         $getNrc = BasicInformation::find($studentNumber);
 
@@ -147,6 +158,7 @@ class DocketController extends Controller
         // Handle errors or validation failures
         return redirect()->back()->with('error', 'Failed to upload students.');
     }
+
     public function index(Request $request){
         $academicYear= 2023;
         $courseName = null;
@@ -168,6 +180,29 @@ class DocketController extends Controller
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
         }
         return view('docket.index', compact('results','courseName','courseId'));
+    }
+
+    public function indexSupsAndDef(Request $request){
+        $academicYear= 2023;
+        $courseName = null;
+        $courseId = null;
+        if($request->input('student-number')){
+            $student = Student::query()
+                        ->where('student_number','=', $request->input('student-number'))
+                        ->where('status','=', 3)
+                        ->first();
+            if($student){
+                $getStudentNumber = $student->student_number;
+                $studentNumbers = [$getStudentNumber];
+                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+            }else{
+                return back()->with('error', 'NOT FOUND.');               
+            }
+        }else{
+            $studentNumbers = Student::where('status', 3)->pluck('student_number')->toArray();
+            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+        }
+        return view('docketSupsAndDef.index', compact('results','courseName','courseId'));
     }
 
     public function resetAllStudentsPasswords()
@@ -395,6 +430,83 @@ class DocketController extends Controller
         }
     }
 
+    private function setAndSaveCoursesForCurrentYear($studentId) {
+        $dataArray = $this->getCoursesForFailedStudentsForCurrentAcademicYear($studentId);
+    
+        if (!$dataArray) {
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+        }
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get()
+            ->pluck('Course')
+            ->toArray();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            if (!in_array($course, $studentCourses)) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses[] = $course;
+            }
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+    }
+
+    private function setAndUpdateCoursesForCurrentYear($studentId) {
+
+        $dataArray = $this->getCoursesForFailedStudentsForCurrentAcademicYear($studentId);
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        // Delete all existing courses for the student
+        Courses::where('Student', $studentId)->delete();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            // Check if Grade is "No Value" and Course is "No Value"
+            if ($item['Course'] === "No Value" && $course === "No Value") {
+                // If Grade and Course are both "No Value", don't insert these rows
+                continue;
+            }
+    
+            $coursesToInsert[] = [
+                'Student' => $item['Student'],
+                'Program' => $item['Program'],
+                'Course' => $course,
+                'Grade' => $item['Grade'],
+            ];
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+    }
+
     private function setAndUpdateCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
     
@@ -465,10 +577,15 @@ class DocketController extends Controller
         }else{
             return back()->with('error', 'NOT FOUND.');               
         }
+        $status = $student->status;
         
-        
-        
-        $this->setAndUpdateCourses($studentId);
+        if($status == 3){
+            $this->setAndUpdateCoursesForCurrentYear($studentId);
+            
+        }else{
+            
+            $this->setAndUpdateCourses($studentId);
+        }
         // Retrieve all unique Student values from the Course model
         $courses = Courses::where('Student', $studentId)->get();
         // return $courses;
@@ -476,7 +593,7 @@ class DocketController extends Controller
         // Pass the $students variable to the view
         // return view('your.view.name', compact('students'));
         
-        return view('docket.show',compact('courses','studentResults'));
+        return view('docket.show',compact('courses','studentResults','status'));
     }
 
     public function showStudentNmcz($studentId){
@@ -530,7 +647,12 @@ class DocketController extends Controller
             $getStudentNumber = $student->student_number;
             $studentNumbers = [$getStudentNumber];
             $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
-            $this->setAndSaveCourses($studentId);
+
+            // if($student->status == 3){
+            //     $this->setAndSaveCoursesForCurrentYear($studentId);
+            // }else{
+            //     $this->setAndSaveCourses($studentId);
+            // }
         // Retrieve all unique Student values from the Course model
             $courses = Courses::where('Student', $studentId)->get();
         }else{

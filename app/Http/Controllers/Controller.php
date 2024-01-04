@@ -239,6 +239,29 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getCoursesForFailedStudentsForCurrentAcademicYear($studentId) {
+        $failedCourses = [];
+        
+        $academicYear = 2023;
+
+        $results = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
+            ->where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->whereIn('Grade', ['D+','NE'])
+            ->get();
+        
+        foreach ($results as $row) {
+            $failedCourses[] = [
+                'Student' => $row->StudentNo,
+                'Program' => $row->ProgramNo, // Replace with the program
+                'Course' => $row->CourseNo,
+                'Grade' => $row->Grade,
+            ];
+        }
+    
+        return $failedCourses;
+    }
+
     public function getCoursesForFailedStudents($studentId) {
         $failedCourses = [];
     
@@ -326,7 +349,7 @@ class Controller extends BaseController
     
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = $email;
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
@@ -363,7 +386,7 @@ class Controller extends BaseController
 
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = $email;
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';

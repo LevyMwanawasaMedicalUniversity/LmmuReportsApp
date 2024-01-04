@@ -60,14 +60,17 @@ Route::group(['middleware' => 'auth'], function () {
         Route::middleware('can:Examination')->group(function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
+                Route::get('/indexSupsAndDef/{id?}', 'DocketController@indexSupsAndDef')->name('docket.indexSupsAndDef');
                 Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
                 // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
                 Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
+                Route::get('/importSupsAndDef', 'DocketController@importSupsAndDef')->name('docket.importSupsAndDef');
                 Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
                 Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
                 Route::get('/showStudentNmcz/{studentNumber}', 'DocketController@showStudentNmcz')->name('docket.showStudentNmcz');
                 Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+                Route::post('/uploadSupsAndDef', 'DocketController@uploadStudentsSupsAndDef')->name('import.studentsSupsAndDef');
                 Route::post('/uploadNmcz', 'DocketController@uploadStudentsNmcz')->name('import.studentsNmcz');
                 Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');
                 Route::get('/importCourses', 'DocketController@importCourseFromSis')->name('courses.import');

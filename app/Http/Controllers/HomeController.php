@@ -48,8 +48,14 @@ class HomeController extends Controller
             }else{
                 return back()->with('error', 'NOT STUDENT.');               
             }             
+            $studentDetails = Student::find($studentId);
+
+            if($studentDetails->status == 3){
+                $this->setAndSaveCoursesForCurrentYear($studentId);
+            }else{
+                $this->setAndUpdateCourses($studentId);
+            }
             
-            $this->setAndUpdateCourses($studentId);
             // Retrieve all unique Student values from the Course model
             $courses = Courses::where('Student', $studentId)->get();
             $status = $student->status;
@@ -57,12 +63,13 @@ class HomeController extends Controller
                 return view('docket.studentViewDocket',compact('studentResults','courses'));
             }elseif($status ==2){
                 return view('docketNmcz.studentViewDocket',compact('studentResults','courses'));
+            }elseif($status ==3){
+                return view('docketSupsAndDef.studentViewDocket',compact('studentResults','courses'));
             }
         }else{
             return view('home');
         }
-        // return $courses;
-       
+        // return $courses;       
     }
 
     private function setAndUpdateCourses($studentId) {
