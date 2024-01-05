@@ -17,6 +17,7 @@
                 <p>Login using '{{ $studentDetails->PrivateEmail}}' as your username and National Registration Card number '{{ $studentDetails->GovernmentID }}' as your password.</p>                
                 <p>If you encounter any challenges logging in, please utilize the "Forgot Password" option located just below the login section to reset your password. Enter '{{ $studentDetails->PrivateEmail}}' as the email address to which the reset password link will be sent, and then follow the provided instructions.</p>
                 <p>Note that '{{ $studentDetails->PrivateEmail}}' is the email address registered on the system, and therefore it is the only one you can use to log in and access your results or reset your password.</p>
+                <p>Note that your password has been reset to '{{ $studentDetails->GovernmentID }}'</p>
                 <p>Best Regards,</p>
                 <p>Registrar</p>
                 <p>Levy Mwanawasa Medical University, LUSAKA.</p>                             
