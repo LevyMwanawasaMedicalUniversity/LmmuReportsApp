@@ -81,7 +81,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/assignStudentsRoles', 'DocketController@assignStudentsRoles')->name('docket.assignStudentsRoles');
                 Route::get('/resetAllStudentsPasswords', 'DocketController@resetAllStudentsPasswords')->name('docket.resetAllStudentsPassword');
                 Route::get('/createAccountsForStudentsNotInUsersTableAndSendEmails', 'DocketController@createAccountsForStudentsNotInUsersTableAndSendEmails')->name('docket.createAccountsForStudentsNotInUsersTableAndSendEmails');
-    
+                Route::get('updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail', 'DocketController@updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail')->name('docket.updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail');
     
                 
             });

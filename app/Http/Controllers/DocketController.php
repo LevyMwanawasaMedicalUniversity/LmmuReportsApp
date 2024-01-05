@@ -33,6 +33,28 @@ class DocketController extends Controller
         return back()->with('success', 'Emails sent successfully.');
     }
 
+    public function updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail(){
+        try {
+            $academicYear = 2023;
+            $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+            
+            $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers);
+            foreach ($studentsDetails as $student) {
+                $studentNumber = $student->StudentID;
+                $email = $student->PrivateEmail;
+                $user = User::where('email', $email)->first();
+                if($user){
+                    $user->update(['name' => $studentNumber]);
+                }
+            }
+            return back()->with('success', 'Emails sent successfully.');
+        } catch (\Exception $e) {
+            // Log the exception message
+            
+            // Redirect back with an error message
+            return back()->with('error', $e);
+        }
+    }
     public function resetAllStudentsPasswords()
     {
         set_time_limit(1200000);

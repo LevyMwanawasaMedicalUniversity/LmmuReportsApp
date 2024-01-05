@@ -38,10 +38,10 @@ class HomeController extends Controller
             $user_id = auth()->user()->id;
             $user = User::find($user_id);
             $studentId = $user->name;
-            $student = Student::query()
-                            ->where('student_number','=', $studentId)
-                            ->first();
-            if(!is_null($student)){
+            $doesStudentExist = Student::query()
+                ->where('student_number', '=', $studentId)
+                ->exists();
+            if(!is_null($doesStudentExist)){
                 $studentNumbers = [$studentId];
                 $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
             }else{
