@@ -66,7 +66,7 @@ class DocketController extends Controller
                     $studentNumber = [$studentDetail->StudentID];
                     $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumber)->first();
 
-                    if($studentResults->RegistrationStatus === 'NO REGISTRATION'){
+                    if($studentResults->RegistrationStatus == 'NO REGISTRATION'){
 
                         $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
                         $email = $studentDetail->PrivateEmail;
