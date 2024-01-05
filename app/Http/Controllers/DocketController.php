@@ -33,6 +33,54 @@ class DocketController extends Controller
         return back()->with('success', 'Emails sent successfully.');
     }
 
+    public function resetAllStudentsPasswords()
+    {
+        set_time_limit(1200000);
+
+        $academicYear = 2023;
+
+        User::join('students', 'students.student_number', '=', 'users.name')
+            ->where('students.status', 1)
+            ->role('Student') // Using Spatie's role scope
+            ->whereDoesntHave('roles', function ($query) {
+                $query->whereIn('name', ['Examination', 'Finance', 'Academics', 'Administrator']);
+            })
+            ->chunk(200, function ($students) use ($academicYear) {
+                foreach ($students as $student) {
+                    $studentNumbers = [$student->name];
+                    $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
+                        ->get()
+                        ->filter(function ($studentDetail) {
+                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
+                        });
+
+                    if ($studentsDetails->isEmpty()) {
+                        continue; // Skip the iteration if no student details found
+                    }
+
+                    $studentDetail = $studentsDetails->first();
+
+                    if ($studentDetail->GovernmentID === null) {
+                        continue; // Skip the iteration if GovernmentID is null
+                    }
+
+                    $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
+                    $email = $studentDetail->PrivateEmail;
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $email = trim($studentDetail->PrivateEmail);
+                    } else {
+                        $email = $student->name . '@lmmu.ac.zm';
+                    }                    
+                    $student->update(['password' => bcrypt($nrc),
+                                        'email' => $email
+                        ]);
+                    $this->sendEmailNotification($student->name);
+                }
+            });
+        return back()->with('success', 'Passwords reset successfully.');
+    }
+
+
     public function uploadStudents(Request $request)
     {
         set_time_limit(1200000);
@@ -94,12 +142,29 @@ class DocketController extends Controller
                         ->toArray();
                     if($status == 3){
                         // Update existing students
+                        
+                        
                         Student::whereIn('student_number', $existingStudents)
                             ->update(['status' => 3]);
 
                         foreach ($existingStudents as $studentId) {
+                            $privateEmail = BasicInformation::find($studentId);
+                            $email = $privateEmail->PrivateEmail;
+                        
+                            // Check if the user exists before trying to update
+                            $user = User::where('name', $studentId)->first();
+                            if ($user) {
+                                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                                    // $email is a valid email address
+                                    $user->update(['email' => $email]);
+                                } else {
+                                    // $email is not a valid email address
+                                    $user->update(['email' => $studentId . '@lmmu.ac.zm']);
+                                }
+                            }
+                        
                             $this->setAndUpdateCoursesForCurrentYear($studentId);
-                            $this->sendTestEmail($studentId); 
+                            $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
@@ -125,12 +190,19 @@ class DocketController extends Controller
                         $this->sendTestEmail($studentNumber);                        
 
                         $getNrc = BasicInformation::find($studentNumber);
+                        $nrc = trim($getNrc->GovernmentID); // Access GovernmentID property on the first student detail
+                        $email = $getNrc->PrivateEmail;
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $email = trim($getNrc->PrivateEmail);
+                        } else {
+                            $email = $studentNumber . '@lmmu.ac.zm';
+                        }
 
                         $nrc = trim($getNrc->GovernmentID);
                         
                             $student = User::create([
                                 'name' => $studentNumber,
-                                'email' => $studentNumber . '@lmmu.ac.zm',
+                                'email' => $email,
                                 'password' => bcrypt($nrc),                                
                             ]);
                                                     
@@ -206,50 +278,7 @@ class DocketController extends Controller
         return view('docketSupsAndDef.index', compact('results','courseName','courseId'));
     }
 
-    public function resetAllStudentsPasswords()
-    {
-        set_time_limit(1200000);
-
-        $academicYear = 2023;
-
-        User::join('students', 'students.student_number', '=', 'users.name')
-            ->where('students.status', 1)
-            ->chunk(200, function ($students) use ($academicYear) {
-                foreach ($students as $student) {
-                    $studentNumbers = [$student->name];
-                    $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
-                        ->get()
-                        ->filter(function ($studentDetail) {
-                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
-                        });
-
-                    if ($studentsDetails->isEmpty()) {
-                        continue; // Skip the iteration if no student details found
-                    }
-
-                    $studentDetail = $studentsDetails->first();
-
-                    if ($studentDetail->GovernmentID === null) {
-                        continue; // Skip the iteration if GovernmentID is null
-                    }
-
-                    $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
-                    $student->update(['password' => bcrypt($nrc)]);
-                    // Create the "Student" role if it doesn't exist
-                    // $studentRole = Role::firstOrCreate(['name' => 'Student']);                        
-                    // // Assign the "Student" role to the user
-                    // $student->assignRole($studentRole);                    
-                    // // Find or create the "Student" permission
-                    // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);                    
-                    // // Assign the "Student" permission to the user
-                    // $student->givePermissionTo($studentPermission);
-                    // $this->sendEmailNotification($student->name);
-                }
-            });
-
-        return back()->with('success', 'Passwords reset successfully.');
-    }
-
+    
     public function assignStudentsRoles(){
         set_time_limit(1200000);
         $users = User::join('students', 'students.student_number', '=', 'users.name')

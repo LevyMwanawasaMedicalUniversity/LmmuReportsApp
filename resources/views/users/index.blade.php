@@ -32,7 +32,7 @@
                       
                       <div class="form-group">
                           <label for="search">Search Users</label>
-                          <input type="email" name="email" class="form-control" id="email" placeholder="Enter user email address">
+                          <input type="text" name="name" class="form-control" id="name" placeholder="Enter student number or user name">
                       </div>
                       
                       <button type="submit" class="btn btn-primary">Search</button>

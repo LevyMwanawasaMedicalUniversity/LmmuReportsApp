@@ -13,11 +13,10 @@
 
                 <p>We are pleased to inform you that you can also access your results at <a href="http://sisreports.lmmu.ac.zm/">
                     http://sisreports.lmmu.ac.zm</a>.</p>
-
-                <p>Login using '{{ $studentDetails->ID }}@lmmu.ac.zm' as your username and your National Registration Card number 
-                    '{{ $studentDetails->GovernmentID }}' as your password. Don't forget to add "@lmmu.ac.zm" to your student number.</p>
-                <p>Kindly note that your password has been reset to your NRC number</p>
-                
+                <p>Please note that from now on you will use your personal email '{{ $studentDetails->PrivateEmail }}' as your username, and your National Registration Card number '{{ $studentDetails->GovernmentID }}' as your password.</p>
+                <p>Login using '{{ $studentDetails->PrivateEmail}}' as your username and National Registration Card number '{{ $studentDetails->GovernmentID }}' as your password.</p>                
+                <p>If you encounter any challenges logging in, please utilize the "Forgot Password" option located just below the login section to reset your password. Enter '{{ $studentDetails->PrivateEmail}}' as the email address to which the reset password link will be sent, and then follow the provided instructions.</p>
+                <p>Note that '{{ $studentDetails->PrivateEmail}}' is the email address registered on the system, and therefore it is the only one you can use to log in and access your results or reset your password.</p>
                 <p>Best Regards,</p>
                 <p>Registrar</p>
                 <p>Levy Mwanawasa Medical University, LUSAKA.</p>                             

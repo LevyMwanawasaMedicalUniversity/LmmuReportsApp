@@ -23,10 +23,10 @@ class UserController extends Controller
     {
         $users = User::latest();
 
-        if ($request->has('email')) {
-            $email = $request->input('email');
-            if (!empty($email)) {
-                $users->where('email', $email);
+        if ($request->has('name')) {
+            $name = $request->input('name');
+            if (!empty($name)) {
+                $users->where('name', 'like', '%' . $name . '%');
             }
         }
 
