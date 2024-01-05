@@ -11,6 +11,7 @@
                 <h2>Exam Results Notification</h2>
                 <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }},</p>            
 
+                <P>Kindly accept our apologies and disregard the previously sent emails.</P>
                 <p>We are pleased to inform you that you can also access your results at <a href="http://sisreports.lmmu.ac.zm/">http://sisreports.lmmu.ac.zm</a>.</p>
                 <p>Please note that from now on, you will use your personal email '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password.</p>
                 <p>Login using '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password.</p>

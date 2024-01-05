@@ -128,7 +128,7 @@ class DocketController extends Controller
                             'password' => '12345678'                            
                         ]);
                     
-                        $this->sendEmailNotification($student->name);
+                        //$this->sendEmailNotification($student->name);
                     }
                 }
             });
