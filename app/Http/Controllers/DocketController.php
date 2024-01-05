@@ -259,7 +259,7 @@ class DocketController extends Controller
                             $student = User::create([
                                 'name' => $studentNumber,
                                 'email' => $email,
-                                'password' => bcrypt($nrc),                                
+                                'password' => '12345678',                                
                             ]);
                                                     
                         // Create the "Student" role if it doesn't exist
