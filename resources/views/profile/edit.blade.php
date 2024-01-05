@@ -23,15 +23,17 @@
               @include('alerts.success')
               <div class="row">
               </div>
-                <div class="row">
-                    <div class="col-md-7 pr-1">
-                        <div class="form-group">
-                            <label>{{__(" Name")}}</label>
+                @if(!auth()->user()->hasRole('Student'))
+                    <div class="row">
+                        <div class="col-md-7 pr-1">
+                            <div class="form-group">
+                                <label>{{__(" Name")}}</label>
                                 <input type="text" name="name" class="form-control" value="{{ old('name', auth()->user()->name) }}">
                                 @include('alerts.feedback', ['field' => 'name'])
+                            </div>
                         </div>
                     </div>
-                </div>
+                @endif
                 <div class="row">
                   <div class="col-md-7 pr-1">
                     <div class="form-group">
