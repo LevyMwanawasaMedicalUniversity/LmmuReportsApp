@@ -36,9 +36,9 @@ class DocketController extends Controller
     public function resetAllStudentsPasswords()
     {
         set_time_limit(1200000);
-
+    
         $academicYear = 2023;
-
+    
         User::join('students', 'students.student_number', '=', 'users.name')
             ->where('students.status', 1)
             ->role('Student') // Using Spatie's role scope
@@ -53,37 +53,37 @@ class DocketController extends Controller
                         ->filter(function ($studentDetail) {
                             return $studentDetail->RegistrationStatus === 'NO REGISTRATION';
                         });
-
+    
                     if ($studentsDetails->isEmpty()) {
                         continue; // Skip the iteration if no student details found
                     }
-
+    
                     $studentDetail = $studentsDetails->first();
-
+    
                     if ($studentDetail->GovernmentID === null) {
                         continue; // Skip the iteration if GovernmentID is null
                     }
+    
                     $studentNumber = [$studentDetail->StudentID];
                     $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumber)->first();
-
-                    if($studentResults->RegistrationStatus == 'NO REGISTRATION'){
-
+    
+                    if ($studentResults && $studentResults->RegistrationStatus == 'NO REGISTRATION') {
                         $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
-                        $email = $studentDetail->PrivateEmail;
-                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                            $email = trim($studentDetail->PrivateEmail);
-                        } else {
-                            $email = $student->name . '@lmmu.ac.zm';
-                        }                    
-                        $student->update(['password' => bcrypt($nrc),
-                                            'email' => $email
-                            ]);
+                        $email = filter_var($studentDetail->PrivateEmail, FILTER_VALIDATE_EMAIL) ? trim($studentDetail->PrivateEmail) : $student->name . '@lmmu.ac.zm';
+    
+                        $student->update([
+                            'password' => bcrypt($nrc),
+                            'email' => $email,
+                        ]);
+    
                         $this->sendEmailNotification($student->name);
                     }
                 }
             });
+    
         return back()->with('success', 'Passwords reset successfully.');
     }
+    
 
 
     public function uploadStudents(Request $request)
