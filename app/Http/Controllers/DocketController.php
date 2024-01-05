@@ -34,25 +34,45 @@ class DocketController extends Controller
     }
 
     public function updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail(){
+        set_time_limit(1200000); // Increase the maximum execution time
+    
         $academicYear = 2023;
         $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
-        
-        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers);
+    
+        // Get all users with role 'Student' and whose name matches any of the student numbers
+        $users = User::whereHas('students', function ($query) use ($studentNumbers) {
+            $query->whereIn('student_number', $studentNumbers);
+        })
+        ->whereIn('name', $studentNumbers)
+        ->role('Student')
+        ->get();
+    
+        // Update emails for these users
+        foreach ($users as $user) {
+            $user->update(['email' => $user->name . '@lmmu.ac.zm']);
+        }
+    
+        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+    
         foreach ($studentsDetails as $student) {
             try {
                 $studentNumber = $student->StudentID;
                 $email = $student->PrivateEmail;
-                $user = User::where('email', $email)->first();
+                $user = User::where('name', $studentNumber)->first();
                 if($user){
-                    $user->update(['name' => $studentNumber]);
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $user->update(['email' => $email]);
+                    } else {
+                        $user->update(['email' => $studentNumber . '@lmmu.ac.zm']);
+                    }
                 }
             } catch (\Exception $e) {
-                // Log the exception message
-                
+                return back()->with('error',$e->getMessage());
             }
         }
-        return back()->with('success', 'Emails sent successfully.');
+        return back()->with('success', 'Emails Users Updated.');
     }
+
     public function resetAllStudentsPasswords()
     {
         set_time_limit(1200000);
