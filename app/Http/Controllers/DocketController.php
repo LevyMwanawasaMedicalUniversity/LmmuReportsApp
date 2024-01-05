@@ -125,7 +125,7 @@ class DocketController extends Controller
                         $nrc = trim($studentResults->GovernmentID); // Access GovernmentID property on the first student detail
                         
                         $student->update([
-                            'password' => bcrypt($nrc)                            
+                            'password' => '12345678'                            
                         ]);
                     
                         $this->sendEmailNotification($student->name);
