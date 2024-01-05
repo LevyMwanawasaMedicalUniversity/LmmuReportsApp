@@ -51,7 +51,7 @@ class DocketController extends Controller
                     $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
                         ->get()
                         ->filter(function ($studentDetail) {
-                            return $studentDetail->YearOfStudy == 'NO REGISTRATION';
+                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
                         });
 
                     if ($studentsDetails->isEmpty()) {
@@ -64,17 +64,20 @@ class DocketController extends Controller
                         continue; // Skip the iteration if GovernmentID is null
                     }
 
-                    $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
-                    $email = $studentDetail->PrivateEmail;
-                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        $email = trim($studentDetail->PrivateEmail);
-                    } else {
-                        $email = $student->name . '@lmmu.ac.zm';
-                    }                    
-                    $student->update(['password' => bcrypt($nrc),
-                                        'email' => $email
-                        ]);
-                    $this->sendEmailNotification($student->name);
+                    if($studentDetail->RegistrationStatus == 'NO REGISTRATION'){
+
+                        $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
+                        $email = $studentDetail->PrivateEmail;
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $email = trim($studentDetail->PrivateEmail);
+                        } else {
+                            $email = $student->name . '@lmmu.ac.zm';
+                        }                    
+                        $student->update(['password' => bcrypt($nrc),
+                                            'email' => $email
+                            ]);
+                        $this->sendEmailNotification($student->name);
+                    }
                 }
             });
         return back()->with('success', 'Passwords reset successfully.');
