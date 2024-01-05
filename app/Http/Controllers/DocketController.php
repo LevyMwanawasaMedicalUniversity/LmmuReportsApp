@@ -37,7 +37,7 @@ class DocketController extends Controller
         set_time_limit(1200000); // Increase the maximum execution time
     
         $academicYear = 2023;
-        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        $studentNumbers = Student::pluck('student_number')->toArray();
     
         // Get all users with role 'Student' and whose name matches any of the student numbers
         $users = User::whereHas('students', function ($query) use ($studentNumbers) {
@@ -66,6 +66,10 @@ class DocketController extends Controller
                 $user = User::where('name', $studentNumber)->first();
                 if($user){
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        if (User::where('email', $email)->exists()) {
+                            // If email already exists, append a random number before '@lmmu.ac.zm'
+                            $email = $email . rand(1000, 9999);
+                        }
                         $user->update(['email' => $email]);
                     } else {
                         $email = $studentNumber . '@lmmu.ac.zm';
