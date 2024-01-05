@@ -31,7 +31,7 @@ class HomeController extends Controller
 
         // Check if the user has the "Student" role
         $hasStudentRole = $user->hasRole('Student');
-    
+
         if ($hasStudentRole) {
 
             $academicYear= 2023;
@@ -41,9 +41,8 @@ class HomeController extends Controller
             $student = Student::query()
                             ->where('student_number','=', $studentId)
                             ->first();
-            if($student){
-                $getStudentNumber = $student->student_number;
-                $studentNumbers = [$getStudentNumber];
+            if(!is_null($student)){
+                $studentNumbers = [$studentId];
                 $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
             }else{
                 return back()->with('error', 'NOT STUDENT.');               
