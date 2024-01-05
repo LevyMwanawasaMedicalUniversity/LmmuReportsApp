@@ -204,20 +204,20 @@ class DocketController extends Controller
                             ->update(['status' => 3]);
 
                         foreach ($existingStudents as $studentId) {
-                            $privateEmail = BasicInformation::find($studentId);
-                            $email = $privateEmail->PrivateEmail;
+                            // $privateEmail = BasicInformation::find($studentId);
+                            // $email = $privateEmail->PrivateEmail;
                         
-                            // Check if the user exists before trying to update
-                            $user = User::where('name', $studentId)->first();
-                            if ($user) {
-                                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                    // $email is a valid email address
-                                    $user->update(['email' => $email]);
-                                } else {
-                                    // $email is not a valid email address
-                                    $user->update(['email' => $studentId . '@lmmu.ac.zm']);
-                                }
-                            }
+                            // // Check if the user exists before trying to update
+                            // $user = User::where('name', $studentId)->first();
+                            // if ($user) {
+                            //     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            //         // $email is a valid email address
+                            //         $user->update(['email' => $email]);
+                            //     } else {
+                            //         // $email is not a valid email address
+                            //         $user->update(['email' => $studentId . '@lmmu.ac.zm']);
+                            //     }
+                            // }
                         
                             $this->setAndUpdateCoursesForCurrentYear($studentId);
                             $this->sendTestEmail($studentId);
@@ -243,7 +243,7 @@ class DocketController extends Controller
                         }else{
                             $this->setAndSaveCourses($studentNumber);
                         }
-                        $this->sendTestEmail($studentNumber);                        
+                                            
 
                         $getNrc = BasicInformation::find($studentNumber);
                         $nrc = trim($getNrc->GovernmentID); // Access GovernmentID property on the first student detail
@@ -273,6 +273,7 @@ class DocketController extends Controller
                         
                         // Assign the "Student" permission to the user
                         $student->givePermissionTo($studentPermission);
+                        $this->sendTestEmail($studentNumber); 
                     }
                 }
 
