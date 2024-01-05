@@ -34,27 +34,24 @@ class DocketController extends Controller
     }
 
     public function updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail(){
-        try {
-            $academicYear = 2023;
-            $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
-            
-            $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers);
-            foreach ($studentsDetails as $student) {
+        $academicYear = 2023;
+        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        
+        $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers);
+        foreach ($studentsDetails as $student) {
+            try {
                 $studentNumber = $student->StudentID;
                 $email = $student->PrivateEmail;
                 $user = User::where('email', $email)->first();
                 if($user){
                     $user->update(['name' => $studentNumber]);
                 }
+            } catch (\Exception $e) {
+                // Log the exception message
+                
             }
-            return back()->with('success', 'Emails sent successfully.');
-        } catch (\Exception $e) {
-            // Log the exception message
-            // \Log::error($e->getMessage());
-            
-            // Redirect back with an error message
-            return back()->with('error', $e->getMessage());
         }
+        return back()->with('success', 'Emails sent successfully.');
     }
     public function resetAllStudentsPasswords()
     {
