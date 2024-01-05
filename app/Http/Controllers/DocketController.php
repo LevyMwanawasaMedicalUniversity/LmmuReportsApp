@@ -49,7 +49,7 @@ class DocketController extends Controller
     
         // Update emails for these users
         foreach ($users as $user) {
-            $user->update(['email' => $user->name . '@lmmu.ac.zm']);
+            $user->update(['email' => $user->name . $user->name . '@lmmu.ac.zm']);
         }
     
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
