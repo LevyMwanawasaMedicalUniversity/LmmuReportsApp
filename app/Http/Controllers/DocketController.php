@@ -49,7 +49,12 @@ class DocketController extends Controller
     
         // Update emails for these users
         foreach ($users as $user) {
-            $user->update(['email' => $user->name . $user->name . '@lmmu.ac.zm']);
+            $email = $user->name . $user->name . '@lmmu.ac.zm';
+            if (User::where('email', $email)->exists()) {
+                // If email already exists, append a random number before '@lmmu.ac.zm'
+                $email = $user->name . $user->name . rand(1000, 9999) . '@lmmu.ac.zm';
+            }
+            $user->update(['email' => $email]);
         }
     
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
@@ -63,7 +68,12 @@ class DocketController extends Controller
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                         $user->update(['email' => $email]);
                     } else {
-                        $user->update(['email' => $studentNumber . '@lmmu.ac.zm']);
+                        $email = $studentNumber . '@lmmu.ac.zm';
+                        if (User::where('email', $email)->exists()) {
+                            // If email already exists, append a random number before '@lmmu.ac.zm'
+                            $email = $studentNumber . rand(1000, 9999) . '@lmmu.ac.zm';
+                        }
+                        $user->update(['email' => $email]);
                     }
                 }
             } catch (\Exception $e) {
