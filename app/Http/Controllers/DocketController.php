@@ -49,12 +49,11 @@ class DocketController extends Controller
     
         // Update emails for these users
         foreach ($users as $user) {
-            $email = $user->name . $user->name . '@lmmu.ac.zm';
-            if (User::where('email', $email)->exists()) {
-                // If email already exists, append a random number before '@lmmu.ac.zm'
-                $email = $user->name . $user->name . rand(1000, 9999) . '@lmmu.ac.zm';
+            try {
+                $user->update(['email' => $user->name . $user->name . '@lmmu.ac.zm']);
+            } catch (\Exception $e) {
+                Log::error('Failed to update email for user ' . $user->id . ': ' . $e->getMessage());
             }
-            $user->update(['email' => $email]);
         }
     
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
@@ -66,22 +65,13 @@ class DocketController extends Controller
                 $user = User::where('name', $studentNumber)->first();
                 if($user){
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                        if (User::where('email', $email)->exists()) {
-                            // If email already exists, append a random number before '@lmmu.ac.zm'
-                            $email = $email . rand(1000, 9999);
-                        }
                         $user->update(['email' => $email]);
                     } else {
-                        $email = $studentNumber . '@lmmu.ac.zm';
-                        if (User::where('email', $email)->exists()) {
-                            // If email already exists, append a random number before '@lmmu.ac.zm'
-                            $email = $studentNumber . rand(1000, 9999) . '@lmmu.ac.zm';
-                        }
-                        $user->update(['email' => $email]);
+                        $user->update(['email' => $studentNumber . '@lmmu.ac.zm']);
                     }
                 }
             } catch (\Exception $e) {
-                return back()->with('error',$e->getMessage());
+                Log::error('Failed to update email for student ' . $studentNumber . ': ' . $e->getMessage());
             }
         }
         return back()->with('success', 'Emails Users Updated.');
