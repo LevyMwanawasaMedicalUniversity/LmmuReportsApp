@@ -57,7 +57,7 @@ class DocketController extends Controller
         foreach ($studentsDetails as $student) {
             try {
                 $studentNumber = $student->StudentID;
-                $email = $student->PrivateEmail;
+                $email = trim($student->PrivateEmail);
                 $user = User::where('name', $studentNumber)->first();
                 if($user){
                     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
