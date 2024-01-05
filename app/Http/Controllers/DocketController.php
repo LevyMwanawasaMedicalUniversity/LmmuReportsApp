@@ -51,7 +51,7 @@ class DocketController extends Controller
                     $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
                         ->get()
                         ->filter(function ($studentDetail) {
-                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
+                            return $studentDetail->RegistrationStatus === 'NO REGISTRATION';
                         });
 
                     if ($studentsDetails->isEmpty()) {
@@ -63,8 +63,10 @@ class DocketController extends Controller
                     if ($studentDetail->GovernmentID === null) {
                         continue; // Skip the iteration if GovernmentID is null
                     }
+                    $studentNumber = [$studentDetail->StudentID];
+                    $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumber)->first();
 
-                    if($studentDetail->RegistrationStatus == 'NO REGISTRATION'){
+                    if($studentResults->RegistrationStatus === 'NO REGISTRATION'){
 
                         $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
                         $email = $studentDetail->PrivateEmail;
