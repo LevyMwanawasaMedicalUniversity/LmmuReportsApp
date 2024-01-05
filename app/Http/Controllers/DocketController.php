@@ -51,7 +51,7 @@ class DocketController extends Controller
                     $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
                         ->get()
                         ->filter(function ($studentDetail) {
-                            return $studentDetail->RegistrationStatus == 'NO REGISTRATION';
+                            return $studentDetail->YearOfStudy == 'NO REGISTRATION';
                         });
 
                     if ($studentsDetails->isEmpty()) {
