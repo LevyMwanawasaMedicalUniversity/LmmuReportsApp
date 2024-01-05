@@ -50,9 +50,10 @@ class DocketController extends Controller
             return back()->with('success', 'Emails sent successfully.');
         } catch (\Exception $e) {
             // Log the exception message
+            // \Log::error($e->getMessage());
             
             // Redirect back with an error message
-            return back()->with('error', $e);
+            return back()->with('error', $e->getMessage());
         }
     }
     public function resetAllStudentsPasswords()
