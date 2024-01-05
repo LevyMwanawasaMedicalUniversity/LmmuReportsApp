@@ -350,7 +350,7 @@ class Controller extends BaseController
     
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+            $sendingEmail = $email;
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
@@ -394,7 +394,7 @@ class Controller extends BaseController
 
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+            $sendingEmail = $email;
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
