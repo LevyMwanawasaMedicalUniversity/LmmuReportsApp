@@ -128,7 +128,7 @@ class DocketController extends Controller
                             'password' => bcrypt($nrc)                            
                         ]);
                     
-                        // $this->sendEmailNotification($student->name);
+                        $this->sendEmailNotification($student->name);
                     }
                 }
             });
