@@ -70,13 +70,18 @@ class DocketController extends Controller
                     if ($studentResults && $studentResults->RegistrationStatus == 'NO REGISTRATION') {
                         $nrc = trim($studentDetail->GovernmentID); // Access GovernmentID property on the first student detail
                         $email = filter_var($studentDetail->PrivateEmail, FILTER_VALIDATE_EMAIL) ? trim($studentDetail->PrivateEmail) : $student->name . '@lmmu.ac.zm';
-    
-                        $student->update([
-                            'password' => bcrypt($nrc),
-                            'email' => $email,
-                        ]);
-    
-                        $this->sendEmailNotification($student->name);
+                    
+                        // Check if the email already exists in the users table
+                        $emailExists = User::where('email', $email)->exists();
+                    
+                        if (!$emailExists) {
+                            $student->update([
+                                'password' => bcrypt($nrc),
+                                'email' => $email,
+                            ]);
+                    
+                            $this->sendEmailNotification($student->name);
+                        }
                     }
                 }
             });
