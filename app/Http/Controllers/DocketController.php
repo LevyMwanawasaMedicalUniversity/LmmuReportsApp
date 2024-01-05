@@ -52,7 +52,7 @@ class DocketController extends Controller
             try {
                 $user->update(['email' => $user->name . $user->name . '@lmmu.ac.zm']);
             } catch (\Exception $e) {
-                Log::error('Failed to update email for user ' . $user->id . ': ' . $e->getMessage());
+                // Log::error('Failed to update email for user ' . $user->id . ': ' . $e->getMessage());
             }
         }
     
@@ -71,7 +71,7 @@ class DocketController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                Log::error('Failed to update email for student ' . $studentNumber . ': ' . $e->getMessage());
+                // Log::error('Failed to update email for student ' . $studentNumber . ': ' . $e->getMessage());
             }
         }
         return back()->with('success', 'Emails Users Updated.');
