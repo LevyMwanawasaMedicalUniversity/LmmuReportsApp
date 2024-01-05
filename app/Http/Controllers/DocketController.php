@@ -38,6 +38,7 @@ class DocketController extends Controller
     
         $academicYear = 2023;
         $studentNumbers = Student::pluck('student_number')->toArray();
+        $failedUpdates = []; // Array to store failed updates
     
         // Get all users with role 'Student' and whose name matches any of the student numbers
         $users = User::whereHas('students', function ($query) use ($studentNumbers) {
@@ -52,7 +53,7 @@ class DocketController extends Controller
             try {
                 $user->update(['email' => $user->name . $user->name . '@lmmu.ac.zm']);
             } catch (\Exception $e) {
-                // Log::error('Failed to update email for user ' . $user->id . ': ' . $e->getMessage());
+                $failedUpdates[] = ['id' => $user->id, 'error' => $e->getMessage()];
             }
         }
     
@@ -71,10 +72,19 @@ class DocketController extends Controller
                     }
                 }
             } catch (\Exception $e) {
-                // Log::error('Failed to update email for student ' . $studentNumber . ': ' . $e->getMessage());
+                $failedUpdates[] = ['id' => $studentNumber, 'error' => $e->getMessage()];
             }
         }
-        return back()->with('success', 'Emails Users Updated.');
+    
+        // Export failed updates to CSV
+        $file = fopen('failed_updates.csv', 'w');
+        fputcsv($file, ['ID', 'Error']);
+        foreach ($failedUpdates as $row) {
+            fputcsv($file, $row);
+        }
+        fclose($file);
+    
+        return back()->with('success', 'Emails Users Updated. Failed updates exported to failed_updates.csv.');
     }
 
     public function resetAllStudentsPasswords()
@@ -119,7 +129,7 @@ class DocketController extends Controller
                             
                         ]);
                     
-                        $this->sendEmailNotification($student->name);
+                        // $this->sendEmailNotification($student->name);
                     }
                 }
             });
