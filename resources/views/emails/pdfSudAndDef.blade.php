@@ -107,7 +107,7 @@
         {{-- Define the route or path you want to convert to a QR code --}}
         @php
             $route = '/verify/'.$studentResults->StudentID; // Replace with your desired route or path
-            $url = url($route); // This generates the complete URL including the base URL
+            $url = 'http://sisreports.lmmu.ac.zm/' . $route; // This generates the complete URL including the base URL
             $base64QRCode = base64_encode(QrCode::size(150)->generate($url));
             $currentDate = (new DateTime())->format('Y-m-d');
             $imagePath = public_path('assets/img/logo2.png'); // Replace with the correct path to your image
