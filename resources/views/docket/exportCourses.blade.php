@@ -12,172 +12,120 @@
         .container {
             max-width: 800px;
             margin: 0 auto;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
 
         .header {
             text-align: center;
-        }
-
-        .logo {
-            text-align: left;
+            margin-bottom: 20px;
         }
 
         .main-content {
-            margin-top: 7px;
-        }
-
-        .student-info {
-            float: left;
-            width: 50%;
-        }
-
-        .balance {
-            float: right;
-            width: 50%;
-            text-align: right;
-        }
-
-        .examination-slip {
-            margin-top: 7px;
-            text-align: left;
-        }
-
-        .student-image {
-            float: left;
-            width: 25%;
-        }
-
-        .courses-table {
-            float: left;
-            width: 75%;
+            margin-top: 20px;
         }
 
         .table-container {
             border: 1px solid #ccc;
-            padding: 5px;
-            width: 100%;
-        }
-
-        .table-header {
-            background-color: #ccc;
+            padding: 10px;
+            margin-top: 20px;
         }
 
         table {
             width: 100%;
+            border-collapse: collapse;
         }
 
-        table td {
-            padding: 5px;
+        table td, table th {
+            padding: 10px;
             border: 1px solid #ccc;
         }
 
-        .no-print {
-            display: none;
-        }
-
-        .print-button {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        /* CSS for the QR code container */
-        .qr-code {
-            float: right; /* Float the QR code to the right */
-            margin-top: 20px; /* Adjust the top margin as needed */
-        }
-
-        /* CSS for the "QR CODE IMAGE" text */
-        .qr-code p {
-            font-weight: bold; /* Add bold styling to the text */
+        table thead {
+            background-color: #f2f2f2;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">           
-            <h2>FINAL EXAMINATION DOCKET 2023</h2>
-            <h4>UNREGISTERED STUDENT</h4>
-            <h6>SENT BY EMAIL</h6>
-        </div>
-        <br>
-        @php
-        use SimpleSoftwareIO\QrCode\Facades\QrCode;
-        @endphp
-
-        {{-- Define the route or path you want to convert to a QR code --}}
-        @php
-            $route = '/verify/'.$studentResults->StudentID; // Replace with your desired route or path
-            $url = url($route); // This generates the complete URL including the base URL
-            $base64QRCode = base64_encode(QrCode::size(150)->generate($url));
-            $currentDate = (new DateTime())->format('Y-m-d');
-            $imagePath = public_path('assets/img/logo2.png'); // Replace with the correct path to your image
-            $base64Image = base64_encode(file_get_contents($imagePath));
-        @endphp
-
-        {{-- Generate a QR code using simplesoftwareio/simple-qrcode --}}
-        <div class="header">
-            <img src="data:image/png;base64, {{ $base64QRCode }}" style="margin-right: 40%;">
-            <img src="data:image/png;base64, {{ $base64Image }}" alt="Logo" height="150" style="margin-left: 40%px;">
+            <h1>{{ $courseName }} - {{ $courseCode }} </h1><h3>EXAMINATION LIST</h3>
         </div>
 
         <div class="main-content">
-            <div class="row">
-            
+            <div class="row" style="display: flex; justify-content: space-between; align-items: center;">
+                @php
+                $imagePath = public_path('assets/img/logo2.png'); // Replace with the correct path to your image
+                $base64Image = base64_encode(file_get_contents($imagePath));
+                @endphp
+                <div>
+                    <img src="data:image/png;base64,{{ $base64Image }}" alt="LMMU" height="100" style="margin-left: 40%;">                    
+                </div>
+            </div>
+            <div class="row" style="display: flex; justify-content: center; align-items: center;">
                 <!-- Student Info Column -->
                 <div class="student-info">
-                    <p>Examination slip for: <b>{{$studentResults->FirstName}} {{$studentResults->Surname}}</b></p>
-                    <p>StudentID No.: <b>{{$studentResults->StudentID}}</b></p>
-                    <p>NRC No.: <b>{{$studentResults->GovernmentID}}</b></p>
+                    
                 </div>
-                <div class="balance">
-                    <p>Balance: <b>K {{$studentResults->Amount}}</b></p>
-                    <p>Delivery: <b>{{$studentResults->StudyType}}</b></p>
-                    <p>Sent On: <b>{{ $currentDate }}</b></p>
+            </div>
+            <div class="row" >
+                <!-- Date Column -->
+                <div class="col">
+                    <h5>DATE:</h5>
+                    
                 </div>
-               
+                <div class="col">
+                    {{-- <h5>TIME:</h5> --}}
+                </div>
+                <div class="col">
+                    <h5>TIME:</h5>
+                </div>                
             </div>
-            <div class="row">
-                <p style="font-weight: bold">The Student is Studying: {{$studentResults->Name}}
-                
-                    Candidate has been authorized to write FINAL EXAMINATION in the following courses:</p>
-            </div>
+                        
             
             <div class="examination-slip">
                 
-
                 <div class="table-container">
                     <table>
-                        <thead class="table-header">
+                        <thead>
                             <tr>
-                                <td>Course</td>
-                                <td><b>DATE / TIME</b></td>
-                                <td><b>VENUE</b></td>
-                                <td><b>SIGNATURE INVIGILATOR</b></td>
+                                <th>STUDENT NUMBER</th>
+                                <th>SCHOOL</th>
+                                <th>PROGRAM</th>
+                                {{-- <th>COURSE CODE</th> --}}
+                                <th>SIGNATURE</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($courses as $course)
+                            @foreach($students as $student)
                             <tr>
-                            <td style="max-width: 30%;">
-                                <div class="course-pair">
-                                    {{$course->Course}} - {{$course->Program}}
-                                </div>
-                            </td>
-                            <td style="width: 30%;">&nbsp;</td>
-                            <td style="width: 30%;">&nbsp;</td>
-                            <td style="width: 20%;">&nbsp;</td>
-                            
+                                <td style="max-width: 30%;">
+                                    <div class="course-pair">
+                                        {{ $student->StudentID }}
+                                    </div>
+                                </td>
+                                <td style="width: 30%;">
+                                    <div class="course-pair">
+                                        {{ $student->Description }}
+                                    </div>
+                                </td>
+                                <td style="width: 30%;">
+                                    <div class="course-pair">
+                                        {{ $student->Name }}
+                                    </div>
+                                </td>
+                                {{-- <td style="width: 30%;">
+                                    <div class="course-pair">
+                                        ahhh
+                                    </div>
+                                </td> --}}
+                                <td style="width: 20%;">&nbsp;</td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-
-                <a href="{{ route('courses.select', $studentResults->StudentID) }}" class="no-print">
-                    <button>Add Course(s)</button>
-                </a>
-
-                
             </div>
         </div>
     </div>

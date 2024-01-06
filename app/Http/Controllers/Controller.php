@@ -335,6 +335,21 @@ class Controller extends BaseController
         return $failedCourses;
     }
 
+    public function getDefferedOrSuplementaryCourses(){
+        $results = $this->queryDefferedOrSuplementaryCourses();
+        return $results;
+    }
+
+    private function queryDefferedOrSuplementaryCourses(){
+        $results = SisCourses::select('courses.ID','courses.Name','courses.CourseDescription')
+            ->join('grades-published', 'Name', '=', 'CourseNo')
+            ->whereIn('Grade', ['D+', 'NE'])
+            ->where('AcademicYear', 2023)
+            ->groupBy('Name')
+            ->get();
+        return $results;
+    }
+
     public function sendEmailNotification($studentID) {               
 
         $privateEmail = BasicInformation::find($studentID);
@@ -360,7 +375,6 @@ class Controller extends BaseController
         return "Test email sent successfully!";
     }
 
-    
     public function sendTestEmail($studentID) {
         $studentResults = $this->getStudentResults($studentID);
         

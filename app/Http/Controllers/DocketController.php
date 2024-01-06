@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\Courses;
+use App\Models\SisCourses;
 use App\Models\Student;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use ZipArchive;
 
 class DocketController extends Controller
 {
@@ -638,7 +640,7 @@ class DocketController extends Controller
             return back()->with('error', 'NOT FOUND.');               
         }
         
-               
+                    
         
         $this->setAndUpdateCourses($studentId);
         // Retrieve all unique Student values from the Course model
@@ -728,7 +730,7 @@ class DocketController extends Controller
             // Get the 'dataArray' from the request
             $dataArray = $request->input('dataArray');
 
-           $dataArray;
+            $dataArray;
             
             if (!empty($dataArray)) {
                 Courses::where('Student', $studentId)->delete();
@@ -790,28 +792,41 @@ class DocketController extends Controller
     }
 
     public function bulkExportAllCoursesToPdfWithStudentsTakingThem(){
-        $courses = AllCourses::all();
-
-        foreach ($courses as $course) {
-            $this->exportCoursesToPdfWithStudentsTakingThem($course->id);            
+        $zip = new ZipArchive;
+        $zipFileName = 'all_courses.zip';
+        $zipPath = public_path($zipFileName);
+    
+        if ($zip->open($zipPath, ZipArchive::CREATE) === TRUE) {
+            $courses = $this->getDefferedOrSuplementaryCourses();
+            $pdfs = [];
+            foreach ($courses as $course) {
+                $pdfs[$course->CourseDescription.'-'.$course->Name] = $this->exportCoursesToPdfWithStudentsTakingThem($course->ID)->output();
+            }
+            foreach ($pdfs as $fileName => $pdf) {
+                $zip->addFromString($fileName.'.pdf', $pdf);
+            }
+            $zip->close();
         }
-        $academicYear = 2023;
-        $pdf = Pdf::loadView('docket.pdfAllCourses', compact('courses','academicYear'));
-        return $pdf->download('AllCourses.pdf');
+    
+        return response()->download($zipPath)->deleteFileAfterSend(true);
     }
-
+    
     public function exportCoursesToPdfWithStudentsTakingThem($courseId){
-        $theCourse = AllCourses::find($courseId);
+        $theCourse = SisCourses::find($courseId);
         $academicYear = 2023;
-        $courseCode = $theCourse->course_code;
-        $courseName = $theCourse->course_name;
-
-        $studentNumbers = Courses::where('Course', $courseCode)->pluck('Student')->toArray();
+        $courseCode = $theCourse->Name;
+        $courseName = $theCourse->CourseDescription;
+    
+        $studentNumbers = Courses::where('Course', $courseCode)
+                ->join('students', 'students.student_number', '=', 'courses.Student')
+                ->where('students.status', 3)
+                ->with('students') // Eager loading
+                ->pluck('Student')->toArray();
                 
-        $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
-
-        $pdf = Pdf::loadView('docket.pdf', compact('results','courseName','courseId'));
-        return $pdf->download('StudentsTaking'.$courseName.'.pdf');
+        $students = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+    
+        $pdf = Pdf::loadView('docket.exportCourses', compact('students','courseName','courseCode'));
+        return $pdf;
     }
 
     public function selectCourses($studentId){

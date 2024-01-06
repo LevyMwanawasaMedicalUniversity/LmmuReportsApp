@@ -82,8 +82,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/resetAllStudentsPasswords', 'DocketController@resetAllStudentsPasswords')->name('docket.resetAllStudentsPassword');
                 Route::get('/createAccountsForStudentsNotInUsersTableAndSendEmails', 'DocketController@createAccountsForStudentsNotInUsersTableAndSendEmails')->name('docket.createAccountsForStudentsNotInUsersTableAndSendEmails');
                 Route::get('updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail', 'DocketController@updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail')->name('docket.updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail');
-                Route::get('exportCoursesToPdfWithStudentsTakingThem', 'DocketController@exportCoursesToPdfWithStudentsTakingThem')->name('docket.exportCoursesToPdfWithStudentsTakingThem');
-                
+                Route::get('/exportCoursesToPdfWithStudentsTakingThem/{courseID}', 'DocketController@exportCoursesToPdfWithStudentsTakingThem')->name('docket.exportCoursesToPdfWithStudentsTakingThem');
+                Route::get('bulkExportAllCoursesToPdfWithStudentsTakingThem', 'DocketController@bulkExportAllCoursesToPdfWithStudentsTakingThem')->name('docket.bulkExportAllCoursesToPdfWithStudentsTakingThem');
             });
 
         });
