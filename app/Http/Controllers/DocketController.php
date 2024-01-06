@@ -808,7 +808,6 @@ class DocketController extends Controller
     }
 
     public function bulkExportAllCoursesToPdfWithStudentsTakingThem(){
-        set_time_limit(1200000); 
         $zip = new ZipArchive;
         $zipFileName = 'all_courses.zip';
         $zipPath = public_path($zipFileName);
@@ -817,7 +816,8 @@ class DocketController extends Controller
             $courses = $this->getDefferedOrSuplementaryCourses();
             $pdfs = [];
             foreach ($courses as $course) {
-                $pdfs[$course->CourseDescription.'-'.$course->Name] = $this->exportCoursesToPdfWithStudentsTakingThem($course->ID)->output();
+                $courseDescription = str_replace('/', '-', $course->CourseDescription);
+                $pdfs[$courseDescription.'-'.$course->Name] = $this->exportCoursesToPdfWithStudentsTakingThem($course->ID)->output();
             }
             foreach ($pdfs as $fileName => $pdf) {
                 $zip->addFromString($fileName.'.pdf', $pdf);
@@ -834,11 +834,13 @@ class DocketController extends Controller
         $courseCode = $theCourse->Name;
         $courseName = $theCourse->CourseDescription;
     
-        $students = Courses::where('Course', $courseCode)
+        $studentNumbers = Courses::where('Course', $courseCode)
                 ->join('students', 'students.student_number', '=', 'courses.Student')
                 ->where('students.status', 3)
-                ->load('students') // Eager loading
-                ->get();
+                ->with('students') // Eager loading
+                ->pluck('Student')->toArray();
+                
+        $students = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
     
         $pdf = Pdf::loadView('docket.exportCourses', compact('students','courseName','courseCode'));
         return $pdf;

@@ -341,12 +341,16 @@ class Controller extends BaseController
     }
 
     private function queryDefferedOrSuplementaryCourses(){
-        $results = SisCourses::select('courses.ID','courses.Name','courses.CourseDescription')
+        $courses = SisCourses::select('courses.ID','courses.Name','courses.CourseDescription')
             ->join('grades-published', 'Name', '=', 'CourseNo')
             ->whereIn('Grade', ['D+', 'NE'])
             ->where('AcademicYear', 2023)
             ->groupBy('Name')
             ->get();
+
+        $studentCourses = Courses::pluck('Course'); 
+        $results = $courses->whereIn('Name', $studentCourses);
+
         return $results;
     }
 
