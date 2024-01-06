@@ -16,4 +16,13 @@ WHERE
 GROUP BY 
     gp.CourseNo;
 
-Select 
+
+SELECT 
+	c.Name, 
+	gp.Grade 
+FROM edurole.courses c 
+	INNER JOIN `grades-published` gp ON c.Name = gp.CourseNo
+WHERE 
+    gp.Grade in ('D+','NE') AND gp.AcademicYear = 2023 
+GROUP by c.Name 
+;
