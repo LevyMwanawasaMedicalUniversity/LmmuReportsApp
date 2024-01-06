@@ -340,7 +340,7 @@ class Controller extends BaseController
         $privateEmail = BasicInformation::find($studentID);
     
         if ($privateEmail) {
-            $email = $privateEmail->PrivateEmail;
+            $email = trim($privateEmail->PrivateEmail);
         } else {
             // Handle the case where there's no BasicInformation record with the provided $studentID
             // For example, you might want to log an error message and return
@@ -390,7 +390,7 @@ class Controller extends BaseController
 
         $privateEmail = BasicInformation::find($studentID);
 
-        $email =$privateEmail->PrivateEmail;
+        $email = trim($privateEmail->PrivateEmail);
 
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
