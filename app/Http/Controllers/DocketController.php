@@ -808,6 +808,7 @@ class DocketController extends Controller
     }
 
     public function bulkExportAllCoursesToPdfWithStudentsTakingThem(){
+        set_time_limit(1200000); 
         $zip = new ZipArchive;
         $zipFileName = 'all_courses.zip';
         $zipPath = public_path($zipFileName);
