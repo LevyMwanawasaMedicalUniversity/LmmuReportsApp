@@ -1,14 +1,6 @@
-SELECT 
-    gp.StudentNo, 
-    bi.FirstName, 
-    bi.Surname, 
-    bi.Sex, 
-    gp.AcademicYear,     
+SELECT    
     gp.CourseNo,
-    gp.ProgramNo, 
-    gp.Grade, 
-    s.Name AS StudyName, 
-    s2.Name AS SchoolName
+    gp.Grade
 FROM 
     edurole.`grades-published` gp
 INNER JOIN 
@@ -20,4 +12,8 @@ INNER JOIN
 INNER JOIN 
     schools s2 ON s2.ID = s.ParentID
 WHERE 
-    gp.Grade = 'D+' AND gp.AcademicYear = 2023;
+    gp.Grade in ('D+','NE') AND gp.AcademicYear = 2023
+GROUP BY 
+    gp.CourseNo;
+
+Select 

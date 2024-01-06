@@ -7,6 +7,7 @@ use App\Models\BasicInformation;
 use App\Models\Courses;
 use App\Models\Student;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Exception;
 use Illuminate\Http\Request;
@@ -255,12 +256,21 @@ class DocketController extends Controller
                         }
 
                         $nrc = trim($getNrc->GovernmentID);
-                        
+
+                        $existingUser = User::where('email', $email)->first();
+                        if ($existingUser) {
+                            
+                            $email = $studentNumber . $email;
+                        }
+                        try{
                             $student = User::create([
                                 'name' => $studentNumber,
                                 'email' => $email,
                                 'password' => '12345678',                                
                             ]);
+                        }catch(Exception $e){
+                            continue;
+                        }
                                                     
                         // Create the "Student" role if it doesn't exist
                         $studentRole = Role::firstOrCreate(['name' => 'Student']);
@@ -773,8 +783,35 @@ class DocketController extends Controller
         } else {
             $courses = AllCourses::all();
         }
+
+        
     
         return view('docket.courses', compact('courses'));
+    }
+
+    public function bulkExportAllCoursesToPdfWithStudentsTakingThem(){
+        $courses = AllCourses::all();
+
+        foreach ($courses as $course) {
+            $this->exportCoursesToPdfWithStudentsTakingThem($course->id);            
+        }
+        $academicYear = 2023;
+        $pdf = Pdf::loadView('docket.pdfAllCourses', compact('courses','academicYear'));
+        return $pdf->download('AllCourses.pdf');
+    }
+
+    public function exportCoursesToPdfWithStudentsTakingThem($courseId){
+        $theCourse = AllCourses::find($courseId);
+        $academicYear = 2023;
+        $courseCode = $theCourse->course_code;
+        $courseName = $theCourse->course_name;
+
+        $studentNumbers = Courses::where('Course', $courseCode)->pluck('Student')->toArray();
+                
+        $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+
+        $pdf = Pdf::loadView('docket.pdf', compact('results','courseName','courseId'));
+        return $pdf->download('StudentsTaking'.$courseName.'.pdf');
     }
 
     public function selectCourses($studentId){
