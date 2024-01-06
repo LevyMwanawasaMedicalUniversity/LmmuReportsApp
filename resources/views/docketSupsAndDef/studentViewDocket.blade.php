@@ -70,7 +70,7 @@
                                 @if ($studentResults->RegistrationStatus == 'NO REGISTRATION')
                                     <a href="students/exam/results/{{$studentResults->StudentID}}" class="btn btn-primary no-print">EXAM RESULTS</a>
                                 @else
-                                     <h3 class="no-print">INELIGIBLE TO VIEW RESULTS</h3> 
+                                    <h3 class="no-print">INELIGIBLE TO VIEW RESULTS</h3> 
                                 @endif
                             </div>
 
