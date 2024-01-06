@@ -834,13 +834,11 @@ class DocketController extends Controller
         $courseCode = $theCourse->Name;
         $courseName = $theCourse->CourseDescription;
     
-        $studentNumbers = Courses::where('Course', $courseCode)
+        $students = Courses::where('Course', $courseCode)
                 ->join('students', 'students.student_number', '=', 'courses.Student')
                 ->where('students.status', 3)
-                ->with('students') // Eager loading
-                ->pluck('Student')->toArray();
-                
-        $students = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+                ->load('students') // Eager loading
+                ->get();
     
         $pdf = Pdf::loadView('docket.exportCourses', compact('students','courseName','courseCode'));
         return $pdf;
