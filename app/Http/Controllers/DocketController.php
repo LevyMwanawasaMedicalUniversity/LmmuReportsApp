@@ -222,8 +222,24 @@ class DocketController extends Controller
                             //     }
                             // }
                         
-                            $this->setAndUpdateCoursesForCurrentYear($studentId);
-                            $this->sendTestEmail($studentId);
+                            $user = User::where('name', $studentId)->first();
+
+                            if ($user) {
+                                // Find or create the "Student" role
+                                $studentRole = Role::firstOrCreate(['name' => 'Student']);
+
+                                // Assign the "Student" role to the user
+                                $user->assignRole($studentRole);
+
+                                // Find or create the "Student" permission
+                                $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+
+                                // Assign the "Student" permission to the user
+                                $user->givePermissionTo($studentPermission);
+
+                                $this->setAndUpdateCoursesForCurrentYear($studentId);
+                            }
+                            // $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
@@ -285,7 +301,7 @@ class DocketController extends Controller
                         
                         // Assign the "Student" permission to the user
                         $student->givePermissionTo($studentPermission);
-                        $this->sendTestEmail($studentNumber); 
+                        // $this->sendTestEmail($studentNumber); 
                     }
                 }
 
