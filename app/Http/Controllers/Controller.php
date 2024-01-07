@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SendEmailJob;
 use App\Mail\DefSupDocket;
 use App\Mail\NotificationEmail;
 use App\Mail\SendAnEmail;
@@ -410,7 +411,9 @@ class Controller extends BaseController
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
     
         $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($pdfPath,$studentID);
-        Mail::to($sendingEmail)->send($mailClass);
+    
+        // Dispatch the email sending job to the queue
+        dispatch(new SendEmailJob($sendingEmail, $mailClass));
     
         unlink($pdfPath);
     
