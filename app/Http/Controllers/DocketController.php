@@ -242,10 +242,11 @@ class DocketController extends Controller
                                         
                                     
                                     }
+                                    $this->sendTestEmail($studentId);
                                     
                                     
                                 }
-                            $this->sendTestEmail($studentId);
+                            
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
