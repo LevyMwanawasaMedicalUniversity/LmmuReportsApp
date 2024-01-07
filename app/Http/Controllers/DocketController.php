@@ -12,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
