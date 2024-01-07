@@ -279,7 +279,7 @@ class DocketController extends Controller
                         }
 
                         $nrc = trim($getNrc->GovernmentID);
-
+                        $defaultPassword = '12345678';
                         $existingUser = User::where('email', $email)->first();
                         if ($existingUser) {
                             
@@ -289,7 +289,7 @@ class DocketController extends Controller
                             $student = User::create([
                                 'name' => $studentNumber,
                                 'email' => $email,
-                                'password' => '12345678',                                
+                                'password' => Hash::make($defaultPassword),                                
                             ]);
                         }catch(Exception $e){
                             continue;
