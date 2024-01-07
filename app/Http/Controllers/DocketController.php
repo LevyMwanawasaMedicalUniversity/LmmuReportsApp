@@ -226,20 +226,20 @@ class DocketController extends Controller
 
                             if ($user) {
                                 // Find or create the "Student" role
-                                $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                                // $studentRole = Role::firstOrCreate(['name' => 'Student']);
 
-                                // Assign the "Student" role to the user
-                                $user->assignRole($studentRole);
+                                // // Assign the "Student" role to the user
+                                // $user->assignRole($studentRole);
 
-                                // Find or create the "Student" permission
-                                $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                                // // Find or create the "Student" permission
+                                // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
 
-                                // Assign the "Student" permission to the user
-                                $user->givePermissionTo($studentPermission);
+                                // // Assign the "Student" permission to the user
+                                // $user->givePermissionTo($studentPermission);
 
                                 $this->setAndUpdateCoursesForCurrentYear($studentId);
                             }
-                            $this->sendTestEmail($studentId);
+                            // $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);

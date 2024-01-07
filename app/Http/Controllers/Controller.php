@@ -248,7 +248,7 @@ class Controller extends BaseController
         $results = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
             ->where('StudentNo', $studentId)
             ->where('AcademicYear', $academicYear)
-            ->whereIn('Grade', ['D+','NE'])
+            ->whereIn('Grade', ['D+','NE','DEF'])
             ->get();
         
         foreach ($results as $row) {
