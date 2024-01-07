@@ -369,7 +369,7 @@ class Controller extends BaseController
     
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
-            $sendingEmail = $email;
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         } else {
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
@@ -406,7 +406,7 @@ class Controller extends BaseController
         $pdf->save($pdfPath);
     
         $privateEmail = BasicInformation::find($studentID);
-        $email = trim($privateEmail->PrivateEmail);
+        $email = 'azwel.simwinga@lmmu.ac.zm';
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
     
         $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($pdfPath,$studentID);
