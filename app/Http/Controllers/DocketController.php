@@ -200,13 +200,12 @@ class DocketController extends Controller
                         ->pluck('student_number')
                         ->toArray();
                     if($status == 3){
-                        // Update existing students
-                        
-                        
-                        Student::whereIn('student_number', $existingStudents)
-                            ->update(['status' => 3]);
+                        // Update existing students                       
 
                         foreach ($existingStudents as $studentId) {
+                            $getStudentStatus = Student::where('student_number', $studentId)->first();
+                            if(!$getStudentStatus->status == 3){
+                                
                             // $privateEmail = BasicInformation::find($studentId);
                             // $email = $privateEmail->PrivateEmail;
                         
@@ -222,27 +221,28 @@ class DocketController extends Controller
                             //     }
                             // }
                         
-                            // $user = User::where('name', $studentId)->first();
+                                $user = User::where('name', $studentId)->first();
 
-                            // if ($user) {
-                            //     // Find or create the "Student" role
-                            //     $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                                if ($user) {
+                                    // Find or create the "Student" role
+                                    $studentRole = Role::firstOrCreate(['name' => 'Student']);
 
-                            //     // // Assign the "Student" role to the user
-                            //     $user->assignRole($studentRole);
+                                    // // Assign the "Student" role to the user
+                                    $user->assignRole($studentRole);
 
-                            //     // // Find or create the "Student" permission
-                            //     $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                                    // // Find or create the "Student" permission
+                                    $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
 
-                            //     // // Assign the "Student" permission to the user
-                            //     $user->givePermissionTo($studentPermission);
+                                    // // Assign the "Student" permission to the user
+                                    $user->givePermissionTo($studentPermission);
+                                    
                                 
-                            
-                            // }
-                            $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
-
-                                if (!$studentExistsInStudentsTable) {
-                                    $this->setAndUpdateCoursesForCurrentYear($studentId);
+                                }
+                                    Student::where('student_number', $studentId)
+                                        ->update(['status' => 3]);
+                                    
+                                        $this->setAndUpdateCoursesForCurrentYear($studentId);
+                                    
                                 }
                             $this->sendTestEmail($studentId);
                         }
