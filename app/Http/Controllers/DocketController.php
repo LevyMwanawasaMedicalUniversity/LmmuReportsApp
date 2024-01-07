@@ -221,28 +221,28 @@ class DocketController extends Controller
                             //         $user->update(['email' => $studentId . '@lmmu.ac.zm']);
                             //     }
                             // }    
-                        
-                                $user = User::where('name', $studentId)->first();
-
-                                if ($user) {
-                                    // Find or create the "Student" role
-                                    $studentRole = Role::firstOrCreate(['name' => 'Student']);
-
-                                    // // Assign the "Student" role to the user
-                                    $user->assignRole($studentRole);
-
-                                    // // Find or create the "Student" permission
-                                    $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
-
-                                    // // Assign the "Student" permission to the user
-                                    $user->givePermissionTo($studentPermission);
-                                    
-                                
-                                }
                                     Student::where('student_number', $studentId)
                                         ->update(['status' => 3]);
                                     
-                                        $this->setAndUpdateCoursesForCurrentYear($studentId);
+                                    $this->setAndUpdateCoursesForCurrentYear($studentId);
+                                    $user = User::where('name', $studentId)->first();
+
+                                    if ($user) {
+                                        // Find or create the "Student" role
+                                        $studentRole = Role::firstOrCreate(['name' => 'Student']);
+
+                                        // // Assign the "Student" role to the user
+                                        $user->assignRole($studentRole);
+
+                                        // // Find or create the "Student" permission
+                                        $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+
+                                        // // Assign the "Student" permission to the user
+                                        $user->givePermissionTo($studentPermission);
+                                        
+                                    
+                                    }
+                                    
                                     
                                 }
                             $this->sendTestEmail($studentId);
