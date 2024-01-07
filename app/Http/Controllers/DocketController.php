@@ -219,7 +219,7 @@ class DocketController extends Controller
                             //         // $email is not a valid email address
                             //         $user->update(['email' => $studentId . '@lmmu.ac.zm']);
                             //     }
-                            // }
+                            // }    
                         
                                 $user = User::where('name', $studentId)->first();
 
