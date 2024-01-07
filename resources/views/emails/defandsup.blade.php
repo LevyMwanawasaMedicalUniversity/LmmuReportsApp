@@ -16,8 +16,8 @@
 
                 <p>You can also access your docket online at <a href="http://sisreports.lmmu.ac.zm/">http://sisreports.lmmu.ac.zm</a>.</p>
 
-                <p><strong>Starting now, please use your personal email '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password for login. Your current password is set to "12345678" if you have not updated it yet.. If you encounter any challenges logging in, utilize the "Forgot Password" option located just below the login section. Enter '{{ $studentDetails->PrivateEmail }}' as the email address and submit. Following this, instructions will be sent to your email. You can then open your personal email and click on the "Reset Password" link, which will direct you to a page where you can create a new password</strong></p>
-                <p><strong>Note:</strong>Your current password is set to "12345678" if you have not updated it yet.</p>
+                <p><strong>Starting now, please use your personal email '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password for login. Your current password is set to "12345678" ONLY if you have not updated it yet.. If you encounter any challenges logging in, utilize the "Forgot Password" option located just below the login section. Enter '{{ $studentDetails->PrivateEmail }}' as the email address and submit. Following this, instructions will be sent to your email. You can then open your personal email and click on the "Reset Password" link, which will direct you to a page where you can create a new password</strong></p>
+                <p><strong>Note: Your current password is set to "12345678" if you have not updated it yet.</strong></p>
                 <p><strong>Note:</strong> '{{ $studentDetails->PrivateEmail }}' is the registered email address, and it is the only one you can use to log in and access your docket or reset your password.</p>
 
                 <p>If you encounter any issues, please visit the Academic Office or ICT Office. Your success is our priority.</p>

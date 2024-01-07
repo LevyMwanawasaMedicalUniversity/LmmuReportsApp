@@ -222,24 +222,28 @@ class DocketController extends Controller
                             //     }
                             // }
                         
-                            // $user = User::where('name', $studentId)->first();
+                            $user = User::where('name', $studentId)->first();
 
-                            // if ($user) {
+                            if ($user) {
                                 // Find or create the "Student" role
-                                // $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                                $studentRole = Role::firstOrCreate(['name' => 'Student']);
 
                                 // // Assign the "Student" role to the user
-                                // $user->assignRole($studentRole);
+                                $user->assignRole($studentRole);
 
                                 // // Find or create the "Student" permission
-                                // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                                $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
 
                                 // // Assign the "Student" permission to the user
-                                // $user->givePermissionTo($studentPermission);
+                                $user->givePermissionTo($studentPermission);
+                                $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
 
-                            $this->setAndUpdateCoursesForCurrentYear($studentId);
-                            // }
-                            // $this->sendTestEmail($studentId);
+                                if (!$studentExistsInStudentsTable) {
+                                    $this->setAndUpdateCoursesForCurrentYear($studentId);
+                                }
+                            
+                            }
+                            $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
@@ -622,7 +626,7 @@ class DocketController extends Controller
         $status = $student->status;
         
         if($status == 3){
-            $studentExistsInStudentsTable = Courses::where('Student', $studentId)->exists();
+            $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
             if (!$studentExistsInStudentsTable) {
                 $this->setAndUpdateCoursesForCurrentYear($studentId); 
             }           
@@ -809,6 +813,7 @@ class DocketController extends Controller
     }
 
     public function bulkExportAllCoursesToPdfWithStudentsTakingThem(){
+        set_time_limit(1200000);
         $zip = new ZipArchive;
         $zipFileName = 'all_courses.zip';
         $zipPath = public_path($zipFileName);

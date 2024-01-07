@@ -343,7 +343,7 @@ class Controller extends BaseController
     private function queryDefferedOrSuplementaryCourses(){
         $courses = SisCourses::select('courses.ID','courses.Name','courses.CourseDescription')
             ->join('grades-published', 'Name', '=', 'CourseNo')
-            ->whereIn('Grade', ['D+', 'NE'])
+            ->whereIn('Grade', ['D+', 'NE','DEF'])
             ->where('AcademicYear', 2023)
             ->groupBy('Name')
             ->get();
@@ -381,57 +381,37 @@ class Controller extends BaseController
 
     public function sendTestEmail($studentID) {
         $studentResults = $this->getStudentResults($studentID);
-        
-    
-        // Define the PDF file name (e.g., using the studentID)
         $fileName = $studentID . '.pdf';
-    
-        // Generate the PDF and save it to the "public" disk
         $student = Student::where('student_number', $studentID)->first();
         $status = $student->status;
-        if($status == 1){
-            $courses = $this->getStudentCourses($studentID);
-            $pdf = PDF::loadView('emails.pdf', compact('studentResults', 'courses'));
-            $pdfPath = storage_path('app/' . $fileName);
-            $pdf->save($pdfPath);
-        }elseif($status == 2){
-            $courses = $this->getStudentCourses($studentID);
-            $pdf = PDF::loadView('emailsNmcz.pdf', compact('studentResults', 'courses'));
-            $pdfPath = storage_path('app/' . $fileName);
-            $pdf->save($pdfPath);
-        }elseif($status == 3){
-            $courses = Courses::where('Student', $studentID)->get();
-            $pdf = PDF::loadView('emails.pdfSudAndDef', compact('studentResults', 'courses'));
-            $pdfPath = storage_path('app/' . $fileName);
-            $pdf->save($pdfPath);
+        $view = '';
+    
+        switch ($status) {
+            case 1:
+                $courses = $this->getStudentCourses($studentID);
+                $view = 'emails.pdf';
+                break;
+            case 2:
+                $courses = $this->getStudentCourses($studentID);
+                $view = 'emailsNmcz.pdf';
+                break;
+            case 3:
+                $courses = Courses::where('Student', $studentID)->get();
+                $view = 'emails.pdfSudAndDef';
+                break;
         }
-
+    
+        $pdf = PDF::loadView($view, compact('studentResults', 'courses'));
+        $pdfPath = storage_path('app/' . $fileName);
+        $pdf->save($pdfPath);
+    
         $privateEmail = BasicInformation::find($studentID);
-
         $email = trim($privateEmail->PrivateEmail);
-
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            // $email is a valid email address
-            $sendingEmail = $email;
-        } else {
-            // $email is not a valid email address
-            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
-        }
-        // return response()->download($pdfPath, $fileName);
+        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
     
-        // Send the email with the PDF attachment
-        if($status == 3){
-            Mail::to($sendingEmail)->send(new DefSupDocket($pdfPath,$studentID));
-        }else{
-            Mail::to($sendingEmail)->send(new SendAnEmail($pdfPath,$studentID));
-        }       
+        $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($pdfPath,$studentID);
+        Mail::to($sendingEmail)->send($mailClass);
     
-        // Send the email with the PDF attachment
-        // Mail::to('mulumbesimwinga@gmail.com')->send(new SendAnEmail($pdfPath,$studentID));
-        // Mail::to('honest.phiri@lmmu.ac.zm')->send(new SendMailNmcz($pdfPath,$studentID));
-    
-    
-        // Delete the temporary PDF file after sending the email
         unlink($pdfPath);
     
         return "Test email sent successfully!";
