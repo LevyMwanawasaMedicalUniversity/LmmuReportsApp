@@ -50,7 +50,11 @@ class HomeController extends Controller
             }             
             
             if($student->status == 3){
-                $this->setAndSaveCoursesForCurrentYear($studentId);
+                $studentExistsInStudentsTable = Courses::where('Student', $studentId)->exists();
+
+                if (!$studentExistsInStudentsTable) {
+                    $this->setAndSaveCoursesForCurrentYear($studentId);
+                }
             }else{
                 $this->setAndUpdateCourses($studentId);
             }

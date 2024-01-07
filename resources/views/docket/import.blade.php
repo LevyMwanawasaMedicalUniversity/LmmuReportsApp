@@ -71,9 +71,10 @@
                             <div class="form-group">
                                 <label for="status" style="font-weight: bold; font-size: 16px;">Type Of Exam</label>
                                 <select name="status" class="form-control" required>
+                                    <option value="3">Deferred And Sups</option>
                                     <option value="1">LMMU Exam</option>   
                                     <option value="2">NMCZ Exam</option>
-                                    <option value="3">Deferred And Sups</option>                                  
+                                                                      
                                 </select>
                             </div>
                         </div>

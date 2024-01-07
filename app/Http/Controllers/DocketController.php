@@ -622,10 +622,11 @@ class DocketController extends Controller
         $status = $student->status;
         
         if($status == 3){
-            $this->setAndUpdateCoursesForCurrentYear($studentId);
-            
-        }else{
-            
+            $studentExistsInStudentsTable = Courses::where('Student', $studentId)->exists();
+            if (!$studentExistsInStudentsTable) {
+                $this->setAndUpdateCoursesForCurrentYear($studentId); 
+            }           
+        }else{            
             $this->setAndUpdateCourses($studentId);
         }
         // Retrieve all unique Student values from the Course model
