@@ -48,6 +48,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/store', 'UserController@store')->name('users.store');
                 Route::get('/{user}/show', 'UserController@show')->name('users.show');
                 Route::get('/{user}/edit', 'UserController@edit')->name('users.edit');
+                Route::post('/{user}/resetUserPassword', 'UserController@resetUserPassword')->name('users.resetUserPassword');
                 Route::patch('/{user}/update', 'UserController@update')->name('users.update');
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');

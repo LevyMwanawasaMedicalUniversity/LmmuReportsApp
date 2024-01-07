@@ -44,6 +44,16 @@ class UserController extends Controller
         return view('users.create',compact('roles'));
     }
 
+    public function resetUserPassword($userId)
+    {
+        $user = User::find($userId);
+        $defaultPassword = '12345678';
+        $user->password = Hash::make($defaultPassword);
+        $user->save();
+
+        return redirect()->back()->with('success', 'Password reset successfully.');
+    }
+
     /**
      * Store a newly created resource in storage.
      */
