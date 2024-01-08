@@ -151,10 +151,6 @@ class UserController extends Controller
                 'required',
                 'confirmed',
                 Rules\Password::defaults(),
-                // Add your custom rules here
-                'min:8',               // Minimum password length
-                'regex:/[A-Za-z0-9]+/', // Requires at least one letter and one number
-                'regex:/[!@#$%^&*]+/',  // Requires at least one special character
             ],
         ], [
             'password.required' => 'The new password field is required.',
