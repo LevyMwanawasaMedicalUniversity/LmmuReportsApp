@@ -77,7 +77,7 @@ class UserController extends Controller
         ]);
 
         $user = User::create(array_merge($validatedData, [
-            'password' => Hash::make('Changeme@123')
+            'password' => Hash::make('12345678')
         ]));
 
         $user->syncRoles($request->get('role'));
