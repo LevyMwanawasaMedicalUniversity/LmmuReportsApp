@@ -51,8 +51,8 @@ class HomeController extends Controller
             
             if($student->status == 3){
                 $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
-
-                if (!$studentExistsInStudentsTable) {
+                $studentCoursesUpdated = Student::where('student_number', $studentId)->whereNotNull('course_updated')->exists();
+                if (!$studentExistsInStudentsTable || !$studentCoursesUpdated ) {
                     $this->setAndUpdateCoursesForCurrentYear($studentId);
                 }
             }else{
