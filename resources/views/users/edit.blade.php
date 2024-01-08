@@ -13,7 +13,7 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">
-            <h4 class="card-title">Update User </h4>\
+            <h4 class="card-title">Update User </h4>
             @if (session('success'))
                         <div class="alert alert-success">
                             {{ session('success') }}
@@ -32,6 +32,7 @@
             <div class="toolbar">
               <!--        Here you can write extra buttons/actions for the toolbar              -->
             </div>
+            
             <form method="POST" action="{{ route('users.update', $user->id) }}">
               @method('patch')
               @csrf
@@ -76,6 +77,7 @@
 
               <button type="submit" class="btn btn-primary">Update user</button>
               <a href="{{ route('users.index') }}" class="btn btn-default">Cancel</a>
+              
             </form>
           </div>
           <!-- end content-->
@@ -90,7 +92,19 @@
       <div class="col-md-12">
         <div class="card">
           <div class="card-header">              
-            <h4 class="card-title">Update Password</h4>
+          <div class="row">
+          <div class="col-md-6">
+              <h4 class="card-title">Update Password</h4>
+          </div>
+          <div class="col-md-6 text-right">
+              <form method="POST" action="{{ route('users.resetUserPassword', $user->id) }}">
+                  @csrf
+                  <button type="submit" rel="tooltip" class="btn btn-success" data-original-title="" title="">
+                      Reset Password
+                  </button>
+              </form>
+          </div>
+      </div>
             <div class="col-12 mt-2">
                                         </div>
           </div>
@@ -118,7 +132,9 @@
               <button type="submit" class="btn btn-primary">Update Password</button>
               <a href="{{ route('users.index') }}" class="btn btn-default">Cancel</a>
           </form>
+          
           </div>
+          
           <!-- end content-->
         </div>
         <!--  end card  -->

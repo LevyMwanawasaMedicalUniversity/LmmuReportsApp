@@ -75,7 +75,7 @@
                     <td class="text-right">
                     <form method="POST" action="{{ route('users.resetUserPassword', $user->id) }}">
                         @csrf
-                        <button type="submit" rel="tooltip" class="btn btn-success btn-icon btn-sm " data-original-title="" title="">
+                        <button type="submit" rel="tooltip" class="btn btn-info btn-icon btn-sm " data-original-title="" title="">
                             <i class="now-ui-icons ui-1_lock-circle-open"></i>
                         </button>
                     </form>

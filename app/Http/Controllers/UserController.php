@@ -140,8 +140,7 @@ class UserController extends Controller
         
         $user->syncRoles($request->get('role'));
 
-        return redirect()->route('users.index')
-        ->with('success', 'Updated Successfully.');
+        return redirect()->back()->with('success', 'Updated Succesfully.');
     }
 
     public function resetPassword(Request $request, $userId)
@@ -166,8 +165,7 @@ class UserController extends Controller
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        return redirect()->route('users.index')
-        ->with('success', 'Updated Successfully.');
+        return redirect()->back()->with('success', 'Updated Succesfully.');
     }
 
     /**
