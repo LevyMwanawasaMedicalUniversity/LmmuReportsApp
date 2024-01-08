@@ -142,6 +142,77 @@ class DocketController extends Controller
     }
 
 
+    // public function uploadStudents(Request $request)
+    // {
+    //     set_time_limit(1200000);
+    //     // Validate the form data
+    //     $request->validate([
+    //         'excelFile' => 'required|mimes:xls,xlsx,csv',
+    //         'academicYear' => 'required',
+    //         'term' => 'required',
+    //         'status' => 'required',
+    //     ]);
+    
+    //     // Get the academic year and term from the form
+    //     $academicYear = $request->input('academicYear');
+    //     $term = $request->input('term');
+    //     $status = $request->input('status');
+    
+    //     // Process the uploaded file
+    //     if ($request->hasFile('excelFile')) {
+    //         $file = $request->file('excelFile');
+    
+    //         // Initialize the Box/Spout reader
+    //         $reader = ReaderEntityFactory::createXLSXReader();
+    //         $reader->open($file->getPathname());
+    
+    //         $isHeaderRow = true; // Flag to identify the header row
+    //         $studentNumbers = [];
+    
+    //         foreach ($reader->getSheetIterator() as $sheet) {
+    //             foreach ($sheet->getRowIterator() as $row) {
+    //                 // Skip the header row
+    //                 if ($isHeaderRow) {
+    //                     $isHeaderRow = false;
+    //                     continue;
+    //                 }
+    
+    //                 // Assuming the student number is in the first column (index 1)
+    //                 $studentNumber = $row->getCellAtIndex(0)->getValue();
+    
+    //                 $studentNumbers[] = $studentNumber;
+    //             }
+    //         }
+    
+    //         $reader->close();
+    
+    //         // Split studentNumbers into chunks
+    //         $chunkSize = 10; // Adjust this as needed
+    //         $chunks = array_chunk($studentNumbers, $chunkSize);
+    
+    //         DB::beginTransaction();
+    
+    //         try {
+    //             // Process each chunk
+    //             foreach ($chunks as $chunk) {
+    //                 $this->processStudentChunk($chunk, $academicYear, $term, $status);
+    //             }
+    
+    //             DB::commit();
+    
+    //             // Provide a success message
+    //             return redirect()->back()->with('success', 'Students imported successfully and the dockets have been sent.');
+    //         } catch (\Throwable $e) {
+    //             DB::rollback();
+    
+    //             // Handle any unexpected errors during import
+    //             return redirect()->back()->with('error', 'Failed to upload students: ' . $e->getMessage());
+    //         }
+    //     }
+    
+    //     // Handle errors or validation failures
+    //     return redirect()->back()->with('error', 'Failed to upload students.');
+    // }
     public function uploadStudents(Request $request)
     {
         set_time_limit(1200000);
@@ -152,23 +223,25 @@ class DocketController extends Controller
             'term' => 'required',
             'status' => 'required',
         ]);
-    
+
         // Get the academic year and term from the form
         $academicYear = $request->input('academicYear');
         $term = $request->input('term');
         $status = $request->input('status');
-    
+
+        // return $status;
+
         // Process the uploaded file
         if ($request->hasFile('excelFile')) {
             $file = $request->file('excelFile');
-    
+
             // Initialize the Box/Spout reader
             $reader = ReaderEntityFactory::createXLSXReader();
             $reader->open($file->getPathname());
-    
+
             $isHeaderRow = true; // Flag to identify the header row
             $studentNumbers = [];
-    
+
             foreach ($reader->getSheetIterator() as $sheet) {
                 foreach ($sheet->getRowIterator() as $row) {
                     // Skip the header row
@@ -176,40 +249,143 @@ class DocketController extends Controller
                         $isHeaderRow = false;
                         continue;
                     }
-    
+
                     // Assuming the student number is in the first column (index 1)
                     $studentNumber = $row->getCellAtIndex(0)->getValue();
-    
+
                     $studentNumbers[] = $studentNumber;
                 }
             }
-    
+
             $reader->close();
-    
+
             // Split studentNumbers into chunks
             $chunkSize = 10; // Adjust this as needed
             $chunks = array_chunk($studentNumbers, $chunkSize);
-    
-            DB::beginTransaction();
-    
+
             try {
                 // Process each chunk
                 foreach ($chunks as $chunk) {
-                    $this->processStudentChunk($chunk, $academicYear, $term, $status);
+                    // Check for duplicate students in a single database query
+                    $existingStudents = Student::whereIn('student_number', $chunk)
+                        ->where('academic_year', $academicYear)
+                        ->where('term', $term)
+                        ->pluck('student_number')
+                        ->toArray();
+                    if($status == 3){
+                        // Update existing students
+                        
+                        
+                        Student::whereIn('student_number', $existingStudents)
+                            ->update(['status' => 3]);
+
+                        foreach ($existingStudents as $studentId) {
+                            // $privateEmail = BasicInformation::find($studentId);
+                            // $email = $privateEmail->PrivateEmail;
+                        
+                            // // Check if the user exists before trying to update
+                            // $user = User::where('name', $studentId)->first();
+                            // if ($user) {
+                            //     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            //         // $email is a valid email address
+                            //         $user->update(['email' => $email]);
+                            //     } else {
+                            //         // $email is not a valid email address
+                            //         $user->update(['email' => $studentId . '@lmmu.ac.zm']);
+                            //     }
+                            // }
+                        
+                            // $user = User::where('name', $studentId)->first();
+
+                            // if ($user) {
+                                // Find or create the "Student" role
+                                // $studentRole = Role::firstOrCreate(['name' => 'Student']);
+
+                                // // Assign the "Student" role to the user
+                                // $user->assignRole($studentRole);
+
+                                // // Find or create the "Student" permission
+                                // $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+
+                                // // Assign the "Student" permission to the user
+                                // $user->givePermissionTo($studentPermission);
+
+                            $this->setAndUpdateCoursesForCurrentYear($studentId);
+                            // }
+                            // $this->sendTestEmail($studentId);
+                        }
+                    }                    // Insert new students
+                    $newStudents = array_diff($chunk, $existingStudents);
+                    $studentsToInsert = [];
+                    foreach ($newStudents as $studentNumber) {
+                        $studentsToInsert[] = [
+                            'student_number' => $studentNumber,
+                            'academic_year' => $academicYear,
+                            'term' => $term,
+                            'status' => $status
+                        ];
+                    }
+
+                    Student::insert($studentsToInsert);
+
+                    // Trigger your setAndSaveCourses function for new students
+                    foreach ($newStudents as $studentNumber) {
+                        if($status == 3){
+                            $this->setAndSaveCoursesForCurrentYear($studentNumber);
+                        }else{
+                            $this->setAndSaveCourses($studentNumber);
+                        }
+                                            
+
+                        $getNrc = BasicInformation::find($studentNumber);
+                        $nrc = trim($getNrc->GovernmentID); // Access GovernmentID property on the first student detail
+                        $email = $getNrc->PrivateEmail;
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $email = trim($getNrc->PrivateEmail);
+                        } else {
+                            $email = $studentNumber . '@lmmu.ac.zm';
+                        }
+
+                        $nrc = trim($getNrc->GovernmentID);
+
+                        $existingUser = User::where('email', $email)->first();
+                        if ($existingUser) {
+                            
+                            $email = $studentNumber . $email;
+                        }
+                        try{
+                            $student = User::create([
+                                'name' => $studentNumber,
+                                'email' => $email,
+                                'password' => '12345678',                                
+                            ]);
+                        }catch(Exception $e){
+                            continue;
+                        }
+                                                    
+                        // Create the "Student" role if it doesn't exist
+                        $studentRole = Role::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" role to the user
+                        $student->assignRole($studentRole); 
+                        
+                        // Find or create the "Student" permission
+                        $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+                        
+                        // Assign the "Student" permission to the user
+                        $student->givePermissionTo($studentPermission);
+                        $this->sendTestEmail($studentNumber); 
+                    }
                 }
-    
-                DB::commit();
-    
+
                 // Provide a success message
                 return redirect()->back()->with('success', 'Students imported successfully and the dockets have been sent.');
             } catch (\Throwable $e) {
-                DB::rollback();
-    
                 // Handle any unexpected errors during import
                 return redirect()->back()->with('error', 'Failed to upload students: ' . $e->getMessage());
             }
         }
-    
+
         // Handle errors or validation failures
         return redirect()->back()->with('error', 'Failed to upload students.');
     }
