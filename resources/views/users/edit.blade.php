@@ -99,7 +99,7 @@
           <div class="col-md-6 text-right">
               <form method="POST" action="{{ route('users.resetUserPassword', $user->id) }}">
                   @csrf
-                  <button type="submit" rel="tooltip" class="btn btn-success" data-original-title="" title="">
+                  <button type="submit" rel="tooltip" class="btn btn-info" data-original-title="" title="">
                       Reset Password
                   </button>
               </form>
