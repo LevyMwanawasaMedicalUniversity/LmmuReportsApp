@@ -312,7 +312,7 @@ class DocketController extends Controller
 
                             $this->setAndUpdateCoursesForCurrentYear($studentId);
                             // }
-                            // $this->sendTestEmail($studentId);
+                             $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
