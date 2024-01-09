@@ -773,6 +773,25 @@ class DocketController extends Controller
             Courses::insert($coursesToInsert);
         }
     }
+
+    public function resetStudent($studentId){
+        $user = User::where('name', $studentId)->first();
+        if ($user && $user->hasRole('Student')) {
+            $username = $user->name;
+            try {
+                $this->sendTestEmail($username);
+                $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                $user->update([
+                    'email' => $privateEmail,
+                    'password' => Hash::make('12345678')
+                ]);
+            } catch (\Exception $e) {
+                // Log the exception or handle it as needed
+            }
+        }
+        return redirect()->back()->with('success', 'Password reset successfully.');
+    }
+
     public function showStudent($studentId){
         // try{
             

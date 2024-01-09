@@ -382,10 +382,10 @@ class Controller extends BaseController
 
     public function sendTestEmail($studentID) {
         $studentResults = $this->getStudentResults($studentID);
-        $fileName = $studentID . '.pdf';
         $student = Student::where('student_number', $studentID)->first();
         $status = $student->status;
         $view = '';
+        $pdfPath = null;
     
         switch ($status) {
             case 1:
@@ -394,28 +394,30 @@ class Controller extends BaseController
                 break;
             case 2:
                 $courses = $this->getStudentCourses($studentID);
-                $view = 'emailsNmcz.pdf';
+                $view = 'emails.pdf';
                 break;
             case 3:
                 $courses = Courses::where('Student', $studentID)->get();
                 $view = 'emails.pdfSudAndDef';
+                $pdf = PDF::loadView($view, compact('studentResults', 'courses'));
+                $fileName = $studentID . '.pdf';
+                $pdfPath = storage_path('app/' . $fileName);
+                $pdf->save($pdfPath);
                 break;
         }
-    
-        $pdf = PDF::loadView($view, compact('studentResults', 'courses'));
-        $pdfPath = storage_path('app/' . $fileName);
-        $pdf->save($pdfPath);
     
         $privateEmail = BasicInformation::find($studentID);
         $email = trim($privateEmail->PrivateEmail);
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
     
-        $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($pdfPath,$studentID);
+        $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($studentID);
     
         // Dispatch the email sending job to the queue
         dispatch(new SendEmailJob($sendingEmail, $mailClass));
     
-        unlink($pdfPath);
+        if ($pdfPath) {
+            unlink($pdfPath);
+        }
     
         return "Test email sent successfully!";
     }

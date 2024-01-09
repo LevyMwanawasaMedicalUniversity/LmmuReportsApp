@@ -94,12 +94,9 @@
                         <thead class="text-primary">
                             <tr>
                                 <th>First Name</th>
-                                <th>Middle Name</th>
                                 <th>Surname</th>
-                                <th>Balance</th>
-                                <th>Gender</th>
                                 <th>Student Number</th>
-                                <th>NRC</th>
+                                <th>Email</th>
                                 <th>Programme</th>
                                 <th>Study Mode</th>
                                 <th>Year Of Study</th>
@@ -111,16 +108,18 @@
                             @foreach($results as $result)
                             <tr>
                                 <td>{{$result->FirstName}}</td>
-                                <td>{{$result->MiddleName}}</td>
                                 <td>{{$result->Surname}}</td>
-                                <td>{{$result->Amount}}</td>
-                                <td>{{$result->Sex}}</td>
                                 <td>{{$result->StudentID}}</td>
-                                <td>{{$result->GovernmentID}}</td>
+                                <td>{{$result->PrivateEmail}}</td>
                                 <td>{{$result->Name}}</td>
                                 <td>{{$result->StudyType}}</td>
                                 <td>{{$result->YearOfStudy}}</td>
-                                <td class="text-end"><a href="{{route('docket.showStudentNmcz',$result->StudentID)}}">View</a></td>
+                                <td class="text-end">
+                                    <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+                                        <a href="{{route('docket.resetStudent',$result->StudentID)}}" class="btn btn-info">Reset</a>
+                                        <a href="{{route('docket.showStudent',$result->StudentID)}}" class="btn btn-primary">View</a>
+                                    </div>
+                                </td>
                                 <!-- Add other table cells for additional properties -->
                             </tr>
                             

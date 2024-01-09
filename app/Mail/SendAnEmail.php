@@ -20,12 +20,12 @@ class SendAnEmail extends Mailable
      * 
      */
 
-     public $pdfPath;
+    //  public $pdfPath;
      public $studentId;
 
-     public function __construct($pdfPath, $studentId)
+     public function __construct($studentId)
     {
-        $this->pdfPath = $pdfPath;
+        
         $this->studentId = $studentId;
     }
     public function build()
@@ -34,12 +34,9 @@ class SendAnEmail extends Mailable
         
         return $this
             ->from('registrar@lmmu.ac.zm')
-            ->subject('Exam Docket For Unregistered Student')
-            ->view('emails.test', compact('studentDetails'))
-            ->attach($this->pdfPath, [
-                'as' => 'exam_docket.pdf',
-                'mime' => 'application/pdf'
-            ]);
+            ->subject('Password Reset Notification')
+            ->view('emails.test', compact('studentDetails'));
+        
     }
 
     

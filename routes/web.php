@@ -85,6 +85,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail', 'DocketController@updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail')->name('docket.updateNameInUsersTableToMatchStudentIdCollectedFromBasicInformationUsingEmail');
                 Route::get('/exportCoursesToPdfWithStudentsTakingThem/{courseID}', 'DocketController@exportCoursesToPdfWithStudentsTakingThem')->name('docket.exportCoursesToPdfWithStudentsTakingThem');
                 Route::get('bulkExportAllCoursesToPdfWithStudentsTakingThem', 'DocketController@bulkExportAllCoursesToPdfWithStudentsTakingThem')->name('docket.bulkExportAllCoursesToPdfWithStudentsTakingThem');
+                Route::get('resetStudent/{studentNumber}', 'DocketController@resetStudent')->name('docket.resetStudent');
+                
             });
 
         });

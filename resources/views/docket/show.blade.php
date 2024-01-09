@@ -159,6 +159,7 @@
                                 Kindly cross-check your courses on this slip against the separate examination timetable for the EXACT date and time of the examination.<br>
                                 VERY IMPORTANT: Admission into the Examination Hall will be STRICTLY by STUDENT IDENTITY CARD, NRC OR PASSPORT, this EXAMINATION CONFIRMATION SLIP, and clearance of all OUTSTANDING TUITION FEES.<br><center>
                                 <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 150px; height: 40px;" size="100" onclick="printContent()">Print Docket</button>
+                                <a href="{{route('docket.resetStudent',$studentResults->StudentID)}}" style="padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 150px; height: 40px;" size="100" class="btn btn-info no-print" ><h6>Reset</h6></a>
                             </div>
                         </div>
                     </div>
