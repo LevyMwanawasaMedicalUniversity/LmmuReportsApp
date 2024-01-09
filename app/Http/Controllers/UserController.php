@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Illuminate\Validation\Rules;
 use App\Http\Requests\ProfileRequest;
+use App\Models\BasicInformation;
+use Hamcrest\Type\IsNumeric;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -24,6 +26,22 @@ class UserController extends Controller
         $users = User::latest();
 
         if ($request->has('name')) {
+
+            if(is_numeric($request->input('name'))){
+                
+                $studentNumber = $request->input('name');
+                try{
+                    $getPrivateEmail = BasicInformation::find($studentNumber);
+                    $privateEmail = $getPrivateEmail->PrivateEmail;
+                    $student = User::where('name', $studentNumber)->first();
+
+                    $student->update([
+                        'email' => $privateEmail                            
+                    ]);
+                }catch(\Exception $e){
+                    // Ignore the exception and continue
+                }
+            }            
             $name = $request->input('name');
             if (!empty($name)) {
                 $users->where('name', 'like', '%' . $name . '%');
@@ -47,10 +65,19 @@ class UserController extends Controller
     public function resetUserPassword($userId)
     {
         $user = User::find($userId);
-        $defaultPassword = '12345678';
-        $user->password = Hash::make($defaultPassword);
-        $user->save();
-
+        if ($user && $user->hasRole('Student')) {
+            $username = $user->name;
+            try {
+                $this->sendTestEmail($username);
+                $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                $user->update([
+                    'email' => $privateEmail,
+                    'password' => Hash::make('12345678')
+                ]);
+            } catch (\Exception $e) {
+                // Log the exception or handle it as needed
+            }
+        }
         return redirect()->back()->with('success', 'Password reset successfully.');
     }
 
