@@ -795,7 +795,7 @@ class DocketController extends Controller
         if($status == 3){
             $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
             $studentCoursesUpdated = Student::where('student_number', $studentId)->where('course_updated', 1)->exists();
-            if (!$studentExistsInStudentsTable || !$studentCoursesUpdated ) {
+            if (!$studentExistsInStudentsTable ) {
                 $this->setAndUpdateCoursesForCurrentYear($studentId); 
             }           
         }else{            
