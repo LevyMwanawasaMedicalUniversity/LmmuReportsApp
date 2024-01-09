@@ -794,7 +794,7 @@ class DocketController extends Controller
         
         if($status == 3){
             $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
-            $studentCoursesUpdated = Student::where('student_number', $studentId)->whereNotNull('course_updated')->exists();
+            $studentCoursesUpdated = Student::where('student_number', $studentId)->where('course_updated', 1)->exists();
             if (!$studentExistsInStudentsTable || !$studentCoursesUpdated ) {
                 $this->setAndUpdateCoursesForCurrentYear($studentId); 
             }           
@@ -933,11 +933,12 @@ class DocketController extends Controller
                             'Program' => $data['Program'],
                             'Grade' => null // You can set a default grade here if needed
                         ]);
+                        Student::where('student_number', $studentId)->update(['course_updated' => 1]);
                     } else {
                         return back()->with('error', 'Invalid data format.');
                     }
                 }
-                Student::where('student_number', $studentId)->update(['course_updated' => 1]);
+                
             }
     
             
