@@ -48,6 +48,7 @@
                       <span class="text-danger text-left">{{ $errors->first('name') }}</span>
                   @endif
               </div>
+              @if(!$user->hasRole("Student"))
               <div class="mb-3">
                   <label for="email" class="form-label">Email</label>
                   <input value="{{ $user->email }}"
@@ -59,6 +60,7 @@
                       <span class="text-danger text-left">{{ $errors->first('email') }}</span>
                   @endif
               </div>
+              @endif
               <div class="mb-3">
                   <label for="role" class="form-label">Role</label>
                   <select class="form-control" name="role" required>

@@ -15,25 +15,27 @@
           <div class="card-header">
             <h5 class="title">{{__(" Edit Profile")}}</h5>
           </div>
+          @if(!Auth::user()->hasRole("Student"))
           <div class="card-body">
             <form method="post" action="{{ route('profile.update') }}" autocomplete="off"
             enctype="multipart/form-data">
               @csrf
               @method('put')
               @include('alerts.success')
+              
               <div class="row">
               </div>
-                @if(!auth()->user()->hasRole('Student'))
-                    <div class="row">
-                        <div class="col-md-7 pr-1">
-                            <div class="form-group">
-                                <label>{{__(" Name")}}</label>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', auth()->user()->name) }}">
-                                @include('alerts.feedback', ['field' => 'name'])
-                            </div>
-                        </div>
-                    </div>
-                @endif
+              
+                  <div class="row">
+                      <div class="col-md-7 pr-1">
+                          <div class="form-group">
+                              <label>{{__(" Name")}}</label>
+                              <input type="text" name="name" class="form-control" value="{{ old('name', auth()->user()->name) }}">
+                              @include('alerts.feedback', ['field' => 'name'])
+                          </div>
+                      </div>
+                  </div>
+                
                 <div class="row">
                   <div class="col-md-7 pr-1">
                     <div class="form-group">
@@ -43,12 +45,14 @@
                     </div>
                   </div>
                 </div>
+                
               <div class="card-footer ">
                 <button type="submit" class="btn btn-primary btn-round">{{__('Save')}}</button>
               </div>
               <hr class="half-rule"/>
             </form>
           </div>
+          @endif
           <div class="card-header">
             <h5 class="title">{{__("Password")}}</h5>
             <p>The new password must contain at least one uppercase letter, one lowercase letter, one digit (0-9), and one special character (e.g., !@#$%^&*).</p>

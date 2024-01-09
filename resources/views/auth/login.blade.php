@@ -63,7 +63,7 @@
                 @endif
                 </div>
                 <div class="card-footer ">
-                <button  type = "submit" class="btn btn-primary btn-round btn-lg btn-block mb-3">{{ __('Get Started') }}</button>
+                <button  type = "submit" class="btn btn-primary btn-round btn-lg btn-block mb-3">{{ __('Login') }}</button>
                 {{-- <div class="pull-left">
                     <h6>
                     <a href="{{ route('register') }}" class="link footer-link">{{ __('Create Account') }}</a>
@@ -71,7 +71,7 @@
                 </div> --}}
                 <div class="text-center">
                     <h6>
-                        <a href="{{ route('password.request') }}" class="link footer-link">{{ __('Forgot Password?') }}</a>
+                        <a href="{{ route('password.request') }}" class="link footer-link"><p>Can't login? Click here to reset your Password</p></a>
                     </h6>                
                 </div>
                 </div>
