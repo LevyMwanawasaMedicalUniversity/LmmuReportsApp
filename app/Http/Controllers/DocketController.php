@@ -781,6 +781,9 @@ class DocketController extends Controller
             try {
                 $this->sendTestEmail($username);
                 $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
+                    $privateEmail = $username . '@lmmu.ac.zm';
+                }
                 $user->update([
                     'email' => $privateEmail,
                     'password' => Hash::make('12345678')
