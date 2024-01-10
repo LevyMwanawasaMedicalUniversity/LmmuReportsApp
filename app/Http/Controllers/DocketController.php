@@ -869,6 +869,7 @@ class DocketController extends Controller
         if(is_numeric($studentId)){
             $student = Student::query()
                             ->where('student_number','=', $studentId)
+                            ->where('status','=', 3)
                             ->first();
         }else{
             $student = []; 
