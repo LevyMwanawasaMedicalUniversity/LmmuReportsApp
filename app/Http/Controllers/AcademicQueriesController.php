@@ -67,7 +67,13 @@ class AcademicQueriesController extends Controller
             $results = $this->getAllProgrammesPerSchool($schoolName)->paginate('20');
         }        
         return view('academics.reports.viewAllProgrammesPerSchool',compact('results','schoolName'));
-    } 
+    }
+    
+    public function examMdificationAuditTrail(Request $request){
+        $academicYear = $request->input('academicYear');
+        $results = $this->getExamModificationAuditTrail()->get();
+        return view('academics.reports.examModificationAuditTrail',compact('results'));
+    }
 
     
 

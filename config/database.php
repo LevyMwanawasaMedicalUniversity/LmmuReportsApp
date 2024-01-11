@@ -56,16 +56,16 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
-        // 'sage_database' => [
-        //     'driver' => 'sqlsrv',
-        //     'host' =>  '192.168.20.145',
-        //     'port' => '1433',
-        //     'database' => 'LMMU_Live',
-        //     'username' => 'lmmureports',
-        //     'password' => '#R3p0rt5@DevBoi!/2580=F!naNc3!le',
-        //     'charset' => 'utf8',
-        //     'collation' => 'utf8_unicode_ci',
-        // ],
+        'sage_database' => [
+            'driver' => 'sqlsrv',
+            'host' =>  '192.168.20.145',
+            'port' => '1433',
+            'database' => 'LMMU_Live',
+            'username' => 'lmmureports',
+            'password' => '#R3p0rt5@DevBoi!/2580=F!naNc3!le',
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+        ],
 
         'mysql' => [
             'driver' => 'mysql',

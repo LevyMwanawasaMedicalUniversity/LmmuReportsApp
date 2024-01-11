@@ -30,21 +30,25 @@ class UserController extends Controller
             if(is_numeric($request->input('name'))){
                 
                 $studentNumber = $request->input('name');
-                try{
-                    $getPrivateEmail = BasicInformation::find($studentNumber);
-                    $privateEmail = $getPrivateEmail->PrivateEmail;
-                    if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
-                        $privateEmail = $studentNumber . '@lmmu.ac.zm';
-                    }
-                    $student = User::where('name', $studentNumber)->first();
+                $ifUserExists = User::where('name', $studentNumber)->first();
+                if($ifUserExists){
+                    try{
+                        $getPrivateEmail = BasicInformation::find($studentNumber);
+                        $privateEmail = trim($getPrivateEmail->PrivateEmail);
+                        if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
+                            $privateEmail = $studentNumber . '@lmmu.ac.zm';
+                        }
+                        $student = User::where('name', $studentNumber)->first();
 
-                    $student->update([
-                        'email' => $privateEmail                            
-                    ]);
-                }catch(\Exception $e){
-                    // Ignore the exception and continue
-                }
-            }            
+                        $student->update([
+                            'email' => $privateEmail                            
+                        ]);
+                    }catch(\Exception $e){
+                        // Ignore the exception and continue
+                    }
+                }            
+            }
+
             $name = $request->input('name');
             if (!empty($name)) {
                 $users->where('name', 'like', '%' . $name . '%');
@@ -72,7 +76,7 @@ class UserController extends Controller
             $username = $user->name;
             try {
                 $this->sendTestEmail($username);
-                $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                $privateEmail = trim(BasicInformation::find($username)->PrivateEmail);
                 if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
                     $privateEmail = $username . '@lmmu.ac.zm';
                 }

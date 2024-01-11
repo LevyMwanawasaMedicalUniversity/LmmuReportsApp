@@ -13,6 +13,7 @@ use App\Models\Courses;
 use App\Models\EduroleCourses;
 use App\Models\Grade;
 use App\Models\Grades;
+use App\Models\GradesModified;
 use App\Models\SageClient;
 use App\Models\SagePostAR;
 use App\Models\Schools;
@@ -162,6 +163,39 @@ class Controller extends BaseController
         $results = $this->queryCoursesWithResults();
         return $results;
     }
+
+    public function getExamModificationAuditTrail(){
+        $results = $this->queryExamModificationAuditTrail();
+        return $results;
+    }
+
+    private function queryExamModificationAuditTrail(){
+        $gradesModified = GradesModified::select([
+                'grade-modified.ID',
+                'grade-modified.GradeID',
+                'grade-modified.StudentID',
+                'grade-modified.CID',
+                'grade-modified.CA',
+                'grade-modified.Exam',
+                'grade-modified.Total',
+                'grade-modified.Grade',
+                'grade-modified.DateTime',
+                'bi.FirstName as SubmittedByFirstName',
+                'bi.Surname as SubmittedBySurname',
+                'bi2.FirstName as ReviewedByFirstName',
+                'bi2.Surname as ReviewedBySurname',
+                'bi3.FirstName as ApprovedByFirstName',
+                'bi3.Surname as ApprovedBySurname',
+                'grade-modified.Type'
+            ])
+            ->join('basic-information as bi', 'bi.ID', '=', 'grade-modified.SubmittedBy')
+            ->join('basic-information as bi2', 'bi2.ID', '=', 'grade-modified.ReviewedBy')
+            ->join('basic-information as bi3', 'bi3.ID', '=', 'grade-modified.ApprovedBy')
+            ->orderBy('grade-modified.DateTime', 'desc');
+
+        return $gradesModified;
+    }
+    
     private function queryCoursesWithResults(){
         $results = SisCourses::select(
             'courses.Name AS CourseCode',
@@ -816,6 +850,115 @@ class Controller extends BaseController
         return $results;
     }
 
+    private function querySumOfAllTransactionsOfEachStudent()
+    {
+        $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
+            ->where('Description', 'like', '%-%-%')
+            ->where('Debit', '>', 0)
+            ->groupBy('AccountLink');
+
+        $academicYear = '2023';
+
+        $studentInformation = Schools::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.Sex',
+            'student-study-link.StudentID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            'programmes.ProgramName AS ProgrammeCode',
+            'study.Name AS StudyName',
+            'schools.Description AS School',
+            'basic-information.StudyType',
+            DB::raw("CASE
+                WHEN `course-electives`.StudentID IS NOT NULL THEN 'REGISTERED'
+                ELSE 'NO REGISTRATION'
+            END AS RegistrationStatus"),
+            DB::raw("CASE 
+                WHEN programmes.ProgramName LIKE '%1' THEN 'YEAR 1'
+                WHEN programmes.ProgramName LIKE '%2' THEN 'YEAR 2'
+                WHEN programmes.ProgramName LIKE '%3' THEN 'YEAR 3'
+                WHEN programmes.ProgramName LIKE '%4' THEN 'YEAR 4'
+                WHEN programmes.ProgramName LIKE '%5' THEN 'YEAR 5'
+                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'
+                WHEN programmes.ProgramName IS NULL THEN 'NO REGISTRATION'
+                ELSE 'NO REGISTRATION'
+            END AS YearOfStudy")
+        )
+        ->leftJoin('study', 'schools.ID', '=', 'study.ParentID')
+        ->leftJoin('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+        ->leftJoin('course-electives', function($join) use ($academicYear) {
+            $join->on('student-study-link.StudentID', '=', 'course-electives.StudentID')
+                ->where('course-electives.Year', '=', $academicYear);
+        })
+        ->leftJoin('courses', 'course-electives.CourseID', '=', 'courses.ID')
+        ->leftJoin('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->leftJoin('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
+        ->where(function ($query) {
+            $query->where('basic-information.StudyType', '=', 'Fulltime')
+                ->orWhere('basic-information.StudyType', '=', 'Distance');
+        })
+        ->where('basic-information.StudyType', '!=', 'Staff')
+        ->groupBy('student-study-link.StudentID')
+        ->get();
+
+        $studentPaymentInformation = SageClient::select(
+            'DCLink',
+            'Account',
+            'Name',
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2024'),            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.TxDate < \'2023-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2023'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0                
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
+            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2024 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
+            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate')
+        )
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->leftJoinSub($latestInvoiceDates, 'lid', function ($join) {
+            $join->on('pa.AccountLink', '=', 'lid.AccountLink');
+        })
+        ->groupBy('DCLink', 'Account', 'Name', 'lid.LatestTxDate', DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'), DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END'))
+        ->get();
+
+        $studentInformation = $studentInformation->toArray();
+        $studentPaymentInformation = $studentPaymentInformation->toArray();
+
+        $mergedResults = [];
+
+        foreach ($studentInformation as $student) {
+            $mergedResult = $student;
+
+            // Find the corresponding payment information for this student
+            foreach ($studentPaymentInformation as $paymentInformation) {
+                if ($paymentInformation['Account'] == $student['StudentID']) {
+                    // Merge the payment information into the result
+                    $mergedResult = array_merge($mergedResult, $paymentInformation);
+                    break;
+                }
+            }
+
+            $mergedResults[] = $mergedResult;
+        }
+
+        return $mergedResults;
+    }
+
+
     // private function querySumOfAllTransactionsOfEachStudent(){
 
     //     // Perform the first query using get() to get a collection
@@ -832,8 +975,5 @@ class Controller extends BaseController
     //     return $result;
     // }
 
-    public function importPayments(){
-        $payments = SagePostAR::get();
-        
-    }
+    
 }

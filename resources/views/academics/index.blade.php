@@ -27,6 +27,10 @@
                     </thead>
                     <tbody>
                       <tr>
+                        <td><a href="{{ route('examMdificationAuditTrail') }}">Grades modification Audit Trail</a></td>
+                        <td>View Grades Modified And The Details of The Modification</td>
+                      </tr>
+                      <tr>
                         <td><a href="{{ route('viewAllCoursesWithResults') }}">Course With Results 2023</a></td>
                         <td>View All Courses With 2023 Results</td>
                       </tr>

@@ -49,6 +49,13 @@
                 </div>
             </div>
         </form> --}} -->
+        <!-- <div class="row">
+            <div class="col-md-6">
+                @if(!empty($results))
+                <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('exportAllPaymentInformation') }}">Export Data</a>
+                @endif
+            </div>
+        </div> -->
         </div>
             @if(!empty($results))
             
@@ -58,19 +65,58 @@
                     <table class="table">
                         <thead class="text-primary">
                         <tr>
-                            
+                            <th>First Name</th>
+                            <th>Middle Name</th>
+                            <th>Surname</th>
+                            <th>Sex</th>
+                            <th>Student ID</th>
+                            <th>Government ID</th>
+                            <th>Email</th>
+                            <th>Mobile Phone</th>
+                            <th>Programme Code</th>
+                            <th>Study Name</th>
+                            <th>School</th>
+                            <th>Study Type</th>
+                            <th>Registration Status</th>
+                            <th>Year Of Study</th>                            
+                            <th>Total Payments</th>
+                            <th>Total Payments 2023</th>
+                            <th>Total Payments 2024</th>
+                            <th>2023 Invoice Status</th>
+                            <th>2024 Invoice Status</th>
+                            <th>Latest Invoice Date</th>                         
                         </tr>
                         </thead>
                         <tbody>
                         @foreach($results as $result)
                         <tr>
-                            
+                            <td>{{ $result['FirstName'] }}</td>
+                            <td>{{ $result['MiddleName'] }}</td>
+                            <td>{{ $result['Surname'] }}</td>
+                            <td>{{ $result['Sex'] }}</td>
+                            <td>{{ $result['StudentID'] }}</td>
+                            <td>{{ $result['GovernmentID'] }}</td>
+                            <td>{{ $result['PrivateEmail'] }}</td>
+                            <td>{{ $result['MobilePhone'] }}</td>
+                            <td>{{ $result['ProgrammeCode'] }}</td>
+                            <td>{{ $result['StudyName'] }}</td>
+                            <td>{{ $result['School'] }}</td>
+                            <td>{{ $result['StudyType'] }}</td>
+                            <td>{{ $result['RegistrationStatus'] }}</td>
+                            <td>{{ $result['YearOfStudy'] }}</td>
+                            <td>{{ isset($result['TotalPayments']) ? $result['TotalPayments'] : '' }}</td>
+                            <td>{{ isset($result['TotalPayment2023']) ? $result['TotalPayment2023'] : '' }}</td>
+                            <td>{{ isset($result['TotalPayment2024']) ? $result['TotalPayment2024'] : '' }}</td>
+                            <td>{{ isset($result['2023InvoiceStatus']) ? $result['2023InvoiceStatus'] : '' }}</td>
+                            <td>{{ isset($result['2024InvoiceStatus']) ? $result['2024InvoiceStatus'] : '' }}</td>
+                            <td>{{ isset($result['LatestInvoiceDate']) ? $result['LatestInvoiceDate'] : '' }}</td>    
+                                                    
                         </tr>
                         @endforeach
                         </tbody>
                     </table>
                 </div>
-                
+                {{ $results->links('pagination::bootstrap-4') }}
             </div>
             
             @else
