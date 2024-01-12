@@ -850,6 +850,77 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function exportDataFromArray($headers, $rowData, $results, $filename)
+    {
+        $filePath = storage_path('app/' . $filename);
+
+        $writer = WriterEntityFactory::createXLSXWriter();
+        $writer->openToFile($filePath);
+
+        $headerRow = WriterEntityFactory::createRowFromArray($headers);
+        $writer->addRow($headerRow);
+
+        foreach ($results as $result) {
+            $data = [];
+            foreach ($rowData as $field) {
+                // Check if the field exists in the result array
+                if (isset($result[$field])) {
+                    $data[] = $result[$field];
+                } else {
+                    $data[] = '';
+                }
+            }
+
+            $dataRow = WriterEntityFactory::createRowFromArray($data);
+            $writer->addRow($dataRow);
+        }
+
+        $writer->close();
+
+        return response()->download($filePath, $filename . '.xlsx')->deleteFileAfterSend();
+    }
+
+    public function getAllCoursesAttachedToProgramme(){
+        $results = $this->queryAllCoursesAttachedToProgramme();
+        return $results;
+    }
+
+    private function queryAllCoursesAttachedToProgramme(){
+        $results = SisCourses::select(
+            'courses.ID',
+            'courses.Name as CourseCode',
+            'courses.CourseDescription as CourseName',
+            'study.Name as Programme',
+            'schools.Name as School',
+            'programmes.ProgramName as CodeRegisteredUnder',
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                END AS YearOfStudy
+            "),
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%-DE-%' THEN 'DISTANCE'
+                    WHEN programmes.ProgramName LIKE '%-FT-%' THEN 'FULLTIME'
+                END as StudyMode
+            ")
+        )
+        ->join('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->join('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->join('study-program-link', 'programmes.ID', '=', 'study-program-link.ProgramID')
+        ->join('study', 'study-program-link.StudyID', '=', 'study.ID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID');
+
+        return $results;
+    }
+
     private function querySumOfAllTransactionsOfEachStudent()
     {
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
@@ -912,12 +983,18 @@ class Controller extends BaseController
             'Name',
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.TxDate > \'2023-01-01\' THEN 0
+                ELSE pa.Credit 
+                END) AS TotalPaymentBefore2023'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),            
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0 
-                WHEN pa.TxDate < \'2023-01-01\' THEN 0 
+                WHEN pa.TxDate < \'2023-01-01\' THEN 0
+                WHEN pa.TxDate > \'2023-12-31\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2023'),
             DB::raw('SUM(CASE 

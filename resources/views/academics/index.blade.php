@@ -31,6 +31,10 @@
                         <td>View Grades Modified And The Details of The Modification</td>
                       </tr>
                       <tr>
+                        <td><a href="{{ route('viewAllCoursesAttachedToProgramme') }}">View All Courses Mapped To Programmes</a></td>
+                        <td>View all courses on Edurole attached to respective programmes, year of study and study mode</td>
+                      </tr>                      
+                      <tr>
                         <td><a href="{{ route('viewAllCoursesWithResults') }}">Course With Results 2023</a></td>
                         <td>View All Courses With 2023 Results</td>
                       </tr>

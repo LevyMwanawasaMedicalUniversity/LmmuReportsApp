@@ -121,7 +121,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::GET('/viewRegisteredAndUnregisteredPerYear',  'AcademicQueriesController@viewRegisteredAndUnregisteredPerYear')->name('viewRegisteredAndUnregisteredPerYear');
                 Route::GET('/exportRegisteredAndUnregisteredPerYear/{academicYear}',  'AcademicQueriesController@exportRegisteredAndUnregisteredPerYear')->name('exportRegisteredAndUnregisteredPerYear');
 
-
+                Route::GET('/viewAllCoursesAttachedToProgramme',  'AcademicQueriesController@viewAllCoursesAttachedToProgramme')->name('viewAllCoursesAttachedToProgramme');
+                Route::GET('/exportAllCoursesAttachedToProgramme',  'AcademicQueriesController@exportAllCoursesAttachedToProgramme')->name('exportAllCoursesAttachedToProgramme');
                 
                 Route::GET('/viewUnregisteredStudentsEligibleForRegistration',  'AcademicQueriesController@viewUnregisteredStudentsEligibleForRegistration')->name('viewUnregisteredStudentsEligibleForRegistration');
 
@@ -140,6 +141,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/index', 'FinanceQueriesController@index')->name('finance.index');
 
                 Route::get('/viewSumOfAllTransactionsOfEachStudent', 'FinanceQueriesController@viewSumOfAllTransactionsOfEachStudent')->name('viewSumOfAllTransactionsOfEachStudent');
+                Route::get('/exportAllPaymentInformation', 'FinanceQueriesController@exportAllPaymentInformation')->name('exportAllPaymentInformation');
+                
             });
         });
 

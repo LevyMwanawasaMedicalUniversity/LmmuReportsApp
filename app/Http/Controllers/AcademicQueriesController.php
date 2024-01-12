@@ -53,6 +53,39 @@ class AcademicQueriesController extends Controller
         $results = $this->getCoursesWithResults()->paginate('20');
         return view('academics.reports.viewAllCoursesWithResults',compact('results'));
     }
+
+    public function viewAllCoursesAttachedToProgramme(){
+        $results = $this->getAllCoursesAttachedToProgramme()->paginate('20');
+        return view('academics.reports.viewAllCoursesAttachedToProgramme',compact('results'));
+    }
+
+    public function exportAllCoursesAttachedToProgramme(){
+
+        $headers = [
+            'Course Code',
+            'Course Name',
+            'Programme',
+            'School',            
+            'Code Registered Under',
+            'Year Of Study',
+            'Study Mode'
+        ];
+        
+        $rowData = [
+            'CourseCode',
+            'CourseName',
+            'Programme',
+            'School',
+            'CodeRegisteredUnder',                        
+            'YearOfStudy',
+            'StudyMode'
+        ];
+        
+        $results = $this->getAllCoursesAttachedToProgramme()->get();        
+        $filename = 'AllCoursesAttachedToProgramme';
+        
+        return $this->exportData($headers, $rowData, $results, $filename);
+    }
     
 
     //All programmes in a specific school

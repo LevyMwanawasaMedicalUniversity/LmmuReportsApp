@@ -34,4 +34,62 @@ class FinanceQueriesController extends Controller
         // return $results;
         return view('finance.reports.viewSumOfAllTransactionsOfEachStudent',compact('results'));
     }
+
+
+    public function exportAllPaymentInformation(){
+
+        $headers = [
+            'First Name',
+            'Middle Name',
+            'Surname',
+            'Sex',
+            'Student ID',
+            'Government ID',
+            'Email',
+            'Mobile Number',
+            'Programme Code',
+            'Study Name',
+            'School',
+            'Study Type',
+            'Registration Status',
+            'Year Of Study',
+            'Total Payments',
+            'Total Payments Before 2023',
+            'Total Payments 2023',
+            'Total Payments 2024',
+            '2023 Invoice Status',
+            '2024 Invoice Status',
+            'Latest Invoice Date',
+            
+        ];
+        
+        $rowData = [
+            'FirstName',
+            'MiddleName',
+            'Surname',
+            'Sex',
+            'StudentID',
+            'GovernmentID',
+            'PrivateEmail',
+            'MobilePhone',
+            'ProgrammeCode',
+            'StudyName',
+            'School',
+            'StudyType',
+            'RegistrationStatus',
+            'YearOfStudy',
+            'TotalPayments',
+            'TotalPaymentBefore2023',
+            'TotalPayment2023',
+            'TotalPayment2024',
+            '2023InvoiceStatus',
+            '2024InvoiceStatus',
+            'LatestInvoiceDate'
+        ];
+        
+        $results = $this->getSumOfAllTransactionsOfEachStudent();        
+        $filename = 'SumOfAllTransactionsOfEachStudent';
+        
+        return $this->exportDataFromArray($headers, $rowData, $results, $filename);
+    }
 }
