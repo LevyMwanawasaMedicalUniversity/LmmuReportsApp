@@ -22,8 +22,8 @@ SELECT
         ELSE 'NO Year Reported'
     END AS "Year Reported",
     CASE 
-        WHEN g.StudentNo IS NOT NULL AND g.AcademicYear = 2022 THEN 'HAS 2022'
-        ELSE 'NO 2022'
+        WHEN g.StudentNo IS NOT NULL AND g.AcademicYear = 2023 THEN 'HAS 2022'
+        ELSE 'NO 2023'
     END AS "2022 RESULT STATUS"
 FROM
     edurole.`basic-information` bi
