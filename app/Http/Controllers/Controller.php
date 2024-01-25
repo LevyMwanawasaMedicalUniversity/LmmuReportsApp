@@ -885,6 +885,46 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudentsUnderNaturalScienceSchool($academicYear,$courseCode){
+        $results = $this->queryStudentsUnderNaturalScienceSchool($academicYear,$courseCode);
+        return $results;
+    }
+
+    private function queryStudentsUnderNaturalScienceSchool($academicYear, $courseCode){
+
+        if(empty($courseCode)){
+            $courseCode = ['PHY101','MAT101','BIO101','CHM101'];
+        } else {
+            $courseCode = [$courseCode];
+        }
+        $results = Study::select(
+            'basic-information.FirstName',
+            'basic-information.Surname',
+            'basic-information.ID',
+            'study.Name as Programme Name',
+            'programmes.ProgramName',
+            'study.ShortName as Programme Code',
+            'study.StudyType as Mode Of Study',
+            'schools.Name as School',
+            'basic-information.FirstName as First Name',
+            'basic-information.Surname as Last Name'
+        )
+        ->join('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+        ->join('basic-information', 'basic-information.ID', '=', 'student-study-link.StudentID')
+        ->join('course-electives', function ($join) use ($academicYear) {
+            $join->on('course-electives.StudentID', '=', 'basic-information.ID')
+                 ->where('course-electives.Year', '=', $academicYear);
+        })
+        ->join('program-course-link', 'program-course-link.CourseID', '=', 'course-electives.CourseID')
+        ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')
+        ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID')
+        ->whereIn('courses.Name', $courseCode)
+        ->whereRaw('LENGTH(basic-information.ID) >= 7')
+        ->groupBy('basic-information.ID');
+    
+        return $results;
+    }
     private function queryAllCoursesAttachedToProgramme(){
         $results = SisCourses::select(
             'courses.ID',

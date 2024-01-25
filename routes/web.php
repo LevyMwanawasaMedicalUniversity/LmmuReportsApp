@@ -127,6 +127,9 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::GET('/viewUnregisteredStudentsEligibleForRegistration',  'AcademicQueriesController@viewUnregisteredStudentsEligibleForRegistration')->name('viewUnregisteredStudentsEligibleForRegistration');
 
                 Route::get('/examMdificationAuditTrail', 'AcademicQueriesController@examMdificationAuditTrail')->name('examMdificationAuditTrail');
+
+                Route::GET('/viewStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@viewStudentsUnderNaturalScienceSchool')->name('viewStudentsUnderNaturalScienceSchool');
+                Route::GET('/exportStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@exportStudentsUnderNaturalScienceSchool')->name('exportStudentsUnderNaturalScienceSchool');
                 
 
 

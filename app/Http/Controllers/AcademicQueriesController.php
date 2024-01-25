@@ -59,6 +59,19 @@ class AcademicQueriesController extends Controller
         return view('academics.reports.viewAllCoursesAttachedToProgramme',compact('results'));
     }
 
+    public function viewStudentsUnderNaturalScienceSchool(Request $request){
+
+        $academicYear = $request->input('academicYear');
+        $courseCode = $request->input('courseCode');
+
+        if ($academicYear === null) {
+            $results = [];
+        } else {
+            $results = $this->getStudentsUnderNaturalScienceSchool($academicYear,$courseCode)->paginate('20');
+        }        
+        return view('academics.reports.viewStudentsUnderNaturalScienceSchool',compact('results','academicYear','courseCode'));
+    }
+
     public function exportAllCoursesAttachedToProgramme(){
 
         $headers = [
