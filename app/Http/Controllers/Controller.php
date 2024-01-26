@@ -901,11 +901,14 @@ class Controller extends BaseController
             'basic-information.FirstName',
             'basic-information.Surname',
             'basic-information.ID',
-            'study.Name as Programme Name',
+            'basic-information.GovernmentID',
+            'basic-information.StudyType',
+            'basic-information.Sex',
+            'study.Name as ProgrammeName',
             'programmes.ProgramName',
             'study.ShortName as Programme Code',
             'study.StudyType as Mode Of Study',
-            'schools.Name as School',
+            'schools.Name as SchoolName',
             'basic-information.FirstName as First Name',
             'basic-information.Surname as Last Name'
         )
@@ -920,44 +923,9 @@ class Controller extends BaseController
         ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
         ->join('schools', 'study.ParentID', '=', 'schools.ID')
         ->whereIn('courses.Name', $courseCode)
-        ->whereRaw('LENGTH(basic-information.ID) >= 7')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) >= 7')
         ->groupBy('basic-information.ID');
     
-        return $results;
-    }
-    private function queryAllCoursesAttachedToProgramme(){
-        $results = SisCourses::select(
-            'courses.ID',
-            'courses.Name as CourseCode',
-            'courses.CourseDescription as CourseName',
-            'study.Name as Programme',
-            'schools.Name as School',
-            'programmes.ProgramName as CodeRegisteredUnder',
-            DB::raw("
-                CASE
-                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
-                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
-                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
-                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
-                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
-                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
-                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
-                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
-                END AS YearOfStudy
-            "),
-            DB::raw("
-                CASE
-                    WHEN programmes.ProgramName LIKE '%-DE-%' THEN 'DISTANCE'
-                    WHEN programmes.ProgramName LIKE '%-FT-%' THEN 'FULLTIME'
-                END as StudyMode
-            ")
-        )
-        ->join('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
-        ->join('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
-        ->join('study-program-link', 'programmes.ID', '=', 'study-program-link.ProgramID')
-        ->join('study', 'study-program-link.StudyID', '=', 'study.ID')
-        ->join('schools', 'study.ParentID', '=', 'schools.ID');
-
         return $results;
     }
 
@@ -968,7 +936,7 @@ class Controller extends BaseController
             ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
 
-        $academicYear = '2023';
+        $academicYear = '2024';
 
         $studentInformation = Schools::select(
             'basic-information.FirstName',
@@ -1074,6 +1042,43 @@ class Controller extends BaseController
 
         return $mergedResults;
     }
+    private function queryAllCoursesAttachedToProgramme(){
+        $results = SisCourses::select(
+            'courses.ID',
+            'courses.Name as CourseCode',
+            'courses.CourseDescription as CourseName',
+            'study.Name as Programme',
+            'schools.Name as School',
+            'programmes.ProgramName as CodeRegisteredUnder',
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                END AS YearOfStudy
+            "),
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%-DE-%' THEN 'DISTANCE'
+                    WHEN programmes.ProgramName LIKE '%-FT-%' THEN 'FULLTIME'
+                END as StudyMode
+            ")
+        )
+        ->join('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->join('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->join('study-program-link', 'programmes.ID', '=', 'study-program-link.ProgramID')
+        ->join('study', 'study-program-link.StudyID', '=', 'study.ID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID');
+
+        return $results;
+    }
+
+    
 
 
     // private function querySumOfAllTransactionsOfEachStudent(){

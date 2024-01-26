@@ -27,6 +27,10 @@
                     </thead>
                     <tbody>
                       <tr>
+                        <td><a href="{{ route('viewStudentsUnderNaturalScienceSchool') }}">Natural Sciences Classlists</a></td>
+                        <td>View Students Registered under the School Of Natural Sciences. You can go further and view students registered under a specific course be it MAT101, PHY101, CHM101 or BIO101. </td>
+                      </tr>
+                      <tr>
                         <td><a href="{{ route('examMdificationAuditTrail') }}">Grades modification Audit Trail</a></td>
                         <td>View Grades Modified And The Details of The Modification</td>
                       </tr>

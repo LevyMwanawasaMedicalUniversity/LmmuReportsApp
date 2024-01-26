@@ -129,7 +129,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/examMdificationAuditTrail', 'AcademicQueriesController@examMdificationAuditTrail')->name('examMdificationAuditTrail');
 
                 Route::GET('/viewStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@viewStudentsUnderNaturalScienceSchool')->name('viewStudentsUnderNaturalScienceSchool');
-                Route::GET('/exportStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@exportStudentsUnderNaturalScienceSchool')->name('exportStudentsUnderNaturalScienceSchool');
+                Route::POST('/exportStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@exportStudentsUnderNaturalScienceSchool')->name('exportStudentsUnderNaturalScienceSchool');
                 
 
 

@@ -64,12 +64,50 @@ class AcademicQueriesController extends Controller
         $academicYear = $request->input('academicYear');
         $courseCode = $request->input('courseCode');
 
-        if ($academicYear === null) {
-            $results = [];
-        } else {
-            $results = $this->getStudentsUnderNaturalScienceSchool($academicYear,$courseCode)->paginate('20');
-        }        
+        if ($academicYear === null) {            
+            $academicYear = 2024;
+        }
+
+        $results = $this->getStudentsUnderNaturalScienceSchool($academicYear,$courseCode);
+        
+        $results = $results->paginate('20');
+                
         return view('academics.reports.viewStudentsUnderNaturalScienceSchool',compact('results','academicYear','courseCode'));
+    }
+
+    public function exportStudentsUnderNaturalScienceSchool(Request $request)
+    {
+        $academicYear = $request->input('academicYear');
+        $courseCode = $request->input('courseCode');
+
+        $headers = [
+            'First Name',
+            'Middle Name',
+            'Surname',
+            'Gender',            
+            'Student Number',
+            'NRC',
+            'Programme',
+            'School',
+            'Study Mode'
+        ];
+        
+        $rowData = [
+            'FirstName',
+            'MiddleName',
+            'Surname',
+            'Sex',
+            'ID',
+            'GovernmentID',
+            'ProgrammeName',
+            'SchoolName',
+            'StudyType'
+        ];
+        
+        $results = $this->getStudentsUnderNaturalScienceSchool($academicYear,$courseCode)->get();        
+        $filename = 'AllStudentsUnderNaturalScienceSchool' . $academicYear . $courseCode;
+        
+        return $this->exportData($headers, $rowData, $results, $filename);
     }
 
     public function exportAllCoursesAttachedToProgramme(){
@@ -99,9 +137,6 @@ class AcademicQueriesController extends Controller
         
         return $this->exportData($headers, $rowData, $results, $filename);
     }
-    
-
-    //All programmes in a specific school
     
     public function viewAllProgrammesPerSchool(Request $request){
 
