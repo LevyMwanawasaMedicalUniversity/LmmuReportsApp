@@ -33,7 +33,7 @@
                             <div class="form-group">
                                 <label for="courseCode"><h6><b>Select Course:</b></h6></label>
                                 <select name="courseCode" id="courseCode" class="form-control">
-                                    <option value="">NONE</option>
+                                    <option value="">ALL COURSES</option>
                                     <option value="MAT101" {{ $courseCode == 'MAT101' ? 'selected' : '' }}>MAT101</option>
                                     <option value="PHY101" {{ $courseCode == 'PHY101' ? 'selected' : '' }}>PHY101</option>
                                     <option value="CHM101" {{ $courseCode == 'CHM101' ? 'selected' : '' }}>CHM101</option>
