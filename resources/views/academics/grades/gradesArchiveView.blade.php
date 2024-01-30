@@ -69,7 +69,7 @@
                         </tbody>
                     </table>
                     </div>
-                    {{ $results->links('pagination::bootstrap-4') }}
+                    
                 </div>
                 @else
                 <div class="card-body text-center">

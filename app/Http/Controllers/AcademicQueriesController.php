@@ -134,7 +134,7 @@ class AcademicQueriesController extends Controller
         $academicYear = 2023;
         $distinctStudentNumbers = GradesPublished::distinct('StudentNo')->pluck('StudentNo')->toArray();
 
-        $results = $this->getAppealStudentDetails($academicYear, $distinctStudentNumbers)->paginate(15);
+        $results = $this->getAppealStudentDetails($academicYear, $distinctStudentNumbers)->get();
         
         return view('academics.grades.gradesArchiveView',compact('results'));
     }   
