@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GradesPublished;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Http\Request;
 
@@ -129,10 +130,25 @@ class AcademicQueriesController extends Controller
 
     
 
-    public function gradesArchiveView(){
+    public function gradesArchiveView(Request $request){
+        $academicYear = 2023;
+        $distinctStudentNumbers = GradesPublished::distinct('StudentNo')->pluck('StudentNo')->toArray();
+
+        $results = $this->getAppealStudentDetails($academicYear, $distinctStudentNumbers)->paginate(15);
         
-        return view('academics.grades.gradesArchiveView');
+        return view('academics.grades.gradesArchiveView',compact('results'));
     }   
+
+    public function showStudentsArchivedResults($studentNumber){
+        $academicYear = 2023;
+        $results =GradesPublished::query()
+            ->where('StudentNo','=', $studentNumber)
+            ->get();
+            $studentNumber = $results[0]->StudentNo;   
+        
+        return view('academics.grades.showStudentsArchivedResults',compact('results','academicYear','studentNumber'));
+
+    }
 
     public function exportStudentsUnderNaturalScienceSchool(Request $request)
     {
