@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Http\Request;
 
 class AcademicQueriesController extends Controller
@@ -74,6 +75,64 @@ class AcademicQueriesController extends Controller
                 
         return view('academics.reports.viewStudentsUnderNaturalScienceSchool',compact('results','academicYear','courseCode'));
     }
+
+    public function gradesArchiveImport(){
+        return view('academics.grades.gradesArchiveImport');
+    }
+
+    public function uploadGradesToArchive(Request $request){
+        set_time_limit(1200000);
+        // Validate the form data
+        $request->validate([
+            'excelFile' => 'required|mimes:xls,xlsx,csv',
+            'academicYear' => 'required',
+        ]);
+       
+        $academicYear = $request->input('academicYear');
+
+        if ($request->hasFile('excelFile')){
+            $file = $request->file('excelFile');
+
+            // Initialize the Box/Spout reader
+            $reader = ReaderEntityFactory::createXLSXReader();
+            $reader->open($file->getPathname());
+
+            $isHeaderRow = true; // Flag to identify the header row
+            $studentNumbers = [];
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $row) {
+                    // Skip the header row
+                    if ($isHeaderRow) {
+                        $isHeaderRow = false;
+                        continue;
+                    }
+
+                    // Assuming the student number is in the first column (index 1)
+                    $studentNumber = $row->getCellAtIndex(0)->getValue();
+
+                    $studentNumbers[] = $studentNumber;
+                }
+            }
+
+            $reader->close();
+
+            foreach ($studentNumbers as $studentNumber) {                
+                $this->setAndSaveResultsForCurrentStudent($studentNumber,$academicYear);
+            }
+
+            
+        }
+
+        return redirect()->back()->with('success', 'Grades Uploaded Successfully');
+    }
+
+    
+
+    public function gradesArchiveView(){
+        
+        return view('academics.grades.gradesArchiveView');
+    }   
 
     public function exportStudentsUnderNaturalScienceSchool(Request $request)
     {

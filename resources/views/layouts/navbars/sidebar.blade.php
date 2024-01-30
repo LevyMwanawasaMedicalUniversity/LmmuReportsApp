@@ -93,11 +93,36 @@
         </li>
       @endif
       @if ((auth()->user()->hasRole('Academics')) || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
-        <li class = "@if ($activePage == 'academics') active @endif">
-          <a href="{{ route('academics.index') }}">
+        <li>
+          <a data-toggle="collapse" href="#academics">
             <i class="now-ui-icons education_hat"></i>
-            <p>{{ __('Academics') }}</p>
+            <p>
+              {{ __("Academics") }}
+              <b class="caret"></b>
+            </p>
           </a>
+          <div class="collapse" id="academics">
+            <ul class="nav">              
+              <li class = "@if ($activePage == 'academics') active @endif">
+                <a href="{{ route('academics.index') }}">
+                  <i class="now-ui-icons files_single-copy-04"></i>
+                  <p>{{ __('Reports') }}</p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'importGradesArchive') active @endif">
+                <a href="{{ route('academics.GradesArchiveImport') }}">
+                  <i class="now-ui-icons arrows-1_share-66"></i>
+                  <p>{{ __('Import to Grades Archive') }}</p>
+                </a>
+              </li>    
+              <li class="@if ($activePage == 'viewGradesArchive') active @endif">
+                <a href="{{ route('academics.GradesArchiveView') }}">
+                  <i class="now-ui-icons business_briefcase-24"></i>
+                  <p>{{ __('Grades Archive') }}</p>
+                </a>
+              </li>                    
+            </ul>
+          </div>
         </li>
       @endif
       @if (auth()->user()->hasRole('Finance') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))

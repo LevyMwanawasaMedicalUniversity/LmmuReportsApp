@@ -14,6 +14,7 @@ use App\Models\EduroleCourses;
 use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\GradesModified;
+use App\Models\GradesPublished;
 use App\Models\SageClient;
 use App\Models\SagePostAR;
 use App\Models\Schools;
@@ -883,6 +884,90 @@ class Controller extends BaseController
     public function getAllCoursesAttachedToProgramme(){
         $results = $this->queryAllCoursesAttachedToProgramme();
         return $results;
+    }
+    
+    public function setAndSaveResultsForCurrentStudent($studentNumber,$academicYear){
+        $dataArray = $this->getResultsForCurrentStudent($studentNumber,$academicYear);       
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+                        
+            $coursesToInsert[] = [
+                'StudentNo' => $item['StudentNo'],
+                'ProgramNo' => $item['ProgramNo'],
+                'CourseNo' => $item['CourseNo'],
+                'Grade' => $item['Grade'],
+                'AcademicYear' => $item['AcademicYear'],
+                'Semester' => $item['Semester'],
+                'ExamMarks' => $item['ExamMarks'],
+                'CAMarks' => $item['CAMarks'],
+                'KeySet' => $item['KeySet'],
+                'TotalMarks' => $item['TotalMarks'],
+                'Points' => $item['Points'],
+                'Comment' => $item['Comment'],
+                'PeriodID' => $item['PeriodID'],
+                'Published' => $item['Published'],
+                'usertime' => $item['usertime'],
+                'userdate' => $item['userdate'],
+                'user' => $item['user']
+            ];            
+        }
+    
+        if (!empty($coursesToInsert)) {
+            // Batch insert the new courses
+            foreach ($coursesToInsert as $course) {
+                GradesPublished::updateOrInsert(
+                    [
+                        'StudentNo' => $course['StudentNo'],
+                        'CourseNo' => $course['CourseNo'],
+                        'AcademicYear' => $course['AcademicYear']
+                    ],
+                    $course
+                );
+            }
+        }
+
+        return $coursesToInsert;
+    }
+
+    public function getResultsForCurrentStudent($studentNumber,$academicYear){
+        
+        $resultsForStudent = [];
+
+        $results = Grade::select('usertime',
+                    'userdate','AcademicYear','Semester','user',
+                    'StudentNo', 'ProgramNo','ExamMarks','CAMarks',
+                    'KeySet','TotalMarks','Points','Comment',
+                     'CourseNo','Published', 'Grade','PeriodID')
+            ->where('StudentNo', $studentNumber)
+            ->where('AcademicYear', $academicYear)
+            ->get();
+        
+        foreach ($results as $row) {
+            $resultsForStudent[] = [
+                'StudentNo' => $row->StudentNo,
+                'ProgramNo' => $row->ProgramNo, // Replace with the program
+                'CourseNo' => $row->CourseNo,
+                'Grade' => $row->Grade,
+                'AcademicYear' => $row->AcademicYear,
+                'Semester' => $row->Semester,
+                'ExamMarks' => $row->ExamMarks,
+                'CAMarks' => $row->CAMarks,
+                'KeySet' => $row->KeySet,
+                'TotalMarks' => $row->TotalMarks,
+                'Points' => $row->Points,
+                'Comment' => $row->Comment,
+                'PeriodID' => $row->PeriodID,
+                'Published' => $row->Published,
+                'usertime' => $row->usertime,
+                'userdate' => $row->userdate,
+                'user' => $row->user
+            ];
+
+        }
+
+        return $resultsForStudent;
     }
 
     public function getStudentsUnderNaturalScienceSchool($academicYear,$courseCode){

@@ -131,7 +131,9 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::GET('/viewStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@viewStudentsUnderNaturalScienceSchool')->name('viewStudentsUnderNaturalScienceSchool');
                 Route::POST('/exportStudentsUnderNaturalScienceSchool',  'AcademicQueriesController@exportStudentsUnderNaturalScienceSchool')->name('exportStudentsUnderNaturalScienceSchool');
                 
-
+                Route::get('/gradesArchiveImport',  'AcademicQueriesController@gradesArchiveImport')->name('academics.GradesArchiveImport');
+                Route::get('/gradesArchiveView',  'AcademicQueriesController@gradesArchiveView')->name('academics.GradesArchiveView');
+                Route::post('/uploadGradesToArchive',  'AcademicQueriesController@uploadGradesToArchive')->name('academics.UploadradesToArchive');
 
                 //dynamic drop down view students specific intake taking programme
                 Route::get('/getProgrammesBySchool',  'AcademicQueriesController@getProgrammesBySchoolDynamicForm')->name('getProgrammesBySchoolDynamicForm'); 
