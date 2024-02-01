@@ -13,7 +13,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Academics Queries</h4>
+                    <h4 class="card-title">Registered And Unregistered Per Year</h4>
                 </div>
                 <form action="{{ route('viewRegisteredAndUnregisteredPerYear') }}" method="GET">
                     <div class="row">
