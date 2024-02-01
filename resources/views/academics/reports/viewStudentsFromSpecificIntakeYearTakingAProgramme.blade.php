@@ -27,6 +27,7 @@
                                     <option value="210" @if (isset($intakeName) && $intakeName == '210') selected @endif>210 (2021)</option>
                                     <option value="220" @if (isset($intakeName) && $intakeName == '220') selected @endif>220 (2022)</option>
                                     <option value="230" @if (isset($intakeName) && $intakeName == '230') selected @endif>230 (2023)</option>
+                                    <option value="240" @if (isset($intakeName) && $intakeName == '240') selected @endif>240 (2024)</option>
                                 </select>
                             </div>
                         </div>

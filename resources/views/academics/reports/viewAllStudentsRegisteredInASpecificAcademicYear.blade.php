@@ -27,6 +27,7 @@
                                     <option value="2021" {{ $academicYear == '2021' ? 'selected' : '' }}>2021</option>
                                     <option value="2022" {{ $academicYear == '2022' ? 'selected' : '' }}>2022</option>
                                     <option value="2023" {{ $academicYear == '2023' ? 'selected' : '' }}>2023</option>
+                                    <option value="2024" {{ $academicYear == '2024' ? 'selected' : '' }}>2024</option>
                                 </select>
                             </div>
                         </div>
