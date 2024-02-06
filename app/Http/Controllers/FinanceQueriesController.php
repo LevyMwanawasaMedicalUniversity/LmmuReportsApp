@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SisReportsSageInvoices;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -35,9 +36,51 @@ class FinanceQueriesController extends Controller
         return view('finance.reports.viewSumOfAllTransactionsOfEachStudent',compact('results'));
     }
 
+    public function viewInvoicesPerProgramme(){
+        
+        $results = $this->getInvoicesPerProgramme()->get();
+        foreach ($results as $result) {
+            SisReportsSageInvoices::updateOrCreate(
+                [ 'AutoIndex' => $result->AutoIndex ],
+                [
+                    'InvNumber' => $result->InvNumber,
+                    'Description' => $result->Description,
+                    'InvDate' => $result->InvDate, 
+                    'Amount' => $result->InvTotExcl
+                ]
+            );
+        }    
+
+        $results = SisReportsSageInvoices::paginate(20);
+        
+        return view('finance.viewInvoicesPerProgramme',compact('results'));
+    }
+
+    public function exportAllProgrammeInvoices(){
+        
+        $headers = [
+            'InvNumber',
+            'Description',
+            'InvDate',
+            'Amount',
+        ];
+        
+        $rowData = [
+            'InvNumber',
+            'Description',
+            'InvDate',
+            'InvTotExcl'
+        ];
+        
+        $results = $this->getInvoicesPerProgramme()->get();
+        $filename = 'InvoicesPerProgramme';
+        
+        return $this->exportDataFromArray($headers, $rowData, $results, $filename);
+    }
+
 
     public function exportAllPaymentInformation(){
-
+        set_time_limit(1200000);
         $headers = [
             'First Name',
             'Middle Name',

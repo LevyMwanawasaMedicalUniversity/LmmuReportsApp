@@ -16,9 +16,11 @@ use App\Models\Grades;
 use App\Models\GradesModified;
 use App\Models\GradesPublished;
 use App\Models\SageClient;
+use App\Models\SageInvoice;
 use App\Models\SagePostAR;
 use App\Models\Schools;
 use App\Models\SisCourses;
+use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\Study;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -970,6 +972,24 @@ class Controller extends BaseController
         return $resultsForStudent;
     }
 
+    public function getInvoicesPerProgramme(){
+        $results = $this->queryInvoicesPerProgramme();
+        return $results;
+    }
+
+    private function queryInvoicesPerProgramme(){
+        $results = SageInvoice::select(
+            'AutoIndex',
+            'InvNumber',
+            'Description',
+            'InvDate',
+            'InvTotExcl'
+        )->where('InvNumber', 'like', 'TPD%')
+        ->orderby('Description');
+        return $results;
+    }
+        
+
     public function getStudentsUnderNaturalScienceSchool($academicYear,$courseCode){
         $results = $this->queryStudentsUnderNaturalScienceSchool($academicYear,$courseCode);
         return $results;
@@ -1070,28 +1090,36 @@ class Controller extends BaseController
         ->groupBy('student-study-link.StudentID')
         ->get();
 
-        $studentPaymentInformation = SageClient::select(
+        $studentPaymentInformation = SageClient::select    (
             'DCLink',
             'Account',
             'Name',
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
+                WHEN pa.Description LIKE \'%-%\' THEN 0  
                 WHEN pa.TxDate > \'2023-01-01\' THEN 0
                 ELSE pa.Credit 
                 END) AS TotalPaymentBefore2023'),
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
+                WHEN pa.Description LIKE \'%-%\' THEN 0   
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),            
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+                WHEN pa.Description LIKE \'%-%\' THEN 0  
                 WHEN pa.TxDate < \'2023-01-01\' THEN 0
                 WHEN pa.TxDate > \'2023-12-31\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2023'),
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0                
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0    
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.Description LIKE \'%-%\' THEN 0            
                 ELSE pa.Credit 
                 END) AS TotalPayments'),
             DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
@@ -1105,6 +1133,8 @@ class Controller extends BaseController
         ->groupBy('DCLink', 'Account', 'Name', 'lid.LatestTxDate', DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'), DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END'))
         ->get();
 
+        $studentInvoices = SisReportsSageInvoices::all();
+        $studentInvoices = $studentInvoices->toArray();
         $studentInformation = $studentInformation->toArray();
         $studentPaymentInformation = $studentPaymentInformation->toArray();
 

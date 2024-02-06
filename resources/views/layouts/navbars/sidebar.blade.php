@@ -126,11 +126,30 @@
         </li>
       @endif
       @if (auth()->user()->hasRole('Finance') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
-        <li class = "@if ($activePage == 'finance') active @endif">
-          <a href="{{ route('finance.index') }}">
+      <li>
+          <a data-toggle="collapse" href="#finance">
             <i class="now-ui-icons business_bank"></i>
-            <p>{{ __('Finance') }}</p>
+            <p>
+              {{ __("Finance") }}
+              <b class="caret"></b>
+            </p>
           </a>
+          <div class="collapse" id="finance">
+            <ul class="nav">              
+              <li class = "@if ($activePage == 'finance') active @endif">
+                <a href="{{ route('finance.index') }}">
+                  <i class="now-ui-icons files_single-copy-04"></i>
+                  <p>{{ __('Reports') }}</p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'invoicesPage') active @endif">
+                <a href="{{ route('finance.ViewInvoicesPerProgramme') }}">
+                  <i class="now-ui-icons arrows-1_share-66"></i>
+                  <p>{{ __('Invoices in Programmes') }}</p>
+                </a>
+              </li>                                  
+            </ul>
+          </div>
         </li>
       @endif
       @if (auth()->user()->hasRole('Examination') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))

@@ -49,4 +49,5 @@ INNER JOIN
 INNER JOIN 
     schools s2 ON s2.ID = s.ParentID
 WHERE 
-    gp.Grade = 'DEF' AND gp.AcademicYear = 2023;
+    gp.Grade in ('D+','NE','D','F') AND gp.AcademicYear = 2023
+GROUP BY gp.StudentNo;

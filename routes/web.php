@@ -149,7 +149,9 @@ Route::group(['middleware' => 'auth'], function () {
 
                 Route::get('/viewSumOfAllTransactionsOfEachStudent', 'FinanceQueriesController@viewSumOfAllTransactionsOfEachStudent')->name('viewSumOfAllTransactionsOfEachStudent');
                 Route::get('/exportAllPaymentInformation', 'FinanceQueriesController@exportAllPaymentInformation')->name('exportAllPaymentInformation');
-                
+                Route::get('/viewInvoicesPerProgramme','FinanceQueriesController@viewInvoicesPerProgramme')->name('finance.ViewInvoicesPerProgramme');
+                Route::get('/exportAllProgrammeInvoices','FinanceQueriesController@exportAllProgrammeInvoices')->name('finance.ExportAllProgrammeInvoices');
+                   
             });
         });
 
