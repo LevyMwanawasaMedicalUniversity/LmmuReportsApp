@@ -34,6 +34,10 @@
                         <tr>
                             <th>InvNumber</th>
                             <th>Description</th>
+                            <th>Invoice Year</th>
+                            <th>Study Mode</th>
+                            <th>Year Of Study</th>
+                            <th>Programme Code</th>
                             <th>InvDate</th>
                             <th>Amount</th>                         
                         </tr>
@@ -42,9 +46,13 @@
                         @foreach($results as $result)
                         <tr>
                             <td>{{ $result->InvNumber }}</td>
-                            <td>{{ $result->Description }}</td>
+                            <td>{{ $result->InvoiceDescription }}</td>
+                            <td>{{ $result->InvoiceYearOfInvoice }}</td>
+                            <td>{{ $result->InvoiceModeOfStudy }}</td>
+                            <td>{{ $result->InvoiceYearOfStudy }}</td>
+                            <td>{{ $result->InvoiceProgrammeCode }}</td> 
                             <td>{{ $result->InvDate }}</td>
-                            <td>K {{ $result->Amount }}</td>                                                    
+                            <td>K {{ $result->InvoiceAmount }}</td>                                                    
                         </tr>
                         @endforeach
                         </tbody>

@@ -128,6 +128,18 @@ class AcademicQueriesController extends Controller
         return redirect()->back()->with('success', 'Grades Uploaded Successfully');
     }
 
+    public function registrationCheck(Request $request){
+
+        if($request->input('student-number')){
+            $results = $this->checkIfStudentIsRegistered($request->input('student-number'))->get();
+        }else{
+            $results = [];
+        }
+
+        
+        return view('academics.registrationCheck', compact('results'));
+    }
+
     
 
     public function gradesArchiveView(Request $request){

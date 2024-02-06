@@ -11,9 +11,13 @@ class SisReportsSageInvoices extends Model
 
     protected $fillable = [
         'InvNumber',
-        'Description',    
+        'InvoiceDescription',    
         'InvDate', 
-        'Amount',
-        'AutoIndex'   
+        'InvoiceAmount',
+        'AutoIndex',
+        'InvoiceProgrammeCode',
+        'InvoiceModeOfStudy',
+        'InvoiceYearOfInvoice',
+        'InvoiceYearOfStudy',
     ];
 }

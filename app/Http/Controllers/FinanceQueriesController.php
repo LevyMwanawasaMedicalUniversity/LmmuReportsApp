@@ -40,13 +40,25 @@ class FinanceQueriesController extends Controller
         
         $results = $this->getInvoicesPerProgramme()->get();
         foreach ($results as $result) {
+            $descriptionParts = explode('-', $result->Description);
+            if(isset($descriptionParts[1])){
+                if($descriptionParts[1] == 'FT'){
+                    $studyMode = 'Fulltime';
+                }else{
+                    $studyMode = 'Distance';
+                }
+            }
             SisReportsSageInvoices::updateOrCreate(
                 [ 'AutoIndex' => $result->AutoIndex ],
                 [
                     'InvNumber' => $result->InvNumber,
                     'Description' => $result->Description,
                     'InvDate' => $result->InvDate, 
-                    'Amount' => $result->InvTotExcl
+                    'Amount' => $result->InvTotExcl,
+                    'ProgrammeCode' => $descriptionParts[0] ?? 'none',
+                    'ModeOfStudy' => $studyMode ?? 'none',
+                    'YearOfInvoice' =>  $descriptionParts[2] ?? 'none',
+                    'YearOfStudy' => $descriptionParts[3] ?? 'none',
                 ]
             );
         }    
@@ -95,6 +107,7 @@ class FinanceQueriesController extends Controller
             'School',
             'Study Type',
             'Registration Status',
+            '2024 Invoice',
             'Year Of Study',
             'Total Payments',
             'Total Payments Before 2023',
@@ -115,11 +128,12 @@ class FinanceQueriesController extends Controller
             'GovernmentID',
             'PrivateEmail',
             'MobilePhone',
-            'ProgrammeCode',
+            'ShortName',
             'StudyName',
             'School',
             'StudyType',
             'RegistrationStatus',
+            'InvoiceAmount',
             'YearOfStudy',
             'TotalPayments',
             'TotalPaymentBefore2023',

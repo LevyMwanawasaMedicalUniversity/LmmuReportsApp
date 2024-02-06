@@ -96,6 +96,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('academics')->group(function () {
                 Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
 
+                Route::get('/registrationCheck', 'AcademicQueriesController@registrationCheck')->name('academics.registrationCheck');
+
                 
                 Route::GET('/viewAllCoursesWithResults',  'AcademicQueriesController@viewAllCoursesWithResults')->name('viewAllCoursesWithResults');
                 Route::get('/exportAllCoursesWithResults', 'AcademicQueriesController@exportAllCoursesWithResults')->name('exportAllCoursesWithResults');
@@ -146,7 +148,6 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::prefix('finance')->group(function () {
                 Route::get('/index', 'FinanceQueriesController@index')->name('finance.index');
-
                 Route::get('/viewSumOfAllTransactionsOfEachStudent', 'FinanceQueriesController@viewSumOfAllTransactionsOfEachStudent')->name('viewSumOfAllTransactionsOfEachStudent');
                 Route::get('/exportAllPaymentInformation', 'FinanceQueriesController@exportAllPaymentInformation')->name('exportAllPaymentInformation');
                 Route::get('/viewInvoicesPerProgramme','FinanceQueriesController@viewInvoicesPerProgramme')->name('finance.ViewInvoicesPerProgramme');

@@ -459,6 +459,51 @@ class Controller extends BaseController
         return "Test email sent successfully!";
     }
 
+    public function checkIfStudentIsRegistered($studentId) {
+        $results = $this->queryIfStudentIsRegistered($studentId);
+        return $results;
+    }
+
+    private function queryIfStudentIsRegistered($studentId) {
+        $result = BasicInformation::query()
+            ->select([
+                'basic-information.FirstName',
+                'basic-information.MiddleName',
+                'basic-information.Surname',
+                'basic-information.StudyType',
+                'basic-information.Sex',
+                'student-study-link.StudentID',
+                'basic-information.GovernmentID',
+                'study.Name as ProgrammeName',
+                'schools.Name as School',
+                DB::raw("
+                    CASE
+                        WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                        WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                        WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                        WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                        WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                        ELSE 'YEAR 6'
+                    END AS 'Year Of Study'
+                ")
+            ])
+            ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+            ->join('study', 'study.ID', '=', 'student-study-link.StudyID')
+            ->join('schools', 'study.ParentID', '=', 'schools.ID')
+            ->join('course-electives', function ($join) {
+                $join->on('course-electives.StudentID', '=', 'basic-information.ID')
+                    ->where('course-electives.Year', '=', 2024);
+            })
+            ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+            ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
+            ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
+            ->where('course-electives.StudentID', $studentId)
+            ->where('course-electives.Year', 2024)
+            ->groupBy('student-study-link.StudentID');
+
+        return $result;
+    }
+
     public function setAndUpdateCoursesForCurrentYear($studentId) {
 
         $dataArray = $this->getCoursesForFailedStudentsForCurrentAcademicYear($studentId);
@@ -1054,6 +1099,7 @@ class Controller extends BaseController
             'basic-information.MobilePhone',
             'programmes.ProgramName AS ProgrammeCode',
             'study.Name AS StudyName',
+            'study.ShortName AS ShortName',
             'schools.Description AS School',
             'basic-information.StudyType',
             DB::raw("CASE
@@ -1154,9 +1200,63 @@ class Controller extends BaseController
 
             $mergedResults[] = $mergedResult;
         }
+        $allResults = [];
 
-        return $mergedResults;
+        foreach ($mergedResults as $student) {
+            // Find the corresponding invoice information for this student
+            foreach ($studentInvoices as $invoice) {
+                // Get the first three characters of the StudentID
+                $studentIdStart = substr($student['StudentID'], 0, 3);
+        
+                // Set the YearOfInvoice based on the start of the StudentID
+                switch ($studentIdStart) {
+                    case '190':
+                        $invoice['InvoiceYearOfInvoice'] = '2019';
+                        $invoice['InvoiceYearOfStudy'] = 'Y2';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                        break;
+                    case '210':
+                        $invoice['InvoiceYearOfInvoice'] = '2021';
+                        $invoice['InvoiceYearOfStudy'] = 'Y2';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                        break;
+                    case '220':
+                        $invoice['InvoiceYearOfInvoice'] = '2022';
+                        $invoice['InvoiceYearOfStudy'] = 'Y2';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                        break;
+                    case '230':
+                        $invoice['InvoiceYearOfInvoice'] = '2023';
+                        $invoice['InvoiceYearOfStudy'] = 'Y2';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                        break;
+                    case '240':
+                        $invoice['InvoiceYearOfInvoice'] = '2024';
+                        $invoice['InvoiceYearOfStudy'] = 'Y1';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                        break;
+                    default:
+                        $invoice['InvoiceYearOfInvoice'] = '2019';
+                        $invoice['InvoiceYearOfStudy'] = 'Y2';
+                        $invoice['InvoiceProgrammeCode'] = $student['ShortName'];
+                        $invoice['InvoiceModeOfStudy'] = $student['StudyType'];
+                }
+        
+                // Merge the invoice information into the result
+                $student = array_merge($student, $invoice);
+                break;
+            }
+            $allResults[] = $student;
+        }
+
+        return $allResults;
     }
+
     private function queryAllCoursesAttachedToProgramme(){
         $results = SisCourses::select(
             'courses.ID',

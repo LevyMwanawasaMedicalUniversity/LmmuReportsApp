@@ -73,7 +73,9 @@ class HomeController extends Controller
         }
 
         return view('home');       
-    }   
+    }  
+    
+    
 
     private function setAndUpdateCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);

@@ -102,13 +102,20 @@
             </p>
           </a>
           <div class="collapse" id="academics">
-            <ul class="nav">              
+            <ul class="nav">   
+                        
               <li class = "@if ($activePage == 'academics') active @endif">
                 <a href="{{ route('academics.index') }}">
                   <i class="now-ui-icons files_single-copy-04"></i>
                   <p>{{ __('Reports') }}</p>
                 </a>
               </li>
+              <li class = "@if ($activePage == 'registrationCheck') active @endif">
+                <a href="{{ route('academics.registrationCheck') }}">
+                  <i class="now-ui-icons education_glasses"></i>
+                  <p>{{ __('Registration Check') }}</p>
+                </a>
+              </li> 
               <li class="@if ($activePage == 'importGradesArchive') active @endif">
                 <a href="{{ route('academics.GradesArchiveImport') }}">
                   <i class="now-ui-icons arrows-1_share-66"></i>

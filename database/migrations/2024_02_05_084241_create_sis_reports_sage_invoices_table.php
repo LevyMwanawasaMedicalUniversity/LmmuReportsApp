@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('sis_reports_sage_invoices', function (Blueprint $table) {
             $table->id();
             $table->string('InvNumber');
-            $table->string('Description');
+            $table->string('InvoiceDescription');
             $table->date('InvDate');
-            $table->float('Amount', 10, 2);
+            $table->float('InvoiceAmount', 10, 2);
             $table->timestamps();
         });
     }
