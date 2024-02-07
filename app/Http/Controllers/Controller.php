@@ -476,6 +476,8 @@ class Controller extends BaseController
                 'basic-information.GovernmentID',
                 'study.Name as ProgrammeName',
                 'schools.Name as School',
+                'courses.Name as CourseName',
+                'courses.CourseDescription as CourseDescription',
                 DB::raw("
                     CASE
                         WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
@@ -498,8 +500,7 @@ class Controller extends BaseController
             ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
             ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
             ->where('course-electives.StudentID', $studentId)
-            ->where('course-electives.Year', 2024)
-            ->groupBy('student-study-link.StudentID');
+            ->where('course-electives.Year', 2024);
 
         return $result;
     }
