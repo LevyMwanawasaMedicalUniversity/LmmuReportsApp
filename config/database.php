@@ -41,7 +41,7 @@ return [
             'port' => '3306',
             'database' => 'edurole',
             'username' => 'azwel',
-            'password' => 'rp0LC2I4d/Sq_z9R',
+            'password' => 'Z3Tr@inB00M!',
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
