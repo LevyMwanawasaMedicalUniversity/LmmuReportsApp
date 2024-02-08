@@ -485,8 +485,10 @@ class Controller extends BaseController
                         WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
                         WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
                         WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
-                        ELSE 'YEAR 6'
-                    END AS 'Year Of Study'
+                        WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                        WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                        WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                    END AS 'YearOfStudy'
                 ")
             ])
             ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')

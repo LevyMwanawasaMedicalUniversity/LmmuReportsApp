@@ -133,7 +133,7 @@ class AcademicQueriesController extends Controller
         if($request->input('student-number')){
             $results = $this->checkIfStudentIsRegistered($request->input('student-number'))->get();
         }else{
-            $results = [];
+            $results = 0;
         }
 
         

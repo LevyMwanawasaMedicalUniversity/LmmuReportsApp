@@ -58,6 +58,14 @@ Route::group(['middleware' => 'auth'], function () {
         
         });
 
+        Route::middleware('can:Dosa')->group(function () {
+            
+            Route::prefix('dosa')->group(function () {
+                Route::get('/registrationCheck', 'AcademicQueriesController@registrationCheck')->name('academics.registrationCheck');
+            });
+
+        });
+
         Route::middleware('can:Examination')->group(function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
@@ -96,7 +104,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::prefix('academics')->group(function () {
                 Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
 
-                Route::get('/registrationCheck', 'AcademicQueriesController@registrationCheck')->name('academics.registrationCheck');
+                
 
                 
                 Route::GET('/viewAllCoursesWithResults',  'AcademicQueriesController@viewAllCoursesWithResults')->name('viewAllCoursesWithResults');
@@ -138,7 +146,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/uploadGradesToArchive',  'AcademicQueriesController@uploadGradesToArchive')->name('academics.UploadradesToArchive');
                 
                 Route::get('/showResultsArchived/{studentID}',  'AcademicQueriesController@showStudentsArchivedResults')->name('archivedResults.showStudent');
-
+                Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');
                 //dynamic drop down view students specific intake taking programme
                 Route::get('/getProgrammesBySchool',  'AcademicQueriesController@getProgrammesBySchoolDynamicForm')->name('getProgrammesBySchoolDynamicForm'); 
                         
