@@ -132,12 +132,17 @@ class AcademicQueriesController extends Controller
 
         if($request->input('student-number')){
             $results = $this->checkIfStudentIsRegistered($request->input('student-number'))->get();
+
+            if(count($results) === 0){
+                return view('academics.registrationCheck', compact('results'))->with('error', 'Student not registered');
+            }else{
+                return view('academics.registrationCheck', compact('results'))->with('success', 'Student Registered');
+            }
         }else{
             $results = 0;
-        }
-
+            return view('academics.registrationCheck', compact('results'))->with('info', 'Search for student number to verify registration');;
+        }      
         
-        return view('academics.registrationCheck', compact('results'));
     }
 
     
