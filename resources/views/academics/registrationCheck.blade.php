@@ -5,9 +5,9 @@
     'activeNav' => '',
 ])
 @section('content')
-  <div class="panel-header panel-header-sm">
-  </div>
-  <div class="content">
+<div class="panel-header panel-header-sm">
+</div>
+<div class="content">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -149,5 +149,5 @@
             </div>
         </div>
     </div>
-  </div>
+</div>
 @endsection
