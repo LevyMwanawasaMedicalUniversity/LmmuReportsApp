@@ -502,10 +502,12 @@ class Controller extends BaseController
             ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
             ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
             ->where('course-electives.StudentID', $studentId)
-            ->where('course-electives.Year', 2024);
+            ->where('course-electives.Year', 2024)
+            ->groupBy('courses.Name');
 
         return $result;
     }
+    
 
     public function setAndUpdateCoursesForCurrentYear($studentId) {
 
@@ -610,7 +612,7 @@ class Controller extends BaseController
         
         
     public function getStudentCourses($studentId){
-               
+            
         
         $this->setAndSaveTheCourses($studentId);
         // Retrieve all unique Student values from the Course model
@@ -989,7 +991,7 @@ class Controller extends BaseController
                     'userdate','AcademicYear','Semester','user',
                     'StudentNo', 'ProgramNo','ExamMarks','CAMarks',
                     'KeySet','TotalMarks','Points','Comment',
-                     'CourseNo','Published', 'Grade','PeriodID')
+                    'CourseNo','Published', 'Grade','PeriodID')
             ->where('StudentNo', $studentNumber)
             ->where('AcademicYear', $academicYear)
             ->get();
@@ -1069,7 +1071,7 @@ class Controller extends BaseController
         ->join('basic-information', 'basic-information.ID', '=', 'student-study-link.StudentID')
         ->join('course-electives', function ($join) use ($academicYear) {
             $join->on('course-electives.StudentID', '=', 'basic-information.ID')
-                 ->where('course-electives.Year', '=', $academicYear);
+                ->where('course-electives.Year', '=', $academicYear);
         })
         ->join('program-course-link', 'program-course-link.CourseID', '=', 'course-electives.CourseID')
         ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')
