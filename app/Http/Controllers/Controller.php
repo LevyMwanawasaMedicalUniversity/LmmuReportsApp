@@ -225,6 +225,41 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudentsToImport(){
+        $results = $this->queryStudentsToImport();
+        return $results;
+    }
+
+    private function queryStudentsToImport() {
+        $results = BasicInformation::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.Sex',
+            'basic-information.ID AS StudentID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            'applicants.Progress' // Include the Progress column from applicants table
+        )
+        ->leftJoin('grades-published', 'grades-published.StudentNo', '=', 'basic-information.ID')
+        ->leftJoin('applicants', 'applicants.StudentID', '=', 'basic-information.ID') // Left join applicants table
+        ->where(function($query) {
+            $query->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
+                ->where('grades-published.AcademicYear', 2023)
+                ->where('basic-information.StudyType', '!=', 'Staff')
+                ->groupBy('basic-information.ID');
+        })
+        ->orWhere(function($query) {
+            $query->where('basic-information.ID', 'like', '240%')
+                ->where('applicants.Progress', 'Accepted');
+        })
+        ->groupBy('basic-information.ID'); // Group by StudentID to ensure uniqueness
+        
+        return $results;
+    }
+
+
     private function queryAppealStudentDetails($academicYear, $studentNumbers) {
         $results = Schools::select(
             'basic-information.FirstName',
@@ -412,7 +447,7 @@ class Controller extends BaseController
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         }
-        Mail::to($sendingEmail)->send(new NotificationEmail($studentID));        
+        // Mail::to($sendingEmail)->send(new NotificationEmail($studentID));        
     
         return "Test email sent successfully!";
     }
@@ -450,7 +485,7 @@ class Controller extends BaseController
         $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($studentID);
     
         // Dispatch the email sending job to the queue
-        dispatch(new SendEmailJob($sendingEmail, $mailClass));
+        // dispatch(new SendEmailJob($sendingEmail, $mailClass));
     
         if ($pdfPath) {
             unlink($pdfPath);

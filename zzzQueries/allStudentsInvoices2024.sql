@@ -12,14 +12,15 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
-    END as "2023 Invoice",
+    END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
+        WHEN bi.ID LIKE "240%" then program.YEAR1
+        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
+    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
+    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
@@ -103,7 +104,8 @@ WHERE
     AND 
     (bi.ID LIKE '210%'
 	OR bi.ID LIKE '220%'
-    OR bi.ID LIKE '230%')
+    OR bi.ID LIKE '230%'
+    OR bi.ID LIKE '240%')
     AND LENGTH(bi.ID) >= 4
 GROUP BY
     bi.ID;
@@ -124,14 +126,15 @@ SELECT
     END AS "Registration Status",
     
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
-    END as "2023 Invoice",
+    END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
+        WHEN bi.ID LIKE "240%" then program.YEAR1
+        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
+    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
+    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
@@ -177,7 +180,8 @@ WHERE
     AND 
     (bi.ID LIKE '210%'
 	OR bi.ID LIKE '220%'
-    OR bi.ID LIKE '230%')
+    OR bi.ID LIKE '230%'
+    OR bi.ID LIKE '240%')
     AND LENGTH(bi.ID) >= 4
 GROUP BY
     bi.ID;
@@ -199,14 +203,15 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
-    END as "2023 Invoice",
+    END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
+        WHEN bi.ID LIKE "240%" then program.YEAR1
+        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
+    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
+    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
@@ -296,14 +301,15 @@ SELECT
     END AS "Registration Status",
     
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
+        WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
-    END as "2023 Invoice",
+    END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "230%" then program.YEAR1
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + program.YEAR2
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 3)
+        WHEN bi.ID LIKE "240%" then program.YEAR1
+        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
+    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
+    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN

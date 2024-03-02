@@ -65,6 +65,8 @@ return [
             'password' => '#R3p0rt5@DevBoi!/2580=F!naNc3!le',
             'charset' => 'utf8',
             'collation' => 'utf8_unicode_ci',
+            'encrypt' => 'yes',
+            'trust_server_certificate' => true,
         ],
 
         'mysql' => [

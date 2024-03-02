@@ -196,6 +196,31 @@
       </li>
       <li>
         <a data-toggle="collapse" href="#docketSupsAndDefExamples">
+          <i class="now-ui-icons education_agenda-bookmark"></i>
+          <p>
+            {{ __("Course Registration") }}
+            <b class="caret"></b>
+          </p>
+        </a>
+        <div class="collapse" id="docketSupsAndDefExamples">
+          <ul class="nav">            
+            <li class="@if ($activePage == 'docket-indexSupsAndDef') active @endif">
+              <a href="{{ route('students.index') }}">
+                <i class="now-ui-icons text_align-left"></i>
+                <p> {{ __("View Students") }} </p>
+              </a>
+            </li> 
+            <li class="@if ($activePage == 'students.import') active @endif">
+              <a href="{{ route('students.import') }}">
+                <i class="now-ui-icons arrows-1_share-66"></i>
+                <p> {{ __("Import Students") }} </p>
+              </a>
+            </li>       
+          </ul>
+        </div>
+      </li>
+      <li>
+        <a data-toggle="collapse" href="#docketSupsAndDefExamples">
           <i class="now-ui-icons education_paper"></i>
           <p>
             {{ __("Sups and Def Docket") }}

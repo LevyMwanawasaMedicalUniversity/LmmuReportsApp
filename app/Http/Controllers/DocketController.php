@@ -33,7 +33,7 @@ class DocketController extends Controller
                     });
         foreach ($studentsDetails as $student) {
             $studentNumber = $student->StudentID;
-            $this->sendEmailNotification($studentNumber);            
+            // $this->sendEmailNotification($studentNumber);            
         }
         return back()->with('success', 'Emails sent successfully.');
     }
@@ -133,7 +133,7 @@ class DocketController extends Controller
                             'password' => '12345678'                            
                         ]);
                     
-                        $this->sendEmailNotification($student->name);
+                        // $this->sendEmailNotification($student->name);
                     }
                 }
             });
@@ -312,7 +312,7 @@ class DocketController extends Controller
 
                             $this->setAndUpdateCoursesForCurrentYear($studentId);
                             // }
-                             $this->sendTestEmail($studentId);
+                            // $this->sendTestEmail($studentId);
                         }
                     }                    // Insert new students
                     $newStudents = array_diff($chunk, $existingStudents);
@@ -374,7 +374,7 @@ class DocketController extends Controller
                         
                         // Assign the "Student" permission to the user
                         $student->givePermissionTo($studentPermission);
-                        $this->sendTestEmail($studentNumber); 
+                        // $this->sendTestEmail($studentNumber); 
                     }
                 }
 
@@ -389,6 +389,7 @@ class DocketController extends Controller
         // Handle errors or validation failures
         return redirect()->back()->with('error', 'Failed to upload students.');
     }
+    
 
     private function processStudentChunk($chunk, $academicYear, $term, $status)
     {
@@ -971,6 +972,10 @@ class DocketController extends Controller
 
     public function import(){
         return view('docket.import');
+    }
+
+    public function allStudentsImport(){
+        
     }
     public function importNmcz(){
         return view('docketNmcz.import');

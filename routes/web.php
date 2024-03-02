@@ -52,7 +52,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::patch('/{user}/update', 'UserController@update')->name('users.update');
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
-                
+                Route::get('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
+                Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
             });
             
         
@@ -74,6 +75,7 @@ Route::group(['middleware' => 'auth'], function () {
                 // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
                 Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
                 Route::get('/import', 'DocketController@import')->name('docket.import');
+                
                 Route::get('/importSupsAndDef', 'DocketController@importSupsAndDef')->name('docket.importSupsAndDef');
                 Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
                 Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
