@@ -1466,6 +1466,14 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getCoursesInASpecificProgrammeCode($programmeCode){
+        $results = $this->queryAllCoursesAttachedToProgramme()
+            ->where('programmes.ProgramName', '=', $programmeCode)
+            ->select('courses.Name')
+            ->distinct();
+        return $results;
+    }
+
     private function queryAllCoursesAttachedToProgramme(){
         $results = SisCourses::select(
             'courses.ID',

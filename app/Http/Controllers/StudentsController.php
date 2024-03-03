@@ -107,9 +107,11 @@ class StudentsController extends Controller
 
     public function setAndSaveCoursesForCurrentYearRegistration($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
+        $failed = 1;
     
         if (!$dataArray) {
             $dataArray = $this->findUnregisteredStudentCourses($studentId);
+            $failed = 2;
         }
     
         if (empty($dataArray)) {
@@ -145,21 +147,30 @@ class StudentsController extends Controller
             return (object) $item;
         });
     
-        return $dataArray;
+        return ['dataArray' => $dataArray, 'failed' => $failed];
         // Batch insert the new courses
     }
+
+    
 
     public function showStudent($studentId){       
         
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
         // return $studentsPayments;
         
-        $courses = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $getResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $courses = $getResults['dataArray'];
+        $failed = $getResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
         // return $coursesArray;
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        $programeCode = $studentsProgramme[0]->CodeRegisteredUnder;
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
+        // return $theNumberOfCourses;
         
+
+
         // return $getInvoiceForStudentsProgramme;        
         $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
@@ -189,9 +200,13 @@ class StudentsController extends Controller
                 // Log the course that didn't find a match in $allInvoicesArray
                 Log::info('No match found for course: ' . $key);
             }
+        
+            // Append the number of courses to the course array
+            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->get()->count();
+        
             return (object) $courseArray;
         });
-        //  return $currentStudentsCourses;
+        // return $currentStudentsCourses;
 
         $allCourses = $getAllCoursesQuery->map(function ($course) use ($allInvoicesArray) {
             $courseArray = $course->toArray();
@@ -221,7 +236,7 @@ class StudentsController extends Controller
         });
         // return $allCourses;
         // return $currentStudentsCourses;
-        return view('allStudents.show',compact('courses','allCourses','currentStudentsCourses','studentsPayments'));
+        return view('allStudents.show',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
     }
 
     
