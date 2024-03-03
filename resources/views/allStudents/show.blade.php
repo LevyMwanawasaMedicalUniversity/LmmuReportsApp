@@ -50,7 +50,7 @@
                                         <td>{{ $studentId }}</td>
                                         <td>@isset($studentsPayments->LatestInvoiceDate) {{ $studentsPayments->LatestInvoiceDate }} @endisset</td>
                                         {{-- <td>@isset($studentsPayments->TotalPayments) K{{ $studentsPayments->TotalPayments }} @endisset</td> --}}
-                                        <td>@isset($studentsPayments->TotalPayment2024) K{{ $studentsPayments->TotalPayment2024 }} @endisset</td>
+                                        <td id="payments2024">{{ $studentsPayments->TotalPayment2024 ?? 0 }}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -89,13 +89,13 @@
                                                 }
                                                 
                                             @endphp
-                                            <span class="ms-auto">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
+                                            <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat{{$loop->index}}{{ $studentId }}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
                                             <span class="ms-auto">Total Invoice = K{{ number_format($amount,2) }}</span>
                                         </button>
                                     </h2>
                                     <div id="collapse{{$loop->index}}{{ $studentId }}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}{{ $studentId }}">
                                         <div class="accordion-body">
-                                            <form method="post" action="">
+                                            {{-- <form method="post" action=""> --}}
                                                 @csrf
                                                 <table class="table">
                                                     <thead class="text-primary">
@@ -110,7 +110,7 @@
                                                     @foreach($courses as $course)
                                                         <tr>
                                                             <td>
-                                                                <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" checked>
+                                                                <input type="checkbox" name="courseRepeat[]" value="{{$course->CourseCode}}" class="courseRepeat" id="courseRepeat{{$loop->parent->index}}{{ $studentId }}{{$loop->index}}" checked>
                                                             </td>
                                                             <td>{{$course->CourseCode}}</td>
                                                             <td class="text-end">{{$course->CourseName}}</td>
@@ -137,8 +137,8 @@
                                                     @endforeach
                                                     </tbody>
                                                 </table>
-                                                <button type="submit" class="btn btn-primary">Register</button>
-                                            </form>
+                                                <button type="submit" class="btn btn-primary registerButtonRepeat" id="registerButtonRepeat{{$loop->index}}{{ $studentId }}">Register</button>
+                                            {{-- </form> --}}
                                         </div>
                                     </div>
                                 </div>
@@ -160,13 +160,13 @@
                                             @php
                                                 $course = $courses->first();
                                             @endphp
-                                            <span class="ms-auto">Registration Fee = K{{ number_format($course->InvoiceAmount * 0.25, 2) }}</span>
+                                            <span class="ms-auto registrationFee" id="registrationFee{{$loop->index}}">Registration Fee = K{{ number_format($course->InvoiceAmount * 0.25, 2) }}</span>
                                             <span class="ms-auto">Total Invoice = K{{ number_format($course->InvoiceAmount,2) }}</span>
                                         </button>
                                     </h2>
                                     <div id="collapse{{$loop->index}}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}">
                                         <div class="accordion-body">
-                                            <form method="post" action="">
+                                            {{-- <form method="post" action=""> --}}
                                                 @csrf
                                                 <table class="table">
                                                     <thead class="text-primary">
@@ -181,7 +181,7 @@
                                                     @foreach($courses as $course)
                                                         <tr>
                                                             <td>
-                                                                <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" checked>
+                                                                <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
                                                             </td>
                                                             <td>{{$course->CourseCode}}</td>
                                                             <td class="text-end">{{$course->CourseName}}</td>
@@ -190,8 +190,8 @@
                                                     @endforeach
                                                     </tbody>
                                                 </table>
-                                                <button type="submit" class="btn btn-primary">Register</button>
-                                            </form>
+                                                <button type="submit" class="btn btn-primary registerButton" id="registerButton{{$loop->index}}">Register</button>
+                                            {{-- </form> --}}
                                         </div>
                                     </div>                                
                                 </div>
@@ -204,8 +204,108 @@
         </div>
     </div>
 </div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Modal for eligible registration -->
+<div class="modal" id="eligibleModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eligible for Registration</h5>
+            </div>
+            <div class="modal-body">
+                <p>You are eligible to register. Do you want to proceed?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary">Yes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Modal for ineligible registration -->
+<div class="modal" id="ineligibleModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Not Eligible for Registration</h5>
+            </div>
+            <div class="modal-body">
+                <p>You do not have enough for registration.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.registerButton').click(function(e) {
+        e.preventDefault();
+
+        var index = $(this).attr('id').replace('registerButton', '');
+        var registrationFeeText = $('#registrationFee' + index).text();
+        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
+        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
+    // Store the courses in a variable
+        var courses = [];
+        $('input[id^="course' + index + '"]:checked').each(function() {
+            courses.push($(this).val());
+        });
+        console.log(courses);
+        console.log(registrationFee);
+        console.log(payments2024);
+
+    // Show the modal
+        if (registrationFee <= payments2024) {
+            $('#eligibleModal').modal('show');
+
+      // Populate the modal with the courses
+        var courseList = '';
+        for (var i = 0; i < courses.length; i++) {
+                courseList += '<p>' + courses[i] + '</p>';
+        }
+        $('#eligibleModal .modal-body').html(courseList);
+        } else {
+            $('#ineligibleModal').modal('show');
+        }
+    });
+});
+
+$(document).ready(function() {
+    $('.registerButtonRepeat').click(function(e) {
+        e.preventDefault();
+
+        var index = $(this).attr('id').replace('registerButtonRepeat', '');
+        var registrationFeeText = $('#registrationFeeRepeat' + index).text();
+        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
+        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
+    // Store the courses in a variable
+        var coursesRepeat = [];
+        $('input[id^="courseRepeat' + index + '"]:checked').each(function() {
+            coursesRepeat.push($(this).val());
+        });
+        console.log(coursesRepeat);
+        console.log(registrationFee);
+        console.log(payments2024);
+
+    // Show the modal
+        if (registrationFee <= payments2024) {
+            $('#eligibleModal').modal('show');
+
+      // Populate the modal with the courses
+        var courseList = '';
+        for (var i = 0; i < coursesRepeat.length; i++) {
+                courseList += '<p>' + coursesRepeat[i] + '</p>';
+        }
+        $('#eligibleModal .modal-body').html(courseList);
+        } else {
+            $('#ineligibleModal').modal('show');
+        }
+    });
+});
+</script>
 
 
 
