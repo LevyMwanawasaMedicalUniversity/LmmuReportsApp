@@ -54,7 +54,9 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
                 Route::get('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
                 Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
-                Route::get('/viewStudents/showStudent/{studentNumber}', 'StudentsController@showStudent')->name('students.showStudent');
+                Route::get('/viewStudents/showStudent/{studentNumber}', 'StudentsController@registerStudent')->name('students.showStudent');
+                Route::post('/viewStudents/submitRegistration', 'StudentsController@submitCourses')->name('sumbitRegistration.student');
+
             });
             
         

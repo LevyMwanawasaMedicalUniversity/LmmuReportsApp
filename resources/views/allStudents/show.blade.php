@@ -209,13 +209,18 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Eligible for Registration</h5>
+                <h5 class="modal-title">The following are the courses you have selected for reigtration</h5>
             </div>
             <div class="modal-body">
                 <p>You are eligible to register. Do you want to proceed?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary">Yes</button>
+                <form method="POST" action="{{ route('sumbitRegistration.student') }}">
+                    @csrf
+                    <input type="hidden" name="courses" id="coursesInput">
+                    <input type="hidden" name="studentNumber" value="{{ $studentId }}">
+                    <button type="submit" class="btn btn-primary">Yes</button>
+                </form>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
             </div>
         </div>
@@ -267,6 +272,7 @@ $(document).ready(function() {
                 courseList += '<p>' + courses[i] + '</p>';
         }
         $('#eligibleModal .modal-body').html(courseList);
+        $('#coursesInput').val(courses.join(','));
         } else {
             $('#ineligibleModal').modal('show');
         }
@@ -300,6 +306,7 @@ $(document).ready(function() {
                 courseList += '<p>' + coursesRepeat[i] + '</p>';
         }
         $('#eligibleModal .modal-body').html(courseList);
+        $('#coursesInput').val(courses.join(','));
         } else {
             $('#ineligibleModal').modal('show');
         }

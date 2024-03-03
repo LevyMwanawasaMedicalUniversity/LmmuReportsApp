@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BasicInformation;
+use App\Models\CourseElectives;
+use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
@@ -153,8 +155,34 @@ class StudentsController extends Controller
 
     
 
-    public function showStudent($studentId){       
+    public function submitCourses(Request $request){
+        $studentId = $request->input('studentNumber');
+        $courses = explode(',', $request->input('courses'));
+        $academicYear = 2024;
+
+        // Insert into CourseRegistration table
+        foreach ($courses as $course) {
+            CourseRegistration::create([
+                'StudentID' => $studentId,
+                'CourseID' => $course,
+                'EnrolmentDate' => now(),
+                'Year' => $academicYear,
+                'Semester' => 1,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Courses submitted successfully.');
+    }       
+
+    
+
+    public function registerStudent($studentId){
         
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)->where('Year', 2024)->where('Semester', 1)->get();
+        if($checkRegistration->count() > 0){
+            
+            return view('allStudents.registrationPage',compact('studentId','checkRegistration'));
+        }
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
         // return $studentsPayments;
         
@@ -168,9 +196,6 @@ class StudentsController extends Controller
         $programeCode = $studentsProgramme[0]->CodeRegisteredUnder;
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
         // return $theNumberOfCourses;
-        
-
-
         // return $getInvoiceForStudentsProgramme;        
         $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
@@ -179,8 +204,7 @@ class StudentsController extends Controller
         $currentStudentsCourses = $studentsProgramme->map(function ($course) use ($allInvoicesArray) {
             $courseArray = $course->toArray();
             $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = null;
-        
+            $matchedKey = null;        
             // Find a key in $allInvoicesArray that contains $key
             foreach ($allInvoicesArray as $invoiceKey => $invoice) {
                 if (stripos($invoiceKey, $key) !== false) {
