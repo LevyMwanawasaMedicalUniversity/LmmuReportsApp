@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\BasicInformation;
+use App\Models\Courses;
+use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -100,6 +103,129 @@ class StudentsController extends Controller
             // Handle any errors during user account creation
         }
     }
+
+
+    public function setAndSaveCoursesForCurrentYearRegistration($studentId) {
+        $dataArray = $this->getCoursesForFailedStudents($studentId);
+    
+        if (!$dataArray) {
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+        }
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get()
+            ->pluck('Course')
+            ->toArray();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            if (!in_array($course, $studentCourses)) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses[] = $course;
+            }
+        }
+    
+        // Convert the array to a collection of objects
+        $dataArray = collect($dataArray)->map(function($item) {
+            return (object) $item;
+        });
+    
+        return $dataArray;
+        // Batch insert the new courses
+    }
+
+    public function showStudent($studentId){       
+        
+        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // return $studentsPayments;
+        
+        $courses = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        
+        $coursesArray = $courses->pluck('Course')->toArray();
+        // return $coursesArray;
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        
+        // return $getInvoiceForStudentsProgramme;        
+        $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+            return [trim($item['InvoiceDescription']) => $item];
+        })->toArray();
+        $currentStudentsCourses = $studentsProgramme->map(function ($course) use ($allInvoicesArray) {
+            $courseArray = $course->toArray();
+            $key = trim($course->CodeRegisteredUnder);
+            $matchedKey = null;
+        
+            // Find a key in $allInvoicesArray that contains $key
+            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
+                if (stripos($invoiceKey, $key) !== false) {
+                    $matchedKey = $invoiceKey;
+                    break;
+                }
+            }
+        
+            if ($matchedKey) {
+                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+                if ($mergedArray == $courseArray) {
+                    // Log the course that didn't merge
+                    Log::info('No merge for course: ' . $key);
+                }
+                $courseArray = $mergedArray;
+            } else {
+                // Log the course that didn't find a match in $allInvoicesArray
+                Log::info('No match found for course: ' . $key);
+            }
+            return (object) $courseArray;
+        });
+        //  return $currentStudentsCourses;
+
+        $allCourses = $getAllCoursesQuery->map(function ($course) use ($allInvoicesArray) {
+            $courseArray = $course->toArray();
+            $key = trim($course->CodeRegisteredUnder);
+            $matchedKey = null;
+        
+            // Find a key in $allInvoicesArray that contains $key
+            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
+                if (stripos($invoiceKey, $key) !== false) {
+                    $matchedKey = $invoiceKey;
+                    break;
+                }
+            }
+        
+            if ($matchedKey) {
+                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+                if ($mergedArray == $courseArray) {
+                    // Log the course that didn't merge
+                    Log::info('No merge for course: ' . $key);
+                }
+                $courseArray = $mergedArray;
+            } else {
+                // Log the course that didn't find a match in $allInvoicesArray
+                Log::info('No match found for course: ' . $key);
+            }
+            return (object) $courseArray;
+        });
+        // return $allCourses;
+        // return $currentStudentsCourses;
+        return view('allStudents.show',compact('courses','allCourses','currentStudentsCourses','studentsPayments'));
+    }
+
+    
+
 
     public function viewAllStudents(Request $request){
         $academicYear= 2024;

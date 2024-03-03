@@ -340,7 +340,7 @@ class Controller extends BaseController
         $failedCourses = [];
     
         $failedStudents = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
-            ->whereNotIn('AcademicYear', ['2023'])
+            ->whereNotIn('AcademicYear', ['2024'])
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
                     ->from('grades')
@@ -367,7 +367,7 @@ class Controller extends BaseController
                 $cleared = Grade::select('StudentNo','ProgramNo', 'CourseNo', 'Grade')
                     ->where('StudentNo', $student)
                     ->where('CourseNo', $course)
-                    ->whereNotIn('AcademicYear', ['2023'])
+                    ->whereNotIn('AcademicYear', ['2024'])
                     ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])
                     ->orderBy('Grade')
                     ->get();
@@ -667,23 +667,32 @@ class Controller extends BaseController
     }
 
     public function getYearOfStudy($courseNos) {
-        $maxYear = [];
+        $firstNumbers = [];
     
         foreach ($courseNos as $courseNo) {
-            // Use regular expression to find the first number after the letters
-            if (preg_match('/[a-zA-Z]+(\d+)/', $courseNo, $matches)) {
-                $year = $matches[1]; // Get the whole number as a string
-                $yearDigits = str_split($year); // Split the number into individual digits
-                $maxYear = array_merge($maxYear, $yearDigits); // Merge the digits into the maxYear array
+            // Use regular expression to remove the letters and get the numbers
+            $numbers = preg_replace('/[a-zA-Z]/', '', $courseNo);
+    
+            // Get the first number
+            $firstNumber = $numbers[0];
+    
+            // Add the first number to the array
+            $firstNumbers[] = $firstNumber;
+        }
+    
+        // Find the highest number
+        if($firstNumbers){
+            $highestNumber = max($firstNumbers);
+            if($highestNumber == 8 ){
+                $highestNumber = 1;
+            }elseif($highestNumber == 9){
+                $highestNumber = 2;
+            }else{
+                $highestNumber = $highestNumber;
             }
-        }    
-        // Find the highest digit
-        if($maxYear){
-            $highestDigit = $maxYear[0];
-            return $highestDigit + 1;
+            return $highestNumber + 1;
         }else{   
-            $highestDigit = 1;
-            return $highestDigit;
+            return 1;
         }
     }
 
@@ -693,7 +702,7 @@ class Controller extends BaseController
         // Perform the query to get grades
         $gradesCheck = Grades::query()
             ->where('grades.StudentNo', $studentId)
-            ->whereNotIn('AcademicYear', ['2023'])
+            ->whereNotIn('AcademicYear', ['2024'])
             ->get();
 
         // Extract course numbers from the results
@@ -747,6 +756,7 @@ class Controller extends BaseController
                 ];
                 return $studentCourses;
             }
+            
             
         }
     
@@ -1057,6 +1067,60 @@ class Controller extends BaseController
         return $resultsForStudent;
     }
 
+    public function setAndUpdateCourses($studentId) {
+        $dataArray = $this->getCoursesForFailedStudents($studentId);
+    
+        if (!$dataArray) {
+            $dataArray = $this->findUnregisteredStudentCourses($studentId);
+        }
+    
+        if (empty($dataArray)) {
+            return; // No data to insert, so exit early
+        }
+    
+        // Check if there are rows with "No Value" for the specific 'Student'
+        $hasNoValueCourses = Courses::where('Student', $studentId)
+            ->where('Course', 'No Value')
+            ->exists();
+    
+        $studentCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', array_column($dataArray, 'Course'))
+            ->get();
+    
+        $coursesToInsert = [];
+    
+        foreach ($dataArray as $item) {
+            $course = $item['Course'];
+    
+            // Check if Grade is "No Value" and Course is "No Value"
+            if ($item['Course'] === "No Value" && $course === "No Value") {
+                // If Grade and Course are both "No Value", don't insert these rows
+                continue;
+            }
+    
+            if (!in_array($course, $studentCourses->pluck('Course')->toArray())) {
+                $coursesToInsert[] = [
+                    'Student' => $item['Student'],
+                    'Program' => $item['Program'],
+                    'Course' => $course,
+                    'Grade' => $item['Grade'],
+                ];
+    
+                // Update the list of existing courses for the student
+                $studentCourses->push(['Course' => $course]);
+            }
+        }
+    
+        if (!empty($coursesToInsert) && $hasNoValueCourses) {
+            // Delete rows with "No Value" entries
+            Courses::where('Student', $studentId)
+                ->delete();
+            
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+    }
+
     public function getInvoicesPerProgramme(){
         $results = $this->queryInvoicesPerProgramme();
         return $results;
@@ -1116,6 +1180,62 @@ class Controller extends BaseController
         ->whereRaw('LENGTH(`basic-information`.`ID`) >= 7')
         ->groupBy('basic-information.ID');
     
+        return $results;
+    }
+
+    public function getStudentsPayments($studentId){
+        $results = $this->queryStudentsPayments($studentId);
+        return $results;
+    }
+
+    private function queryStudentsPayments($studentId){
+
+        $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
+            ->where('Description', 'like', '%-%-%')
+            ->where('Debit', '>', 0)
+            ->groupBy('AccountLink');
+        $results = SageClient::select    (
+            'DCLink',
+            'Account',
+            'Name',
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
+                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.TxDate > \'2023-01-01\' THEN 0
+                ELSE pa.Credit 
+                END) AS TotalPaymentBefore2023'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
+                WHEN pa.Description LIKE \'%-%\' THEN 0   
+                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2024'),            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.TxDate < \'2023-01-01\' THEN 0
+                WHEN pa.TxDate > \'2023-12-31\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2023'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0    
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.Description LIKE \'%-%\' THEN 0            
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
+            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2024 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
+            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate')
+        )
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->leftJoinSub($latestInvoiceDates, 'lid', function ($join) {
+            $join->on('pa.AccountLink', '=', 'lid.AccountLink');
+        })
+        ->where('Account', $studentId)
+        ->groupBy('DCLink', 'Account', 'Name', 'lid.LatestTxDate', DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'), DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END'));
         return $results;
     }
 
@@ -1295,6 +1415,55 @@ class Controller extends BaseController
         }
 
         return $allResults;
+    }
+
+    public function getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId,$courses){
+        $results = $this->queryAllCoursesAttachedToProgrammeForAStudent($studentId)
+                    ->whereIn('courses.Name', $courses);
+        return $results;
+    }
+
+    public function getAllCoursesAttachedToProgrammeForAStudent($studentId){
+        $results = $this->queryAllCoursesAttachedToProgrammeForAStudent($studentId);
+        return $results;
+    }
+
+    private function queryAllCoursesAttachedToProgrammeForAStudent($studentId){
+        $results = SisCourses::select(
+            'courses.ID',
+            'courses.Name as CourseCode',
+            'courses.CourseDescription as CourseName',
+            'study.Name as Programme',
+            'schools.Name as School',
+            'programmes.ProgramName as CodeRegisteredUnder',
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                END AS YearOfStudy
+            "),
+            DB::raw("
+                CASE
+                    WHEN programmes.ProgramName LIKE '%-DE-%' THEN 'DISTANCE'
+                    WHEN programmes.ProgramName LIKE '%-FT-%' THEN 'FULLTIME'
+                END as StudyMode
+            ")
+        )
+        ->join('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->join('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->join('study-program-link', 'programmes.ID', '=', 'study-program-link.ProgramID')
+        ->join('study', 'study-program-link.StudyID', '=', 'study.ID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID')
+        ->join('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+        ->where('student-study-link.StudentID', $studentId);
+
+        return $results;
     }
 
     private function queryAllCoursesAttachedToProgramme(){

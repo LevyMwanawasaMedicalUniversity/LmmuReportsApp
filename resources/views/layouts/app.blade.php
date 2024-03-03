@@ -22,6 +22,7 @@
   <!-- <script src="your-custom-script.js"></script> -->
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="{{ asset('assets') }}/demo/demo.css" rel="stylesheet" />
+  
 </head>
 
 <body class="{{ $class ?? '' }}">

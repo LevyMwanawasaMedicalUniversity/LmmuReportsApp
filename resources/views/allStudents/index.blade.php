@@ -122,7 +122,7 @@
                                 <td class="text-end">
                                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                                         <a href="{{route('docket.resetStudent',$result->StudentID)}}" class="btn btn-info">Reset</a>
-                                        <a href="{{route('docket.showStudent',$result->StudentID)}}" class="btn btn-primary">View</a>
+                                        <a href="{{route('students.showStudent',$result->StudentID)}}" class="btn btn-primary">View</a>
                                     </div>
                                 </td>
                                 <!-- Add other table cells for additional properties -->

@@ -39,6 +39,7 @@ class FinanceQueriesController extends Controller
     public function viewInvoicesPerProgramme(){
         
         $results = $this->getInvoicesPerProgramme()->get();
+        // return $results;
         foreach ($results as $result) {
             $descriptionParts = explode('-', $result->Description);
             if(isset($descriptionParts[1])){
@@ -52,13 +53,13 @@ class FinanceQueriesController extends Controller
                 [ 'AutoIndex' => $result->AutoIndex ],
                 [
                     'InvNumber' => $result->InvNumber,
-                    'Description' => $result->Description,
+                    'InvoiceDescription' => $result->Description,
                     'InvDate' => $result->InvDate, 
-                    'Amount' => $result->InvTotExcl,
-                    'ProgrammeCode' => $descriptionParts[0] ?? 'none',
-                    'ModeOfStudy' => $studyMode ?? 'none',
-                    'YearOfInvoice' =>  $descriptionParts[2] ?? 'none',
-                    'YearOfStudy' => $descriptionParts[3] ?? 'none',
+                    'InvoiceAmount' => $result->InvTotExcl,
+                    'InvoiceProgrammeCode' => $descriptionParts[0] ?? 'none',
+                    'InvoiceModeOfStudy' => $studyMode ?? 'none',
+                    'InvoiceYearOfInvoice' =>  $descriptionParts[2] ?? 'none',
+                    'InvoiceYearOfStudy' => $descriptionParts[3] ?? 'none',
                 ]
             );
         }    
