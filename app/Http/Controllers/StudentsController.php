@@ -6,6 +6,7 @@ use App\Models\BasicInformation;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
+use App\Models\EduroleCourses;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\User;
@@ -79,6 +80,24 @@ class StudentsController extends Controller
         }
         // Provide a success message
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    }
+
+    public function printIDCard(Request $request){
+
+        $studentId = $request->input('studentId');
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+        ->where('Year', 2024)
+        ->where('Semester', 1)
+        ->exists();
+
+        if (!$checkRegistration) {            
+            return redirect()->back()->with('error', 'UNREGISTERED STUDENT');
+        }
+
+        $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+        // return $studentInformation;
+
+        return view('allStudents.studentIDCard',compact('studentInformation'));
     }
 
     public function viewDocket(){
@@ -199,6 +218,30 @@ class StudentsController extends Controller
         return ['dataArray' => $dataArray, 'failed' => $failed];
     }
 
+    public function deleteEntireRegistration(Request $request){
+        $studentId = $request->input('studentId');
+        $year = $request->input('year');
+    
+        CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', $year)
+            ->delete();
+    
+        return redirect()->back()->with('success', 'Registration deleted successfully');
+    }
+
+    public function deleteCourseInRegistration(Request $request){
+        $studentId = $request->input('studentId');
+        $year = $request->input('year');
+        $courseId = $request->input('courseId');
+    
+        CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', $year)
+            ->where('CourseID', $courseId)
+            ->delete();
+    
+        return redirect()->back()->with('success', 'Registration deleted successfully');
+    }
+
     public function studentRegisterForCourses($studentId) {
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
             ->where('Year', 2024)
@@ -206,8 +249,14 @@ class StudentsController extends Controller
             ->exists();
     
         if ($checkRegistration) {
-            $checkRegistration = $this->getStudentRegistration($studentId);
-            return view('allStudents.registrationPage', compact('studentId','checkRegistration'));
+            $checkRegistration = collect($this->getStudentRegistration($studentId));
+            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+            
+            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            
+            $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+            
+            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
         }
     
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
@@ -255,7 +304,70 @@ class StudentsController extends Controller
         return view('allStudents.studentSelfRegistration', compact('courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
+    public function registerStudent($studentId) {
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
     
+        if ($checkRegistration) {
+            $checkRegistration = collect($this->getStudentRegistration($studentId));
+            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+            
+            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            
+            $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+            
+            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+        }
+    
+        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // No need to return $studentsPayments here
+        
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
+        
+        $coursesArray = $courses->pluck('Course')->toArray();
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+    
+        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme->transform(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
+    
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+    
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
+    
+        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+            return [trim($item['InvoiceDescription']) => $item];
+        })->toArray();
+    
+        $processCourse = function ($course) use ($allInvoicesArray) {
+            $courseArray = $course->toArray();
+            $key = trim($course->CodeRegisteredUnder);
+            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
+            
+            if ($matchedKey) {
+                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+            } else {
+                Log::info('No match found for course: ' . $key);
+            }
+    
+            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
+            
+            return (object) $courseArray;
+        };
+    
+        $currentStudentsCourses = $studentsProgramme->map($processCourse);
+        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get()->map($processCourse);
+    
+        return view('allStudents.adminRegisterStudent', compact('courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+    }  
 
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
@@ -305,68 +417,6 @@ class StudentsController extends Controller
                 ->get();
         return $checkRegistration;
     }
-
-    public function registerStudent($studentId) {
-        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-            ->where('Year', 2024)
-            ->where('Semester', 1)
-            ->exists();
-    
-        if ($checkRegistration) {
-            $checkRegistration = $this->getStudentRegistration($studentId);
-            return view('allStudents.registrationPage', compact('studentId','checkRegistration'));
-        }
-    
-        $studentsPayments = $this->getStudentsPayments($studentId)->first();
-        // No need to return $studentsPayments here
-        
-        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-        $courses = $registrationResults['dataArray'];
-        $failed = $registrationResults['failed'];
-        
-        $coursesArray = $courses->pluck('Course')->toArray();
-        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-    
-        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
-        if (str_starts_with($studentId, '190')) {
-            $studentsProgramme->transform(function ($studentProgramme) {
-                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
-                return $studentProgramme;
-            });
-        }
-    
-        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
-    
-        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
-    
-        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
-            return [trim($item['InvoiceDescription']) => $item];
-        })->toArray();
-    
-        $processCourse = function ($course) use ($allInvoicesArray) {
-            $courseArray = $course->toArray();
-            $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
-            
-            if ($matchedKey) {
-                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-            } else {
-                Log::info('No match found for course: ' . $key);
-            }
-    
-            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
-            
-            return (object) $courseArray;
-        };
-    
-        $currentStudentsCourses = $studentsProgramme->map($processCourse);
-        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get()->map($processCourse);
-    
-        return view('allStudents.adminRegisterStudent', compact('courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
-    }
-
-    
-
 
     public function viewAllStudents(Request $request){
         $academicYear= 2024;

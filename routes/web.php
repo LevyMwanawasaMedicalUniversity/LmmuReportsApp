@@ -56,6 +56,9 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
                 Route::get('/viewStudents/showStudent/{studentNumber}', 'StudentsController@registerStudent')->name('students.showStudent');
                 Route::post('/viewStudents/submitRegistration', 'StudentsController@adminSubmitCourses')->name('sumbitRegistration.student');
+                Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
+                Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
+                Route::post('/viewStudents/printIDCard', 'StudentsController@printIDCard')->name('printIDCard.student');
 
             });
             
@@ -73,7 +76,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::middleware('can:Student')->group(function () {
             
             Route::prefix('student')->group(function () {
-                Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
+                // Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
                 Route::get('/viewResults', 'StudentsController@viewResults')->name('student.viewResults');
                 Route::get('/coursesRegistration/{studentId}', 'StudentsController@studentRegisterForCourses')->name('student.coursesRegistration');
                 Route::post('/submitCourseRegistration', 'StudentsController@studentSubmitCourseRegistration')->name('student.submitCourseRegistration');

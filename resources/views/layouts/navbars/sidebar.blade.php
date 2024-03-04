@@ -28,7 +28,7 @@
         </a>
       </li>
       <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
-        <a href="{{ route('student.viewDocket') }}">
+        <a href="#">
           <i class="now-ui-icons education_paper"></i>
           <p>{{ __('Docket') }}</p>
         </a>
@@ -193,7 +193,7 @@
         </a>
         <div class="collapse" id="courseRegistration">
           <ul class="nav">            
-            <li class="@if ($activePage == 'docket-indexSupsAndDef') active @endif">
+            <li class="@if ($activePage == 'courseRegistration') active @endif">
               <a href="{{ route('students.index') }}">
                 <i class="now-ui-icons text_align-left"></i>
                 <p> {{ __("View Students") }} </p>
