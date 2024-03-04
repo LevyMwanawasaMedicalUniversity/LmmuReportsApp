@@ -1,14 +1,13 @@
 @extends('layouts.app', [
-    'namePage' => 'Dashboard',
+    'namePage' => 'studentExaminationDocket',
     'class' => 'sidebar-mini ',
-    'activePage' => 'home',
+    'activePage' => 'studentExaminationDocket',
     'activeNav' => '',
 ])
 
 @section('content')
-<div class="panel-header panel-header-sm">
-    
-  </div>
+<div class="panel-header panel-header-sm">    
+</div>
 <div class="content">
     <div class="row">
         <div class="col-md-12">
@@ -36,7 +35,7 @@
                             </div>
 
                             {{-- Include the QR code generator --}}
-                           {{-- Include the QR code generator --}}
+                            {{-- Include the QR code generator --}}
                             @php
                             use SimpleSoftwareIO\QrCode\Facades\QrCode;
                             @endphp

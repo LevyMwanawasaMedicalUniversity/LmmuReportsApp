@@ -19,6 +19,7 @@
   <link href="{{ asset('assets') }}/css/customcss.css" rel="stylesheet" />
   <link href="{{ asset('assets') }}/css/now-ui-dashboard.css?v=1.3.0" rel="stylesheet" />
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="{{ asset('assets') }}/js/courseRegistration.js"></script>
   <!-- <script src="your-custom-script.js"></script> -->
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="{{ asset('assets') }}/demo/demo.css" rel="stylesheet" />

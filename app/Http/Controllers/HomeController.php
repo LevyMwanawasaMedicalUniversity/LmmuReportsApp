@@ -27,57 +27,12 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user(); // Get the currently logged-in user
-
-        // Check if the user has the "Student" role
-        $hasStudentRole = $user->hasRole('Student');
-
-        if ($hasStudentRole) {
-
-            $academicYear= 2023;
-            $studentName = $user->name;
-            $student = Student::query()
-                            ->where('student_number','=', $studentName)
-                            ->first();
-
-            if(is_null($student)){
-                return back()->with('error', 'NOT STUDENT.');               
-            }             
-            
-            $studentNumbers = [$studentName];
-            $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
-
-            if($student->status == 3){
-                $studentExistsInStudentsTable = Courses::where('Student', $studentName)->whereNotNull('updated_at')->exists();
-                if (!$studentExistsInStudentsTable) {
-                    $this->setAndUpdateCoursesForCurrentYear($studentName);
-                }
-            }else{
-                $this->setAndUpdateCourses($studentName);
-            }
-            
-            $courses = Courses::where('Student', $studentName)->get();
-
-            switch($student->status){
-                case 1:
-                    return view('docket.studentViewDocket',compact('studentResults','courses'));
-                case 2:
-                    return view('docketNmcz.studentViewDocket',compact('studentResults','courses'));
-                case 3:
-                    return view('docketSupsAndDef.studentViewDocket',compact('studentResults','courses'));
-                default:
-                    return view('home');
-            }
-        }else{
-            return view('home');  
-        }
-
-        return view('home');       
-    }  
+        return view('home');
+    } 
     
     
 
-    private function setAndUpdateCourses($studentId) {
+    public function setAndUpdateCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
     
         if (!$dataArray) {

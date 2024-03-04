@@ -11,6 +11,7 @@ use App\Models\Student;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -78,6 +79,51 @@ class StudentsController extends Controller
         }
         // Provide a success message
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    }
+
+    public function viewDocket(){
+        $user = Auth::user(); // Get the currently logged-in user
+
+        // If the user doesn't have the "Student" role, return the home view
+        if (!$user->hasRole('Student')) {
+            return view('home');
+        }
+
+        // return $user->getRoleNames();
+
+        $student = Student::where('student_number', $user->name)->first();
+        // return $student;
+
+        // If the student doesn't exist, return back with an error message
+        if (is_null($student)) {
+            return back()->with('error', 'NOT STUDENT.');
+        }
+
+        $academicYear = 2023;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
+
+        // Update courses based on the student's status
+        if ($student->status == 3 && !Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
+            $this->setAndUpdateCoursesForCurrentYear($user->name);
+        } else {
+            $this->setAndUpdateCourses($user->name);
+        }
+        // return $student->status;
+
+        $courses = Courses::where('Student', $user->name)->get();
+
+        // Cast the status to an integer
+        $status = (int) $student->status;
+
+        // Return the appropriate view based on the student's status
+        $viewName = match ($status) {
+            1 => 'docket.studentViewDocket',
+            4 => 'docket.studentViewDocket',
+            2 => 'docketNmcz.studentViewDocket',
+            3 => 'docketSupsAndDef.studentViewDocket',
+        };
+
+        return view($viewName, compact('studentResults', 'courses'));
     }
 
     private function createUserAccount($studentId)
@@ -153,6 +199,77 @@ class StudentsController extends Controller
         // Batch insert the new courses
     }
 
+    public function studentRegisterForCourses($studentId){
+        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // return $studentsPayments;
+        
+        $getResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $courses = $getResults['dataArray'];
+        $failed = $getResults['failed'];
+        
+        $coursesArray = $courses->pluck('Course')->toArray();
+        // return $coursesArray;
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+
+        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme = $studentsProgramme->map(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
+
+        // return $studentsProgramme;
+        $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
+
+        // return $programeCode;   
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
+        // return $theNumberOfCourses;
+        // return $getInvoiceForStudentsProgramme;        
+        $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        
+        if (str_starts_with($studentId, '190')) {
+            $getAllCoursesQuery = $getAllCoursesQuery->map(function ($getAllCoursesQuery) {
+                $getAllCoursesQuery->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $getAllCoursesQuery->CodeRegisteredUnder);
+                return $getAllCoursesQuery;
+            });
+        }
+        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+            return [trim($item['InvoiceDescription']) => $item];
+        })->toArray();
+        $currentStudentsCourses = $studentsProgramme->map(function ($course) use ($allInvoicesArray) {
+            $courseArray = $course->toArray();
+            $key = trim($course->CodeRegisteredUnder);
+            $matchedKey = null;
+        
+            // Find a key in $allInvoicesArray that contains $key
+            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
+                if (stripos($invoiceKey, $key) !== false) {
+                    $matchedKey = $invoiceKey;
+                    break;
+                }
+            }
+        
+            if ($matchedKey) {
+                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+                if ($mergedArray == $courseArray) {
+                    // Log the course that didn't merge
+                    Log::info('No merge for course: ' . $key);
+                }
+                $courseArray = $mergedArray;
+            } else {
+                // Log the course that didn't find a match in $allInvoicesArray
+                Log::info('No match found for course: ' . $key);
+            }
+        
+            // Append the number of courses to the course array
+            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->get()->count();
+        
+            return (object) $courseArray;
+        });
+        return view('allStudents.studentSelfRegistration',compact('courses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
+    }
+
     
 
     public function submitCourses(Request $request){
@@ -193,11 +310,30 @@ class StudentsController extends Controller
         $coursesArray = $courses->pluck('Course')->toArray();
         // return $coursesArray;
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        $programeCode = $studentsProgramme[0]->CodeRegisteredUnder;
+        // return $studentsProgramme;
+        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme = $studentsProgramme->map(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
+
+        // return $studentsProgramme;
+        $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
+
+        // return $programeCode;   
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
         // return $theNumberOfCourses;
         // return $getInvoiceForStudentsProgramme;        
         $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        
+        if (str_starts_with($studentId, '190')) {
+            $getAllCoursesQuery = $getAllCoursesQuery->map(function ($getAllCoursesQuery) {
+                $getAllCoursesQuery->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $getAllCoursesQuery->CodeRegisteredUnder);
+                return $getAllCoursesQuery;
+            });
+        }
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
@@ -260,7 +396,7 @@ class StudentsController extends Controller
         });
         // return $allCourses;
         // return $currentStudentsCourses;
-        return view('allStudents.show',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
+        return view('allStudents.adminRegisterStudent',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
     }
 
     
