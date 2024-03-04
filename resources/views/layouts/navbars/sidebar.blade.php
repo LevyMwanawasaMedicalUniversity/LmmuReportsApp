@@ -184,45 +184,14 @@
       @endif
       @if (auth()->user()->hasRole('Examination') || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
       <li>
-        <a data-toggle="collapse" href="#docketExamples">
-          <i class="now-ui-icons education_paper"></i>
-          <p>
-            {{ __("Docket") }}
-            <b class="caret"></b>
-          </p>
-        </a>
-        <div class="collapse" id="docketExamples">
-          <ul class="nav">
-            <li class="@if ($activePage == 'docket-import') active @endif">
-              <a href="{{ route('docket.import') }}">
-                <i class="now-ui-icons arrows-1_share-66"></i>
-                <p> {{ __("Import Students") }} </p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'docket-index') active @endif">
-              <a href="{{ route('docket.index') }}">
-                <i class="now-ui-icons text_align-left"></i>
-                <p> {{ __("View Students") }} </p>
-              </a>
-            </li>
-            <li class="@if ($activePage == 'docket-courses') active @endif">
-              <a href="{{ route('courses.import') }}">
-                <i class="now-ui-icons arrows-1_cloud-upload-94"></i>
-                <p> {{ __("All Courses") }} </p>
-              </a>
-            </li>         
-          </ul>
-        </div>
-      </li>
-      <li>
-        <a data-toggle="collapse" href="#docketSupsAndDefExamples">
+        <a data-toggle="collapse" href="#courseRegistration">
           <i class="now-ui-icons education_agenda-bookmark"></i>
           <p>
             {{ __("Course Registration") }}
             <b class="caret"></b>
           </p>
         </a>
-        <div class="collapse" id="docketSupsAndDefExamples">
+        <div class="collapse" id="courseRegistration">
           <ul class="nav">            
             <li class="@if ($activePage == 'docket-indexSupsAndDef') active @endif">
               <a href="{{ route('students.index') }}">
@@ -240,43 +209,87 @@
         </div>
       </li>
       <li>
-        <a data-toggle="collapse" href="#docketSupsAndDefExamples">
-          <i class="now-ui-icons education_paper"></i>
-          <p>
-            {{ __("Sups and Def Docket") }}
-            <b class="caret"></b>
-          </p>
+        <a data-toggle="collapse" href="#parentDocket">
+            <i class="now-ui-icons education_paper"></i>
+            <p>
+                {{ __("EXAMINATION DOCKETS") }}
+                <b class="caret"></b>
+            </p>
         </a>
-        <div class="collapse" id="docketSupsAndDefExamples">
-          <ul class="nav">            
-            <li class="@if ($activePage == 'docket-indexSupsAndDef') active @endif">
-              <a href="{{ route('docket.indexSupsAndDef') }}">
-                <i class="now-ui-icons text_align-left"></i>
-                <p> {{ __("View Students") }} </p>
-              </a>
-            </li>        
-          </ul>
+        <div class="collapse" id="parentDocket">
+            <ul class="nav">
+                <li>
+                    <a data-toggle="collapse" href="#docketExamples">
+                        <i class="now-ui-icons education_paper"></i>
+                        <p>
+                            {{ __("FINAL EXAM") }}
+                            <b class="caret"></b>
+                        </p>
+                    </a>
+                    <div class="collapse" id="docketExamples">
+                        <ul class="nav">
+                            <li class="@if ($activePage == 'docket-import') active @endif">
+                                <a href="{{ route('docket.import') }}">
+                                    <i class="now-ui-icons arrows-1_share-66"></i>
+                                    <p> {{ __("Import Students") }} </p>
+                                </a>
+                            </li>
+                            <li class="@if ($activePage == 'docket-index') active @endif">
+                                <a href="{{ route('docket.index') }}">
+                                    <i class="now-ui-icons text_align-left"></i>
+                                    <p> {{ __("View Students") }} </p>
+                                </a>
+                            </li>
+                            <li class="@if ($activePage == 'docket-courses') active @endif">
+                                <a href="{{ route('courses.import') }}">
+                                    <i class="now-ui-icons arrows-1_cloud-upload-94"></i>
+                                    <p> {{ __("All Courses") }} </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a data-toggle="collapse" href="#docketSupsAndDefExamples">
+                        <i class="now-ui-icons education_paper"></i>
+                        <p>
+                            {{ __("SUPS OR DEFFERED") }}
+                            <b class="caret"></b>
+                        </p>
+                    </a>
+                    <div class="collapse" id="docketSupsAndDefExamples">
+                        <ul class="nav">
+                            <li class="@if ($activePage == 'docket-indexSupsAndDef') active @endif">
+                                <a href="{{ route('docket.indexSupsAndDef') }}">
+                                    <i class="now-ui-icons text_align-left"></i>
+                                    <p> {{ __("View Students") }} </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+                <li>
+                    <a data-toggle="collapse" href="#docketNmczExamples">
+                        <i class="now-ui-icons education_paper"></i>
+                        <p>
+                            {{ __("NMCZ EXAMS") }}
+                            <b class="caret"></b>
+                        </p>
+                    </a>
+                    <div class="collapse" id="docketNmczExamples">
+                        <ul class="nav">
+                            <li class="@if ($activePage == 'docket-indexNmcz') active @endif">
+                                <a href="{{ route('docket.indexNmcz') }}">
+                                    <i class="now-ui-icons text_align-left"></i>
+                                    <p> {{ __("View Students") }} </p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
         </div>
-      </li>
-      <li>
-        <a data-toggle="collapse" href="#docketNmczExamples">
-          <i class="now-ui-icons education_paper"></i>
-          <p>
-            {{ __("NMCZ Docket") }}
-            <b class="caret"></b>
-          </p>
-        </a>
-        <div class="collapse" id="docketNmczExamples">
-          <ul class="nav">
-            <li class="@if ($activePage == 'docket-indexNmcz') active @endif">
-              <a href="{{ route('docket.indexNmcz') }}">
-                <i class="now-ui-icons text_align-left"></i>
-                <p> {{ __("View Students") }} </p>
-              </a>
-            </li>                    
-          </ul>
-        </div>
-      </li>  
+    </li> 
       @endif      
     </ul>
   </div>
