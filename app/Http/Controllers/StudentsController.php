@@ -291,7 +291,7 @@ class StudentsController extends Controller
             });
         }
 
-        return $studentsProgramme;
+        // return $studentsProgramme;
         $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
 
         // return $programeCode;   

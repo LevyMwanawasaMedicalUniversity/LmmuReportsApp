@@ -16,23 +16,24 @@
                                             @php
                                                 $course = $courses->first();
                                                 $amount = $course->InvoiceAmount;
-                                                $otherFee = 0;
-                                                if (strpos($studentId, '190') === 0) {
-                                                    $otherFee = 2950;
+                                                $otherFee = 2625;
+                                                /*if (strpos($studentId, '190') === 0) {
+                                                    $otherFee = 2625;
                                                 } else {
                                                     $otherFee = 2625;
-                                                }
+                                                }*/
                                                 if($failed == 1){
-                                                    $tuitionFee = ($amount -$otherFee) / $theNumberOfCourses;
+                                                    $totalTuitionFee = ($amount - $otherFee);
+                                                    $tuitionFeePercourse = $totalTuitionFee / $theNumberOfCourses;
                                                     $numberOfRepeatCourses = $currentStudentsCourses->count();
-                                                    $amount = ($tuitionFee * $numberOfRepeatCourses) + $otherFee;
+                                                    $amount = $amount - ($tuitionFeePercourse * ($theNumberOfCourses - $numberOfRepeatCourses));
                                                 }else{
                                                     $amount = $amount;
                                                 }
                                                 
                                             @endphp
                                             <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat{{$loop->index}}{{ $studentId }}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
-                                            <span class="ms-auto">Total Invoice = K{{ number_format($amount,2) }}</span>
+                                            <span class="ms-auto">Total Invoice = K{{ number_format($amount,0) }}</span>
                                         </button>
                                     </h2>
                                     <div id="collapse{{$loop->index}}{{ $studentId }}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}{{ $studentId }}">
@@ -55,25 +56,7 @@
                                                                 <input type="checkbox" name="courseRepeat[]" value="{{$course->CourseCode}}" class="courseRepeat" id="courseRepeat{{$loop->parent->index}}{{ $studentId }}{{$loop->index}}" checked>
                                                             </td>
                                                             <td>{{$course->CourseCode}}</td>
-                                                            <td class="text-end">{{$course->CourseName}}</td>
-                                                            @php
-                                                                
-                                                                $amount = 0;
-                                                                $otherFee = 0;
-                                                                if (strpos($studentId, '190') === 0) {
-                                                                    $otherFee = 2950;
-                                                                } else {
-                                                                    $otherFee = 2625;
-                                                                }
-                                                                if($failed == 1){
-                                                                    $tuitionFee = $course->InvoiceAmount - $otherFee;
-                                                                    $numberOfCourses = $course->numberOfCourses;
-                                                                    $amount = ($tuitionFee * $numberOfCourses) + $otherFee;
-                                                                }else{
-                                                                    $amount = $course->InvoiceAmount;
-                                                                }
-                                                                
-                                                            @endphp
+                                                            <td class="text-end">{{$course->CourseName}}</td>                                                            
                                                             <td class="text-end">{{$course->Programme}}</td>
                                                         </tr>
                                                     @endforeach
