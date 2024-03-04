@@ -40,7 +40,7 @@
                         @method('DELETE')
                         
                         <input type="hidden" name="studentId" value="{{ $studentId }}">
-                        <input type="hidden" name="year" value="{{ $checkRegistration[0]->Year }}">
+                        <input type="hidden" name="year" value="2024">
                         <button type="submit" class="btn btn-danger">Delete Registration</button>
                     </form>  
                     @endif            
@@ -94,7 +94,7 @@
                             @foreach($checkRegistration as $result)
                             <tr>
                                 <td>{{$result->Name}}</td>
-                                <td>{{ $result->CourseDescription }}
+                                <td>{{ $result->CourseDescription }}  {{ $result->Year }}
                                 <td class="text-right">
                                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
                                     <form method="POST" action="{{ route('deleteCourseInRegistration.student') }}">
@@ -102,7 +102,7 @@
                                         @method('DELETE')
                                         <input type="hidden" name="courseId" value="{{ $result->Name }}">
                                         <input type="hidden" name="studentId" value="{{ $studentId }}">
-                                        <input type="hidden" name="year" value="{{ $result->Year }}">
+                                        <input type="hidden" name="year" value="2024">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                     @endif

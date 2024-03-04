@@ -221,6 +221,7 @@ class StudentsController extends Controller
     public function deleteEntireRegistration(Request $request){
         $studentId = $request->input('studentId');
         $year = $request->input('year');
+        
     
         CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
@@ -233,7 +234,7 @@ class StudentsController extends Controller
         $studentId = $request->input('studentId');
         $year = $request->input('year');
         $courseId = $request->input('courseId');
-    
+        
         CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
             ->where('CourseID', $courseId)
