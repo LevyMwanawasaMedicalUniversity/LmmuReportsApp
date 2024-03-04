@@ -68,6 +68,17 @@ Route::group(['middleware' => 'auth'], function () {
 
         });
 
+        Route::middleware('can:Student')->group(function () {
+            
+            Route::prefix('student')->group(function () {
+                Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
+                Route::get('/viewResults', 'StudentsController@viewResults')->name('student.viewResults');
+                Route::get('/coursesRegistration/{studentId}', 'StudentsController@studentRegisterForCourses')->name('student.coursesRegistration');
+                Route::post('/submitCourseRegistration', 'StudentsController@submitCourseRegistration')->name('student.submitCourseRegistration');
+            });
+
+        });
+
         Route::middleware('can:Examination')->group(function () {
             Route::prefix('docket')->group(function () {
                 Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');

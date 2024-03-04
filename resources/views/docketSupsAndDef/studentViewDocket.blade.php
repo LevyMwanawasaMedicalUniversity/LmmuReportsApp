@@ -1,14 +1,14 @@
 @extends('layouts.app', [
-    'namePage' => 'Dashboard',
+    'namePage' => 'studentExaminationDocket',
     'class' => 'sidebar-mini ',
-    'activePage' => 'home',
+    'activePage' => 'studentExaminationDocket',
     'activeNav' => '',
 ])
 
 @section('content')
 <div class="panel-header panel-header-sm">
     
-  </div>
+</div>
 <div class="content">
     <div class="row">
         <div class="col-md-12">
@@ -36,7 +36,7 @@
                             </div>
 
                             {{-- Include the QR code generator --}}
-                           {{-- Include the QR code generator --}}
+                            {{-- Include the QR code generator --}}
                             @php
                             use SimpleSoftwareIO\QrCode\Facades\QrCode;
                             @endphp
@@ -109,7 +109,7 @@
                         </div>
                         <div style="width: 100%; margin-left: 20px; margin-top: 20px;">
                             <table style="border: 1px solid #ccc; padding: 5px; width: 800px;">
-                             <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                            <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
                                 <form id="myForm" action="" method="POST">
                                     @csrf
                                     <table id="myTable">
@@ -119,7 +119,7 @@
                                                 <th style="border: 1px solid #ccc; padding: 5px;"><b>DATE / TIME</b></th>
                                                 <th style="border: 1px solid #ccc; padding: 5px;"><b>VENUE</b></th>
                                                 <th style="border: 1px solid #ccc; padding: 5px;"><b>SIGNATURE INVIGILATOR</b></th>
-                                               
+                                                
                                             </tr>
                                         </thead>
                                         <tbody>

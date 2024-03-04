@@ -27,41 +27,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user(); // Get the currently logged-in user
-
-        // If the user doesn't have the "Student" role, return the home view
-        if (!$user->hasRole('Student')) {
-            return view('home');
-        }
-
-        $student = Student::where('student_number', $user->name)->first();
-
-        // If the student doesn't exist, return back with an error message
-        if (is_null($student)) {
-            return back()->with('error', 'NOT STUDENT.');
-        }
-
-        $academicYear = 2023;
-        $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
-
-        // Update courses based on the student's status
-        if ($student->status == 3 && !Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
-            $this->setAndUpdateCoursesForCurrentYear($user->name);
-        } else {
-            $this->setAndUpdateCourses($user->name);
-        }
-
-        $courses = Courses::where('Student', $user->name)->get();
-
-        // Return the appropriate view based on the student's status
-        $viewName = match ($student->status) {
-            1 => 'docket.studentViewDocket',
-            2 => 'docketNmcz.studentViewDocket',
-            3 => 'docketSupsAndDef.studentViewDocket',
-            default => 'home',
-        };
-
-        return view($viewName, compact('studentResults', 'courses'));
+        return view('home');
     } 
     
     
