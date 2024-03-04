@@ -222,7 +222,7 @@
                     <a data-toggle="collapse" href="#docketExamples">
                         <i class="now-ui-icons education_paper"></i>
                         <p>
-                            {{ __("FINAL EXAM") }}
+                            {{ __("LMMU FINALS") }}
                             <b class="caret"></b>
                         </p>
                     </a>
