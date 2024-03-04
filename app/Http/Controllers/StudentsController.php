@@ -154,128 +154,114 @@ class StudentsController extends Controller
 
 
     public function setAndSaveCoursesForCurrentYearRegistration($studentId) {
+        // First, attempt to get courses for failed students
         $dataArray = $this->getCoursesForFailedStudents($studentId);
-        $failed = 1;
+        $failed = $dataArray ? 1 : 2;
     
+        // If no failed courses found, try to find unregistered student courses
         if (!$dataArray) {
             $dataArray = $this->findUnregisteredStudentCourses($studentId);
-            $failed = 2;
         }
     
+        // If still no data, exit early
         if (empty($dataArray)) {
-            return; // No data to insert, so exit early
+            return ['dataArray' => collect(), 'failed' => $failed];
         }
     
-        $studentCourses = Courses::where('Student', $studentId)
-            ->whereIn('Course', array_column($dataArray, 'Course'))
-            ->get()
+        // Retrieve existing courses for the student
+        $existingCourses = Courses::where('Student', $studentId)
+            ->whereIn('Course', collect($dataArray)->pluck('Course'))
             ->pluck('Course')
             ->toArray();
     
-        $coursesToInsert = [];
+        // Prepare new courses to insert
+        $coursesToInsert = collect($dataArray)->reject(function ($item) use ($existingCourses) {
+            return in_array($item['Course'], $existingCourses);
+        })->map(function ($item) use ($studentId) {
+            return [
+                'Student' => $studentId,
+                'Program' => $item['Program'],
+                'Course' => $item['Course'],
+                'Grade' => $item['Grade'],
+            ];
+        });
     
-        foreach ($dataArray as $item) {
-            $course = $item['Course'];
-    
-            if (!in_array($course, $studentCourses)) {
-                $coursesToInsert[] = [
-                    'Student' => $item['Student'],
-                    'Program' => $item['Program'],
-                    'Course' => $course,
-                    'Grade' => $item['Grade'],
-                ];
-    
-                // Update the list of existing courses for the student
-                $studentCourses[] = $course;
-            }
+        // Insert new courses if there are any
+        if ($coursesToInsert->isNotEmpty()) {
+            Courses::insert($coursesToInsert->all());
         }
     
         // Convert the array to a collection of objects
-        $dataArray = collect($dataArray)->map(function($item) {
-            return (object) $item;
+        $dataArray = collect($dataArray)->map(function ($item) {
+            return (object)$item;
         });
     
         return ['dataArray' => $dataArray, 'failed' => $failed];
-        // Batch insert the new courses
     }
 
-    public function studentRegisterForCourses($studentId){
+    public function studentRegisterForCourses($studentId) {
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
+    
+        if ($checkRegistration) {
+            $checkRegistration = $this->getStudentRegistration($studentId);
+            return view('allStudents.registrationPage', compact('studentId','checkRegistration'));
+        }
+    
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
-        // return $studentsPayments;
-        
-        $getResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
-        $courses = $getResults['dataArray'];
-        $failed = $getResults['failed'];
+    
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
-        // return $coursesArray;
+    
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-
-        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
+    
         if (str_starts_with($studentId, '190')) {
-            $studentsProgramme = $studentsProgramme->map(function ($studentProgramme) {
+            $studentsProgramme->transform(function ($studentProgramme) {
                 $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
                 return $studentProgramme;
             });
         }
-
-        // return $studentsProgramme;
-        $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
-
-        // return $programeCode;   
-        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
-        // return $theNumberOfCourses;
-        // return $getInvoiceForStudentsProgramme;        
-        $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
-        
-        if (str_starts_with($studentId, '190')) {
-            $getAllCoursesQuery = $getAllCoursesQuery->map(function ($getAllCoursesQuery) {
-                $getAllCoursesQuery->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $getAllCoursesQuery->CodeRegisteredUnder);
-                return $getAllCoursesQuery;
-            });
-        }
+    
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
+    
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
-        $currentStudentsCourses = $studentsProgramme->map(function ($course) use ($allInvoicesArray) {
+    
+        $processCourse = function ($course) use ($allInvoicesArray) {
             $courseArray = $course->toArray();
             $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = null;
-        
-            // Find a key in $allInvoicesArray that contains $key
-            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
-                if (stripos($invoiceKey, $key) !== false) {
-                    $matchedKey = $invoiceKey;
-                    break;
-                }
-            }
-        
+            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
+            
             if ($matchedKey) {
-                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-                if ($mergedArray == $courseArray) {
-                    // Log the course that didn't merge
-                    Log::info('No merge for course: ' . $key);
-                }
-                $courseArray = $mergedArray;
+                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
             } else {
-                // Log the course that didn't find a match in $allInvoicesArray
                 Log::info('No match found for course: ' . $key);
             }
-        
-            // Append the number of courses to the course array
-            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->get()->count();
-        
+    
+            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
+            
             return (object) $courseArray;
-        });
-        return view('allStudents.studentSelfRegistration',compact('courses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
+        };
+    
+        $currentStudentsCourses = $studentsProgramme->map($processCourse);
+    
+        return view('allStudents.studentSelfRegistration', compact('courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
     
 
-    public function submitCourses(Request $request){
+    public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
         $courses = explode(',', $request->input('courses'));
         $academicYear = 2024;
+        
 
         // Insert into CourseRegistration table
         foreach ($courses as $course) {
@@ -289,114 +275,94 @@ class StudentsController extends Controller
         }
 
         return redirect()->back()->with('success', 'Courses submitted successfully.');
-    }       
-
+    }  
     
+    public function studentSubmitCourseRegistration(Request $request){
+        $studentId = $request->input('studentNumber');
+        $courses = explode(',', $request->input('courses'));
+        $academicYear = 2024;
+        
 
-    public function registerStudent($studentId){
-        
-        $checkRegistration = CourseRegistration::where('StudentID', $studentId)->where('Year', 2024)->where('Semester', 1)->get();
-        if($checkRegistration->count() > 0){
-            
-            return view('allStudents.registrationPage',compact('studentId','checkRegistration'));
+        // Insert into CourseRegistration table
+        foreach ($courses as $course) {
+            CourseRegistration::create([
+                'StudentID' => $studentId,
+                'CourseID' => $course,
+                'EnrolmentDate' => now(),
+                'Year' => $academicYear,
+                'Semester' => 1,
+            ]);
         }
+
+        return redirect()->back()->with('success', 'Courses submitted successfully.');
+    }
+
+    private function getStudentRegistration($studentId)
+    {
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+                ->where('Year', 2024)
+                ->where('Semester', 1)
+                ->get();
+        return $checkRegistration;
+    }
+
+    public function registerStudent($studentId) {
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
+    
+        if ($checkRegistration) {
+            $checkRegistration = $this->getStudentRegistration($studentId);
+            return view('allStudents.registrationPage', compact('studentId','checkRegistration'));
+        }
+    
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
-        // return $studentsPayments;
+        // No need to return $studentsPayments here
         
-        $getResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
-        $courses = $getResults['dataArray'];
-        $failed = $getResults['failed'];
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
-        // return $coursesArray;
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        // return $studentsProgramme;
+    
         // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
         if (str_starts_with($studentId, '190')) {
-            $studentsProgramme = $studentsProgramme->map(function ($studentProgramme) {
+            $studentsProgramme->transform(function ($studentProgramme) {
                 $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
                 return $studentProgramme;
             });
         }
-
-        // return $studentsProgramme;
-        $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
-
-        // return $programeCode;   
-        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
-        // return $theNumberOfCourses;
-        // return $getInvoiceForStudentsProgramme;        
-        $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
-        
-        if (str_starts_with($studentId, '190')) {
-            $getAllCoursesQuery = $getAllCoursesQuery->map(function ($getAllCoursesQuery) {
-                $getAllCoursesQuery->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $getAllCoursesQuery->CodeRegisteredUnder);
-                return $getAllCoursesQuery;
-            });
-        }
+    
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+    
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
+    
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
-        $currentStudentsCourses = $studentsProgramme->map(function ($course) use ($allInvoicesArray) {
+    
+        $processCourse = function ($course) use ($allInvoicesArray) {
             $courseArray = $course->toArray();
             $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = null;        
-            // Find a key in $allInvoicesArray that contains $key
-            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
-                if (stripos($invoiceKey, $key) !== false) {
-                    $matchedKey = $invoiceKey;
-                    break;
-                }
-            }
-        
+            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
+            
             if ($matchedKey) {
-                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-                if ($mergedArray == $courseArray) {
-                    // Log the course that didn't merge
-                    Log::info('No merge for course: ' . $key);
-                }
-                $courseArray = $mergedArray;
+                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
             } else {
-                // Log the course that didn't find a match in $allInvoicesArray
                 Log::info('No match found for course: ' . $key);
             }
-        
-            // Append the number of courses to the course array
-            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->get()->count();
-        
+    
+            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
+            
             return (object) $courseArray;
-        });
-        // return $currentStudentsCourses;
-
-        $allCourses = $getAllCoursesQuery->map(function ($course) use ($allInvoicesArray) {
-            $courseArray = $course->toArray();
-            $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = null;
-        
-            // Find a key in $allInvoicesArray that contains $key
-            foreach ($allInvoicesArray as $invoiceKey => $invoice) {
-                if (stripos($invoiceKey, $key) !== false) {
-                    $matchedKey = $invoiceKey;
-                    break;
-                }
-            }
-        
-            if ($matchedKey) {
-                $mergedArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-                if ($mergedArray == $courseArray) {
-                    // Log the course that didn't merge
-                    Log::info('No merge for course: ' . $key);
-                }
-                $courseArray = $mergedArray;
-            } else {
-                // Log the course that didn't find a match in $allInvoicesArray
-                Log::info('No match found for course: ' . $key);
-            }
-            return (object) $courseArray;
-        });
-        // return $allCourses;
-        // return $currentStudentsCourses;
-        return view('allStudents.adminRegisterStudent',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
+        };
+    
+        $currentStudentsCourses = $studentsProgramme->map($processCourse);
+        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get()->map($processCourse);
+    
+        return view('allStudents.adminRegisterStudent', compact('courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
     
