@@ -165,14 +165,30 @@ class StudentsController extends Controller
         $coursesArray = $courses->pluck('Course')->toArray();
         // return $coursesArray;
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        $programeCode = $studentsProgramme[0]->CodeRegisteredUnder;
+
+        // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme = $studentsProgramme->map(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
+
+        // return $studentsProgramme;
+        $programeCode = trim($studentsProgramme[0]->CodeRegisteredUnder);
+
+        // return $programeCode;   
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->get()->count();
         // return $theNumberOfCourses;
-        
-
-
         // return $getInvoiceForStudentsProgramme;        
         $getAllCoursesQuery = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        
+        if (str_starts_with($studentId, '190')) {
+            $getAllCoursesQuery = $getAllCoursesQuery->map(function ($getAllCoursesQuery) {
+                $getAllCoursesQuery->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $getAllCoursesQuery->CodeRegisteredUnder);
+                return $getAllCoursesQuery;
+            });
+        }
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
@@ -236,7 +252,7 @@ class StudentsController extends Controller
         });
         // return $allCourses;
         // return $currentStudentsCourses;
-        return view('allStudents.show',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
+        return view('allStudents.adminRegisterStudent',compact('courses','allCourses','currentStudentsCourses','studentsPayments','failed','studentId','theNumberOfCourses'));
     }
 
     

@@ -145,59 +145,6 @@
                             </div>
                             @endforeach
                         </div>
-                    </div>                
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">ALL COURSES</h4>
-                        </div>
-                        <div class="card-body"> 
-                            @foreach($allCourses->groupBy('CodeRegisteredUnder') as $programme => $courses)                       
-                            <div class="accordion" id="coursesAccordion{{$loop->index}}">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="heading{{$loop->index}}">
-                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}" aria-expanded="false" aria-controls="collapse{{$loop->index}}">
-                                            {{ $programme }}
-                                            @php
-                                                $course = $courses->first();
-                                            @endphp
-                                            <span class="ms-auto registrationFee" id="registrationFee{{$loop->index}}">Registration Fee = K{{ number_format($course->InvoiceAmount * 0.25, 2) }}</span>
-                                            <span class="ms-auto">Total Invoice = K{{ number_format($course->InvoiceAmount,2) }}</span>
-                                        </button>
-                                    </h2>
-                                    <div id="collapse{{$loop->index}}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}">
-                                        <div class="accordion-body">
-                                            {{-- <form method="post" action=""> --}}
-                                                @csrf
-                                                <table class="table">
-                                                    <thead class="text-primary">
-                                                        <tr>
-                                                            <th>Select</th>
-                                                            <th>Course Code</th>
-                                                            <th class="text-end">Course Name</th>
-                                                            <th class="text-end">Program</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach($courses as $course)
-                                                        <tr>
-                                                            <td>
-                                                                <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
-                                                            </td>
-                                                            <td>{{$course->CourseCode}}</td>
-                                                            <td class="text-end">{{$course->CourseName}}</td>
-                                                            <td class="text-end">{{$course->Programme}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
-                                                <button type="submit" class="btn btn-primary registerButton" id="registerButton{{$loop->index}}">Register</button>
-                                            {{-- </form> --}}
-                                        </div>
-                                    </div>                                
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
                     </div> 
                 </div>               
             </div>
@@ -240,71 +187,7 @@
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('.registerButton').click(function(e) {
-        e.preventDefault();
 
-        var index = $(this).attr('id').replace('registerButton', '');
-        var registrationFeeText = $('#registrationFee' + index).text();
-        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
-        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
-    // Store the courses in a variable
-        var courses = [];
-        $('input[id^="course' + index + '"]:checked').each(function() {
-            courses.push($(this).val());
-        });
-        console.log(courses);
-        console.log(registrationFee);
-        console.log(payments2024);
-
-    // Show the modal
-        if (registrationFee <= payments2024) {
-            $('#eligibleModal').modal('show');
-
-      // Populate the modal with the courses
-        var courseList = '';
-        for (var i = 0; i < courses.length; i++) {
-                courseList += '<p>' + courses[i] + '</p>';
-        }
-        $('#eligibleModal .modal-body').html(courseList);
-        } else {
-            $('#ineligibleModal').modal('show');
-        }
-    });
-});
-
-$(document).ready(function() {
-    $('.registerButtonRepeat').click(function(e) {
-        e.preventDefault();
-
-        var index = $(this).attr('id').replace('registerButtonRepeat', '');
-        var registrationFeeText = $('#registrationFeeRepeat' + index).text();
-        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
-        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
-    // Store the courses in a variable
-        var coursesRepeat = [];
-        $('input[id^="courseRepeat' + index + '"]:checked').each(function() {
-            coursesRepeat.push($(this).val());
-        });
-        console.log(coursesRepeat);
-        console.log(registrationFee);
-        console.log(payments2024);
-
-    // Show the modal
-        if (registrationFee <= payments2024) {
-            $('#eligibleModal').modal('show');
-
-      // Populate the modal with the courses
-        var courseList = '';
-        for (var i = 0; i < coursesRepeat.length; i++) {
-                courseList += '<p>' + coursesRepeat[i] + '</p>';
-        }
-        $('#eligibleModal .modal-body').html(courseList);
-        } else {
-            $('#ineligibleModal').modal('show');
-        }
-    });
-});
 </script>
 
 
