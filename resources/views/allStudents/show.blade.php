@@ -74,8 +74,10 @@
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}{{ $studentId }}" aria-expanded="false" aria-controls="collapse{{$loop->index}}{{ $studentId }}">
                                             {{ $programme }}
                                             @php
+                                                App\Models\SisReportsSageInvoices;
+                                                $sisInvoices = SisReportsSageInvoices::query()->where('InvoiceDescription','=',$programme)->first();
                                                 $course = $courses->first();
-                                                $amount = $course->InvoiceAmount;
+                                                $amount = $sisInvoices->InvoiceAmount;
                                                 $otherFee = 0;
                                                 if (strpos($studentId, '190') === 0) {
                                                     $otherFee = 2950;

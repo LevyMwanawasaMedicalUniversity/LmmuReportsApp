@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ExistingStudentMail;
+use App\Mail\NewStudentMail;
 use App\Models\BasicInformation;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
@@ -14,6 +16,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -28,63 +31,86 @@ class StudentsController extends Controller
         // Split studentIds into chunks to avoid MySQL placeholder limit
         $studentIdsChunks = array_chunk($studentIds, 1000); // Adjust the chunk size as needed
 
-        // Check if the student IDs already exist in the students table and update their status
-        foreach ($studentIdsChunks as $studentIdsChunk) {
-            Student::whereIn('student_number', $studentIdsChunk)
-                ->where('status', '!=', 4) // Exclude students with status 4
-                ->update(['status' => 4]);
-        }
-
-        // Insert new students with a status of 4 and create accounts for them
-        foreach ($studentIdsChunks as $studentIdsChunk) {
-            $studentsToInsert = [];
-            foreach ($studentIdsChunk as $studentId) {
-                $studentsToInsert[] = [
-                    'student_number' => $studentId,
-                    'academic_year' => 2024,
-                    'term' => 1,
-                    'status' => 4
-                ];
-            }
-
-            // Batch insert new students
-            Student::insert($studentsToInsert);
-        }
-
         // Get all existing users
         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
 
-        // Create accounts for each student
         foreach ($studentIdsChunks as $studentIdsChunk) {
+            $studentsToInsert = [];
             foreach ($studentIdsChunk as $studentId) {
-                // Check if the student number exists in the students table
+                $ifStudentExistsOnRequiredStatus = Student::where('student_number', $studentId)
+                        ->where('status', 4)
+                        ->exists();
+                if ($ifStudentExistsOnRequiredStatus) {
+                    continue;
+                }
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+
+                $allNoValue = true;
+                foreach ($courses as $course) {
+                    if ($course->Course !== 'NO VALUE' || $course->Grade !== 'NO VALUE' || $course->Program !== 'NO VALUE') {
+                        $allNoValue = false;
+                        break;
+                    }
+                }
+                if ($allNoValue) {
+                    continue;
+                }
+
+                $results = $this->checkIfStudentIsRegistered($studentId)->exists();
+                if ($results) {
+                    continue;
+                }
+                $results = BasicInformation::find($studentId);          
+                
+                $email = $results->PrivateEmail;
+                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    // $email is a valid email address
+                    // $sendingEmail = $email;
+                    $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+                } else {
+                    // $email is not a valid email address
+                    $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+                }
                 $student = Student::where('student_number', $studentId)->first();
                 if ($student) {
-                    // If the student number exists, check if a user account exists for the student
-                    $user = User::where('name', $studentId)->first();
-                    if (!$user) {
-                        // If a user account doesn't exist, create it
-                        $this->createUserAccount($studentId);
-                    }
+                    // If the student number exists, update its status
+                    $student->update(['status' => 4]);
+
+                    // Send email to existing student
+                    Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
                 } else {
-                    // If the student number doesn't exist, insert the student and create a user account
+                    // If the student number doesn't exist, prepare to insert the student
                     Student::create([
                         'student_number' => $studentId,
                         'academic_year' => 2024,
                         'term' => 1,
                         'status' => 4
                     ]);
+                    // Send email to new student
+                    Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+                }
+
+                // Check if a user account exists for the student
+                if (!isset($existingUsers[$studentId])) {
+                    // If a user account doesn't exist, create it
                     $this->createUserAccount($studentId);
                 }
             }
+
+            // Batch insert new students
+            if (!empty($studentsToInsert)) {
+                Student::insert($studentsToInsert);
+            }
         }
+
         // Provide a success message
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
 
-    public function printIDCard(Request $request){
+    public function printIDCard( $studentId){
 
-        $studentId = $request->input('studentId');
+        
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
         ->where('Year', 2024)
         ->where('Semester', 1)
@@ -152,7 +178,9 @@ class StudentsController extends Controller
         $email = $basicInfo->PrivateEmail;
         $existingUser = User::where('email', $email)->first();
         if ($existingUser) {
-            $email = $studentId . $email;
+            $email = $studentId . $email . '@lmmu.ac.zm';
+        }elseif($email == null){
+            $email = $studentId . '@lmmu.ac.zm';
         }
         try {
             $user = User::create([
@@ -276,6 +304,9 @@ class StudentsController extends Controller
                 return $studentProgramme;
             });
         }
+        if ($studentsProgramme->isEmpty()) {
+            return redirect()->back()->with('warning', 'No courses found for the student.');
+        }
     
         $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
@@ -284,25 +315,26 @@ class StudentsController extends Controller
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
     
-        $processCourse = function ($course) use ($allInvoicesArray) {
-            $courseArray = $course->toArray();
-            $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
+        // $processCourse = function ($course) use ($allInvoicesArray) {
+        //     $courseArray = $course->toArray();
+        //     $key = trim($course->CodeRegisteredUnder);
+        //     $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
             
-            if ($matchedKey) {
-                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-            } else {
-                Log::info('No match found for course: ' . $key);
-            }
+        //     if ($matchedKey) {
+        //         $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+        //     } else {
+        //         Log::info('No match found for course: ' . $key);
+        //     }
     
-            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
+        //     $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
             
-            return (object) $courseArray;
-        };
+        //     return (object) $courseArray;
+        // };
     
-        $currentStudentsCourses = $studentsProgramme->map($processCourse);
+        $currentStudentsCourses = $studentsProgramme;
+        $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
     
-        return view('allStudents.studentSelfRegistration', compact('courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.studentSelfRegistration', compact('studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
     public function registerStudent($studentId) {
@@ -327,6 +359,7 @@ class StudentsController extends Controller
         
         $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
         $courses = $registrationResults['dataArray'];
+        // return $courses;
         $failed = $registrationResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
@@ -339,7 +372,12 @@ class StudentsController extends Controller
                 return $studentProgramme;
             });
         }
-    
+        
+        if ($studentsProgramme->isEmpty()) {
+            return redirect()->back()->with('warning', 'No courses found for the student. Student Has Graduated');
+        }
+
+        // return $studentsProgramme;
         $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
     
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
@@ -347,27 +385,37 @@ class StudentsController extends Controller
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
-    
-        $processCourse = function ($course) use ($allInvoicesArray) {
-            $courseArray = $course->toArray();
-            $key = trim($course->CodeRegisteredUnder);
-            $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
+        // return $allInvoicesArray;
+        // $processCourse = function ($course) use ($allInvoicesArray) {
+        //     $courseArray = $course->toArray();
+        //     $key = trim($course->CodeRegisteredUnder);
+        //     $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
             
-            if ($matchedKey) {
-                $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-            } else {
-                Log::info('No match found for course: ' . $key);
-            }
+        //     if ($matchedKey) {
+        //         $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
+        //     } else {
+        //         Log::info('No match found for course: ' . $key);
+        //     }
     
-            $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
+        //     $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
             
-            return (object) $courseArray;
-        };
+        //     return (object) $courseArray;
+        // };
+        
     
-        $currentStudentsCourses = $studentsProgramme->map($processCourse);
-        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get()->map($processCourse);
+        // $currentStudentsCourses = $studentsProgramme->map($processCourse);
+        $currentStudentsCourses = $studentsProgramme;
+        // return $currentStudentsCourses;
+        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        if (str_starts_with($studentId, '190')) {
+            $allCourses->transform(function ($allCourses) {
+                $allCourses->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $allCourses->CodeRegisteredUnder);
+                return $allCourses;
+            });
+        }
+        $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
     
-        return view('allStudents.adminRegisterStudent', compact('courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.adminRegisterStudent', compact('studentDetails','courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }  
 
     public function adminSubmitCourses(Request $request){

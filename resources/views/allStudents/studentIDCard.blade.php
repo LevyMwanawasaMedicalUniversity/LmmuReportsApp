@@ -32,7 +32,7 @@
 				
 				<!-- PHOTO -->	  
 				<div style=" position: relative; clear: both; margin-top: 100px; margin-left: 20px;   width: 110px; height: 138px; text-align: center; overflow: hidden; border: 2px solid black;">
-					<img width="120" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/190101912.png">
+					<img width="120" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/{{ $studentInformation->StudentID }}.png">
 				</div>
 				
 				<!-- FIELDS -->	  
@@ -75,7 +75,7 @@
 						Levy Mwanawasa Medical University,<br>
 						P.O.Box 33991, Lusaka
 				<br>
-				<img src="https://portal.edenuniversity.edu.zm/barcode.php?ID=.{{ $studentInformation->StudentID }}"  height="50px;" style="margin: 10px;"> <br>
+				<img src="https://portal.edenuniversity.edu.zm/barcode.php?ID={{ $studentInformation->StudentID }}"  height="50px;" style="margin: 10px;"> <br>
 				If found return it to the above address<br>
 				or take it to the nearest Police Station<br>
 				Issuing Authority<br>

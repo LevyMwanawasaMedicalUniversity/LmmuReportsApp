@@ -34,6 +34,7 @@
                 <div class="card-body">
                     @include('allStudents.components.finacialInformation')
                     @include('allStudents.components.studentCoursesForRegistration')                                                                    
+                    <!-- <div class="container"> -->
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">ALL COURSES</h4>
@@ -46,47 +47,54 @@
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}" aria-expanded="false" aria-controls="collapse{{$loop->index}}">
                                             {{ $programme }}
                                             @php
+                                                $sisInvoices = \App\Models\SisReportsSageInvoices::where('InvoiceDescription','=',$programme)->first();
                                                 $course = $courses->first();
+                                                $amount = $sisInvoices ? $sisInvoices->InvoiceAmount : 0;
                                             @endphp
-                                            <span class="ms-auto registrationFee" id="registrationFee{{$loop->index}}">Registration Fee = K{{ number_format($course->InvoiceAmount * 0.25, 2) }}</span>
-                                            <span class="ms-auto">Total Invoice = K{{ number_format($course->InvoiceAmount,0) }}</span>
+                                    @isset($sisInvoices)
+                                            <span class="ms-auto registrationFee" id="registrationFee{{$loop->index}}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
+                                            <span class="ms-auto">Total Invoice = K{{ number_format($amount,0) }}</span>
                                         </button>
                                     </h2>
                                     <div id="collapse{{$loop->index}}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}">
                                         <div class="accordion-body">
                                             {{-- <form method="post" action=""> --}}
                                                 @csrf
-                                                <table class="table">
-                                                    <thead class="text-primary">
-                                                        <tr>
-                                                            <th>Select</th>
-                                                            <th>Course Code</th>
-                                                            <th class="text-end">Course Name</th>
-                                                            <th class="text-end">Program</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    @foreach($courses as $course)
-                                                        <tr>
-                                                            <td>
-                                                                <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
-                                                            </td>
-                                                            <td>{{$course->CourseCode}}</td>
-                                                            <td class="text-end">{{$course->CourseName}}</td>
-                                                            <td class="text-end">{{$course->Programme}}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
+                                                <div class="table-responsive">
+                                                    <table class="table">
+                                                        <thead class="text-primary">
+                                                            <tr>
+                                                                <th>Select</th>
+                                                                <th>Course Code</th>
+                                                                <th class="text-end">Course Name</th>
+                                                                <th class="text-end">Program</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        @foreach($courses as $course)
+                                                            <tr>
+                                                                <td>
+                                                                    <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
+                                                                </td>
+                                                                <td>{{$course->CourseCode}}</td>
+                                                                <td class="text-end">{{$course->CourseName}}</td>
+                                                                <td class="text-end">{{$course->Programme}}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                                 <button type="submit" class="btn btn-primary registerButton" id="registerButton{{$loop->index}}">Register</button>
                                             {{-- </form> --}}
                                         </div>
-                                    </div>                                
+                                    </div>
+                                    @endisset                              
                                 </div>
                             </div>
                             @endforeach
                         </div>
                     </div> 
+                    <!-- </div> -->
                 </div>               
             </div>
         </div>

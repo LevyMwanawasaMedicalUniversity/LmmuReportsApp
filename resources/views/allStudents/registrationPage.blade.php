@@ -47,13 +47,9 @@
                 </div>   
                 <div class="col-md-6 text-right">
                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
-                    <form method="POST" action="{{ route('printIDCard.student') }}" class="mr-3">
-                        @csrf
-                        
-                        <input type="hidden" name="studentId" value="{{ $studentId }}">
-                        <input type="hidden" name="year" value="{{ $checkRegistration[0]->Year }}">
-                        <button type="submit" class="btn btn-info">PRINT ID CARD</button>
-                    </form>  
+                    <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
+                        <button class="btn btn-info">PRINT ID CARD</button>
+                    </a> 
                     @endif            
                 </div>              
             </div>       

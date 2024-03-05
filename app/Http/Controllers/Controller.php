@@ -507,6 +507,7 @@ class Controller extends BaseController
                 'basic-information.Surname',
                 'basic-information.StudyType',
                 'basic-information.Sex',
+                'basic-information.PrivateEmail',
                 'student-study-link.StudentID',
                 'basic-information.GovernmentID',
                 'study.Name as ProgrammeName',
@@ -673,11 +674,14 @@ class Controller extends BaseController
             // Use regular expression to remove the letters and get the numbers
             $numbers = preg_replace('/[a-zA-Z]/', '', $courseNo);
     
-            // Get the first number
-            $firstNumber = $numbers[0];
+            // Check if $numbers is not empty
+            if ($numbers !== '') {
+                // Get the first number
+                $firstNumber = $numbers[0];
     
-            // Add the first number to the array
-            $firstNumbers[] = $firstNumber;
+                // Add the first number to the array
+                $firstNumbers[] = $firstNumber;
+            }
         }
     
         // Find the highest number

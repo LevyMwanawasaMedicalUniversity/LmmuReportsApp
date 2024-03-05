@@ -15,7 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+
+    if (Auth::check()) {
+        // If user is logged in, redirect to a different page
+        return redirect('/home');
+    } else {
+        // If user is not logged in, show the welcome page
+        return view('welcome');
+    }
 });
 
 Auth::routes(['register' => false]);
@@ -58,7 +65,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/viewStudents/submitRegistration', 'StudentsController@adminSubmitCourses')->name('sumbitRegistration.student');
                 Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
                 Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
-                Route::post('/viewStudents/printIDCard', 'StudentsController@printIDCard')->name('printIDCard.student');
+                Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
 
             });
             
