@@ -26,7 +26,7 @@
     <p><strong>Note:</strong> Your current password is set to "12345678" if you have not updated it yet. '{{ $studentLocalDetails->email }}' is the registered email address and the only one you can use to log in or reset your password.</p>
     
     <p><strong>If you forget your password, you can utilize the <a href="http://sisreports.lmmu.ac.zm/password/reset">Forgot Password"</a> option below the login section. Enter '{{ $studentLocalDetails->email }}' as the email address, and follow the instructions sent to your email to reset your password.</strong></p>
-    <p><strong>Disclaimer:</strong> If you have received this email in error, please disregard it and do not take any action based on its content.</p>
+        <p><strong>Disclaimer:</strong> If you have received this email in error, please disregard it and do not take any action based on its content. Any unauthorized use, dissemination, or reproduction of this email is prohibited and may be unlawful. Please notify the sender immediately by replying to this email, and then delete it from your system.</p>
 
     <p>Thank you,</p>
     <p>Registrar</p>
