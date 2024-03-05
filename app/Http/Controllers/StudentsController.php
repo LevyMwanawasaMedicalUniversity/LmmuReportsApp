@@ -22,8 +22,7 @@ use Spatie\Permission\Models\Role;
 
 class StudentsController extends Controller
 {
-    public function importStudentsFromBasicInformation()
-    {
+    public function importStudentsFromBasicInformation(){
         set_time_limit(12000000);
         // Join BasicInformation with GradesPublished and select the student IDs
         $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
@@ -175,8 +174,7 @@ class StudentsController extends Controller
         return view($viewName, compact('studentResults', 'courses'));
     }
 
-    private function createUserAccount($studentId)
-    {
+    private function createUserAccount($studentId){
         // Get the student's email from BasicInformation
         $basicInfo = BasicInformation::find($studentId);
         $email = $basicInfo->PrivateEmail;
@@ -203,8 +201,7 @@ class StudentsController extends Controller
         }
     }
 
-
-    public function setAndSaveCoursesForCurrentYearRegistration($studentId) {
+    public function setAndSaveCoursesForCurrentYearRegistration($studentId){
         // First, attempt to get courses for failed students
         $dataArray = $this->getCoursesForFailedStudents($studentId);
         $failed = $dataArray ? 1 : 2;
@@ -462,8 +459,7 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Courses submitted successfully.');
     }
 
-    private function getStudentRegistration($studentId)
-    {
+    private function getStudentRegistration($studentId){
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
                 ->where('Year', 2024)
                 ->where('Semester', 1)
