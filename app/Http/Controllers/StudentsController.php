@@ -111,6 +111,33 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
 
+    private function createUserAccount($studentId){
+        // Get the student's email from BasicInformation
+        $basicInfo = BasicInformation::find($studentId);
+        $email = $basicInfo->PrivateEmail;
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser) {
+            $email = $studentId . $email . '@lmmu.ac.zm';
+        }elseif($email == null){
+            $email = $studentId . '@lmmu.ac.zm';
+        }
+        try {
+            $user = User::create([
+                'name' => $studentId,
+                'email' => $email,
+                'password' => '12345678',
+            ]);
+
+            // Assign roles and permissions to the user
+            $studentRole = Role::firstOrCreate(['name' => 'Student']);
+            $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
+            $user->assignRole($studentRole);
+            $user->givePermissionTo($studentPermission);
+        } catch (Exception $e) {
+            // Handle any errors during user account creation
+        }
+    }
+
     public function printIDCard( $studentId){
 
         
@@ -172,34 +199,7 @@ class StudentsController extends Controller
         };
 
         return view($viewName, compact('studentResults', 'courses'));
-    }
-
-    private function createUserAccount($studentId){
-        // Get the student's email from BasicInformation
-        $basicInfo = BasicInformation::find($studentId);
-        $email = $basicInfo->PrivateEmail;
-        $existingUser = User::where('email', $email)->first();
-        if ($existingUser) {
-            $email = $studentId . $email . '@lmmu.ac.zm';
-        }elseif($email == null){
-            $email = $studentId . '@lmmu.ac.zm';
-        }
-        try {
-            $user = User::create([
-                'name' => $studentId,
-                'email' => $email,
-                'password' => '12345678',
-            ]);
-
-            // Assign roles and permissions to the user
-            $studentRole = Role::firstOrCreate(['name' => 'Student']);
-            $studentPermission = Permission::firstOrCreate(['name' => 'Student']);
-            $user->assignRole($studentRole);
-            $user->givePermissionTo($studentPermission);
-        } catch (Exception $e) {
-            // Handle any errors during user account creation
-        }
-    }
+    }   
 
     public function setAndSaveCoursesForCurrentYearRegistration($studentId){
         // First, attempt to get courses for failed students
