@@ -468,6 +468,10 @@ class Controller extends BaseController
                 $courses = $this->getStudentCourses($studentID);
                 $view = 'emails.pdf';
                 break;
+            case 4:
+                $courses = $this->getStudentCourses($studentID);
+                $view = 'emails.pdf';
+                break;
             case 3:
                 $courses = Courses::where('Student', $studentID)->get();
                 $view = 'emails.pdfSudAndDef';

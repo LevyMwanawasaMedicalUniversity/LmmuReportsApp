@@ -5,6 +5,8 @@ $(document).ready(function() {
         var index = $(this).attr('id').replace('registerButton', '');
         var registrationFeeText = $('#registrationFee' + index).text();
         var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
+        var totalFeeText = $('#totalFee' + index).text();
+        var totalFee = parseFloat(totalFeeText.replace(/[^0-9\.]/g, ''));
         var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
         // Store the courses in a variable
         var courses = [];
@@ -14,6 +16,7 @@ $(document).ready(function() {
         console.log(courses);
         console.log(registrationFee);
         console.log(payments2024);
+        console.log(totalFee);
 
         // Show the modal
         if (registrationFee <= payments2024) {
@@ -24,11 +27,14 @@ $(document).ready(function() {
             for (var i = 0; i < courses.length; i++) {
                 courseList += '<p>' + courses[i] + '</p>';
             }
-            $('#eligibleModal .modal-body').html(courseList);
+            var courseListText = '<p>You are submitting the following course for registration. Click "Yes" to proceed and "No" to cancel</p><br>' + courseList + '<br><p>Your Total Invoice is: K ' + totalFee + '</p>';
+            $('#eligibleModal .modal-body').html(courseListText);
 
             // Update the hidden input field with the selected courses
             $('#coursesInput').val(courses.join(','));
         } else {
+            var shortfall = registrationFee - payments2024;
+            $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
             $('#ineligibleModal').modal('show');
         }
     });
@@ -41,6 +47,8 @@ $(document).ready(function() {
         var index = $(this).attr('id').replace('registerButtonRepeat', '');
         var registrationFeeText = $('#registrationFeeRepeat' + index).text();
         var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
+        var totalFeeText = $('#totalFeeRepeat' + index).text();
+        var totalFee = parseFloat(totalFeeText.replace(/[^0-9\.]/g, ''));
         var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
         // Store the courses in a variable
         var coursesRepeat = [];
@@ -60,11 +68,14 @@ $(document).ready(function() {
             for (var i = 0; i < coursesRepeat.length; i++) {
                 courseList += '<p>' + coursesRepeat[i] + '</p>';
             }
-            $('#eligibleModal .modal-body').html(courseList);
+            var courseListText = '<p>You are submitting the following course for registration. Click "Yes" to proceed and "No" to cancel</p><br>' + courseList + '<br><p>Your Total Invoice is: K ' + totalFee + '</p>';
+            $('#eligibleModal .modal-body').html(courseListText);
 
             // Update the hidden input field with the selected courses
             $('#coursesInput').val(coursesRepeat.join(','));
         } else {
+            var shortfall = registrationFee - payments2024;
+            $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
             $('#ineligibleModal').modal('show');
         }
     });

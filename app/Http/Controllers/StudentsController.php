@@ -45,17 +45,21 @@ class StudentsController extends Controller
                 }
                 $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
                 $courses = $registrationResults['dataArray'];
-
-                $allNoValue = true;
-                foreach ($courses as $course) {
-                    if ($course->Course !== 'NO VALUE' || $course->Grade !== 'NO VALUE' || $course->Program !== 'NO VALUE') {
-                        $allNoValue = false;
-                        break;
-                    }
-                }
-                if ($allNoValue) {
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if ($studentsProgramme->isEmpty()) {
                     continue;
                 }
+                // $allNoValue = true;
+                // foreach ($courses as $course) {
+                //     if ($course->Course !== 'NO VALUE' || $course->Grade !== 'NO VALUE' || $course->Program !== 'NO VALUE') {
+                //         $allNoValue = false;
+                //         break;
+                //     }
+                // }
+                // if ($allNoValue) {
+                //     continue;
+                // }
 
                 $results = $this->checkIfStudentIsRegistered($studentId)->exists();
                 if ($results) {
@@ -364,7 +368,7 @@ class StudentsController extends Controller
         
         $coursesArray = $courses->pluck('Course')->toArray();
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-    
+        
         // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {

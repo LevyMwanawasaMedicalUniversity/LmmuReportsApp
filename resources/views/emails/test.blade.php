@@ -13,7 +13,7 @@
 
                 <p>Please note that you password has been reset to "12345678"</p>
                 <p>Kindly login to the system using your student number and the password provided above.</p>
-                <p>Your Username is {{ $studentDetails->PrivateEmail }} and password is "12345678".</p>
+                <p>Your Username is {{ $studentLocalDetails->email }} and password is "12345678".</p>
                 <p>You can access the system at <a href="http://sisreports.lmmu.ac.zm/">http://sisreports.lmmu.ac.zm</a>.</p>
 
                 <!-- <p>We are pleased to provide you with your exam docket, which is attached to this email. You have been awarded this docket because your 2023 payments account for 25% of the total payments required for the 2023 academic year.</p>
