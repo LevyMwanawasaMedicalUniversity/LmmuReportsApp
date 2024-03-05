@@ -473,7 +473,7 @@ class StudentsController extends Controller
         $courseId = null;
         if($request->input('student-number')){
             $student = Student::query()
-                        ->where('student_number','=', $request->input('student-number'))
+                        ->where('student_number', 'like', '%' . $request->input('student-number') . '%')
                         ->where('status','=', 4)
                         ->first();
             if($student){
