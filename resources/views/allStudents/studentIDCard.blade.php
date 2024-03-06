@@ -1,18 +1,7 @@
-@extends('layouts.app', [
-    'class' => 'sidebar-mini ',
-    'namePage' => 'Student ID',
-    'activePage' => 'courseRegistration',
-    'activeNav' => '',
-])
-
-@section('content')
-<div class="panel-header panel-header-sm">
-</div>
-
-<div class="content">
-    <div class="row">
-        <div class="col-md-12">
-            <div style=" height: 280px; break-inside: avoid; text-align:center; width: 395pt;">
+<html>
+	<head></head>
+	<body style="margin: 0px; padding: 0px;">
+				<div style=" height: 280px; break-inside: avoid; text-align:center; width: 395pt;">
 			
 				<!-- TOP BAR -->
 				<div class="university" style="font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
@@ -52,7 +41,7 @@
 						
 						<!-- <div class="date" style=" font-family: arial;  color:black; float:left; font-size: 12pt; width: 40pt; text-align: left;  height: 18pt;"> <b>Exp</b>  </div>
 						<div  style="width: 20pt; float: left;  height: 18pt;">:</div>
-						<div class="studentid" style=" font-size: 12pt; color:black;  font-family: arial; font-weight: bold;  float:left; width: 200px; text-align: left;  height: 18pt;">04-Mar-2028 </div> -->
+						<div class="studentid" style=" font-size: 12pt; color:black;  font-family: arial; font-weight: bold;  float:left; width: 200px; text-align: left;  height: 18pt;">06-Mar-2028 </div> -->
 
 
 						<div class="date" style=" font-family: arial;  color:black; float:left; font-size: 12pt; width: 40pt; text-align: left;  height: 18pt;"> <b>Prog</b>  </div>.
@@ -68,22 +57,19 @@
 				</div>
 				
 			</div>
-            <div style="page-break-before: always; color:#2e164e; text-align: center; width: 350pt; padding-top: 5px;">
+			<div style="page-break-before: always; color:#2e164e; text-align: center; width: 350pt; padding-top: 5px;">
 				<br><br>
 				<div style="font-size: 12pt;  font-family: arial;  color:#000; padding-bottom: 0px;">
 					This Card is the property of<br>
 						Levy Mwanawasa Medical University,<br>
 						P.O.Box 33991, Lusaka
 				<br>
-				<img src="https://portal.edenuniversity.edu.zm/barcode.php?ID={{ $studentInformation->StudentID }}"  height="50px;" style="margin: 10px;"> <br>
+				<img src="https://portal.edenuniversity.edu.zm/barcode.php?ID={{ $studentInformation->StudentID }}" height="50px;" style="margin: 10px;"> <br>
 				If found return it to the above address<br>
 				or take it to the nearest Police Station<br>
 				Issuing Authority<br>
 				<img src="https://edurole.lmmu.ac.zm/templates/mobile/images/signature.png" height="40px;"> <br><div style="font-size: 15pt;"> Registrar</div><br>
 				</div>
 			</div>
-        </div>
-    </div>
-</div>
-
-@endsection
+		</body>
+</html>

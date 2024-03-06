@@ -60,6 +60,8 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
                 Route::get('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
+                Route::get('/import/single/students', 'StudentsController@importSingleStudent')->name('students.importSingleStudent');
+                Route::post('/upload/single/students', 'StudentsController@uploadSingleStudent')->name('students.uploadSingleStudent');
                 Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
                 Route::get('/viewStudents/showStudent/{studentNumber}', 'StudentsController@registerStudent')->name('students.showStudent');
                 Route::post('/viewStudents/submitRegistration', 'StudentsController@adminSubmitCourses')->name('sumbitRegistration.student');

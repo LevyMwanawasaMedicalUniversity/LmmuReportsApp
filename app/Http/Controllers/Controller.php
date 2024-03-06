@@ -250,10 +250,10 @@ class Controller extends BaseController
                 ->where('basic-information.StudyType', '!=', 'Staff')
                 ->groupBy('basic-information.ID');
         })
-        ->orWhere(function($query) {
-            $query->where('basic-information.ID', 'like', '240%')
-                ->where('applicants.Progress', 'Accepted');
-        })
+        // ->orWhere(function($query) {
+        //     $query->where('basic-information.ID', 'like', '240%')
+        //         ->where('applicants.Progress', 'Accepted');
+        // })
         ->groupBy('basic-information.ID'); // Group by StudentID to ensure uniqueness
         
         return $results;

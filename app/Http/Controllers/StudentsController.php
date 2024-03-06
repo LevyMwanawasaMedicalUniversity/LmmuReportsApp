@@ -111,6 +111,55 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
 
+    public function importSingleStudent(){
+        return view('allStudents.importSingleStudent');
+    }
+
+    public function uploadSingleStudent(Request $request){
+        $studentId = $request->input('studentId');
+        $results = $this->checkIfStudentIsRegistered($studentId)->exists();
+        if ($results) {
+            return redirect()->back()->with('error', 'Student already registered.');
+        }
+        $results = BasicInformation::find($studentId);
+        if (!$results) {
+            return redirect()->back()->with('error', 'Student not found.');
+        }
+        $email = $results->PrivateEmail;
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // $email is a valid email address
+            // $sendingEmail = $email;
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        } else {
+            // $email is not a valid email address
+            // $sendingEmail = $email . $studentId . '@lmmu.ac.zm';
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        }
+        $student = Student::where('student_number', $studentId)->first();
+        if ($student) {
+            // If the student number exists, update its status
+            $student->update(['status' => 4]);
+
+            // Send email to existing student
+            Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
+        } else {
+            // If the student number doesn't exist, prepare to insert the student
+            Student::create([
+                'student_number' => $studentId,
+                'academic_year' => 2024,
+                'term' => 1,
+                'status' => 4
+            ]);
+            $existingUsers = User::where('name', $studentId)->get()->keyBy('name');
+            if (!isset($existingUsers[$studentId])) {
+                // If a user account doesn't exist, create it
+                $this->createUserAccount($studentId);
+                Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+            }            
+        }           
+        return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
+    }
+
     private function createUserAccount($studentId){
         // Get the student's email from BasicInformation
         $basicInfo = BasicInformation::find($studentId);
@@ -472,20 +521,19 @@ class StudentsController extends Controller
         $courseName = null;
         $courseId = null;
         if($request->input('student-number')){
-            $student = Student::query()
+            $students = Student::query()
                         ->where('student_number', 'like', '%' . $request->input('student-number') . '%')
                         ->where('status','=', 4)
-                        ->first();
-            if($student){
-                $getStudentNumber = $student->student_number;
-                $studentNumbers = [$getStudentNumber];
-                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+                        ->get();
+            if($students){
+                $studentNumbers = $students->pluck('student_number')->toArray();
+                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(30);
             }else{
                 return back()->with('error', 'NOT FOUND.');               
             }
         }else{
             $studentNumbers = Student::where('status', 4)->pluck('student_number')->toArray();
-            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(15);
+            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(30);
         }
         return view('allStudents.index', compact('results','courseName','courseId'));
     }

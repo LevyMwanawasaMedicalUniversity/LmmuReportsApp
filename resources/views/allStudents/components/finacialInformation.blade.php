@@ -1,6 +1,7 @@
 <div class="card">
     <div class="card-header">
         <h4 class="card-title">PAYMENT INFORMATION</h4>
+        <h5>{{$studentDetails->FirstName}}  {{$studentDetails->Surname}}</h5>
         <p>Note that your Registration is based on your payments made in 2024</p>
     </div>
     <div class="card-body">
@@ -8,7 +9,7 @@
             <table class="table">
                 <thead class="text-primary">
                     <tr>
-                        <th>Account</th>                        
+                        <th>Student Number</th>                        
                         <th>Total Payments made in 2024</th>
                         <th>
                             {{ $studentDetails->Amount < 0 ? 'Current Balance' : 'Outstanding Balance' }}
