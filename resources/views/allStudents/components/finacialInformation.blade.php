@@ -1,8 +1,11 @@
 <div class="card">
     <div class="card-header">
         <h4 class="card-title">PAYMENT INFORMATION</h4>
-        <h5>{{$studentDetails->FirstName}}  {{$studentDetails->Surname}}</h5>
-        <p>Note that your Registration is based on your payments made in 2024</p>
+        <h5 style="font-weight:bold; color :{{ $studentDetails->Amount >= 0 ? 'red' : 'green' }};">{{$studentDetails->FirstName}}  {{$studentDetails->Surname}}</h5>
+        <p><strong>Note that your Registration is based on your payments made in 2024</strong></p>
+        @if ($studentDetails->Amount > 0)
+            <p style="font-weight:bold; color: red;">Note that your Outstanding balance should be cleared by September 2024</p>
+        @endif
     </div>
     <div class="card-body">
         <div class="table-responsive">
@@ -12,7 +15,7 @@
                         <th>Student Number</th>                        
                         <th>Total Payments made in 2024</th>
                         <th>
-                            {{ $studentDetails->Amount < 0 ? 'Current Balance' : 'Outstanding Balance' }}
+                            {{ $studentDetails->Amount < 0 ? 'Current Balance' : 'Balance Due September' }}
                         </th>
                         <th>Latest Invoice</th>
                     </tr>
