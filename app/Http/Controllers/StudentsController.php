@@ -46,7 +46,6 @@ class StudentsController extends Controller
                 $studentAlreadyCreatedAndUpdated = Student::where('student_number', $studentId)->where('status', 4)->exists();
                 if ($studentAlreadyCreatedAndUpdated) {
                     $studentAccount->update(['email' => $email]);
-                    $emailType = 1;
                     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                     continue;
                 } 
@@ -54,7 +53,6 @@ class StudentsController extends Controller
                 if ($student) {
                     $student->update(['status' => 4]);
                     $studentAccount->update(['email' => $email]);
-                    $emailType = 1;
                     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 } else {
                     Student::create([
@@ -63,7 +61,7 @@ class StudentsController extends Controller
                         'term' => 1,
                         'status' => 4
                     ]);
-                    $emailType = 2;
+                    
                     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 }
             }
