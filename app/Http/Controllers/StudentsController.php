@@ -481,8 +481,9 @@ class StudentsController extends Controller
         $failed = $registrationResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
+        // return $coursesArray;
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        
+        return $studentsProgramme;
         // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {
@@ -490,12 +491,13 @@ class StudentsController extends Controller
                 return $studentProgramme;
             });
         }
+        return $studentsProgramme;
         
         if ($studentsProgramme->isEmpty()) {
             return redirect()->back()->with('warning', 'No courses found for the student. Student Has Graduated');
         }
 
-        // return $studentsProgramme;
+        
         $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
     
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
