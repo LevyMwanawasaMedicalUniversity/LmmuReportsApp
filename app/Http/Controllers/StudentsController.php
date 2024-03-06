@@ -123,7 +123,7 @@ class StudentsController extends Controller
         }
         $results = BasicInformation::find($studentId);
         if (!$results) {
-            return redirect()->back()->with('error', 'Student not found.');
+            return redirect()->back()->with('error', 'Student not found on Edurole.');
         }
         $email = $results->PrivateEmail;
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
