@@ -25,168 +25,79 @@ class StudentsController extends Controller
     public function importStudentsFromBasicInformation(){
         set_time_limit(12000000);
         $maxAttempts = 10;
-        // Join BasicInformation with GradesPublished and select the student IDs
+    
         $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
-
-        // Split studentIds into chunks to avoid MySQL placeholder limit
-        $studentIdsChunks = array_chunk($studentIds, 1000); // Adjust the chunk size as needed
-
-        // Get all existing users
+        $studentIdsChunks = array_chunk($studentIds, 1000);
+    
         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
-
+    
         foreach ($studentIdsChunks as $studentIdsChunk) {
             $studentsToInsert = [];
             foreach ($studentIdsChunk as $studentId) {
-                $ifStudentExistsOnRequiredStatus = Student::where('student_number', $studentId)
-                        ->where('status', 4)
-                        ->exists();
-                if ($ifStudentExistsOnRequiredStatus) {
-                    if (!isset($existingUsers[$studentId])) {
-                        // If a user account doesn't exist, create it
-                        $this->createUserAccount($studentId);
-                    }
-                    $privateEmail = BasicInformation::find($studentId);
-
-                    
-                    if ($privateEmail) {
-                        $email = trim($privateEmail->PrivateEmail);
-                        $existingUser = User::where('email', $email)->first();
-                        if ($existingUser) {
-                            $email = $studentId . $email . '@lmmu.ac.zm';
-                        }elseif($email == null){
-                            $email = $studentId . '@lmmu.ac.zm';
-                        }
-                        User::where('name', $studentId)->update(['email' => $email]);
-                        
-                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                            // $email is a valid email address
-                            $sendingEmail = $email;
-                        } else {
-                            // $email is not a valid email address
-                            $sendingEmail = 'registration@lmmu.ac.zm';
-                        }
-                        $attempts = 0;
-                        while ($attempts < $maxAttempts) {
-                            try {
-                                Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
-                                break; // If the email was sent successfully, break the loop
-                            } catch (\Exception $e) {
-                                // Log the exception or handle it as you wish
-                                error_log('Unable to send email: ' . $e->getMessage());
-                                $attempts++;
-                                if ($attempts === $maxAttempts) {
-                                    error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
-                                }
-                                // Wait for 1 second before the next attempt
-                                sleep(1);
-                            }
-                        }
-                    }
-                    
-                    continue;
-                }
-                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-                $courses = $registrationResults['dataArray'];
-                $coursesArray = $courses->pluck('Course')->toArray();
-                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-                if ($studentsProgramme->isEmpty()) {
-                    continue;
-                }
-                // $allNoValue = true;
-                // foreach ($courses as $course) {
-                //     if ($course->Course !== 'NO VALUE' || $course->Grade !== 'NO VALUE' || $course->Program !== 'NO VALUE') {
-                //         $allNoValue = false;
-                //         break;
-                //     }
-                // }
-                // if ($allNoValue) {
-                //     continue;
-                // }
-
-                $results = $this->checkIfStudentIsRegistered($studentId)->exists();
-                if ($results) {
-                    continue;
-                }
-
-                // Check if a user account exists for the student
+                $student = Student::where('student_number', $studentId)->first();
+    
                 if (!isset($existingUsers[$studentId])) {
-                    // If a user account doesn't exist, create it
                     $this->createUserAccount($studentId);
                 }
-                $results = BasicInformation::find($studentId);          
-                
-                $email = trim($results->PrivateEmail);
-                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    // $email is a valid email address
-                    // $sendingEmail = $email;
-                    
-                    $sendingEmail = $email;
-                } else {
-                    // $email is not a valid email address
-                    $sendingEmail = 'registration@lmmu.ac.zm';
+    
+                $privateEmail = BasicInformation::find($studentId);
+                if ($privateEmail) {
+                    $email = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+                    User::where('name', $studentId)->update(['email' => $email]);
+                    $this->sendEmailToStudent($email, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
                 }
-                $student = Student::where('student_number', $studentId)->first();
+    
                 if ($student) {
-                    // If the student number exists, update its status
                     $student->update(['status' => 4]);
-                    $tudentAccount = User::where('name', $studentId)->first();  
-                    $emailAccount = $tudentAccount->email;
+                    $emailAccount = User::where('name', $studentId)->first()->email;
                     $trimmedEmail = trim($emailAccount);
                     $student->email->update(['email' => $trimmedEmail]);
-                    // Send email to existing student
-                    $attempts = 0;
-                    while ($attempts < $maxAttempts) {
-                        try {
-                            Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
-                            break; // If the email was sent successfully, break the loop
-                        } catch (\Exception $e) {
-                            // Log the exception or handle it as you wish
-                            error_log('Unable to send email: ' . $e->getMessage());
-                            $attempts++;
-                            if ($attempts === $maxAttempts) {
-                                error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
-                            }
-                            // Wait for 1 second before the next attempt
-                            sleep(1);
-                        }
-                    }
                 } else {
-                    // If the student number doesn't exist, prepare to insert the student
                     Student::create([
                         'student_number' => $studentId,
                         'academic_year' => 2024,
                         'term' => 1,
                         'status' => 4
                     ]);
-                    // Send email to new student
-                    $attempts = 0;
-                    while ($attempts < $maxAttempts) {
-                        try {
-                            Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
-                            break; // If the email was sent successfully, break the loop
-                        } catch (\Exception $e) {
-                            // Log the exception or handle it as you wish
-                            error_log('Unable to send email: ' . $e->getMessage());
-                            $attempts++;
-                            if ($attempts === $maxAttempts) {
-                                error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
-                            }
-                            // Wait for 1 second before the next attempt
-                            sleep(1);
-                        }
-                    }
+                    $this->sendEmailToStudent($email, $studentId, $maxAttempts, new NewStudentMail($studentId));
                 }
-                
             }
-
-            // Batch insert new students
+    
             if (!empty($studentsToInsert)) {
                 Student::insert($studentsToInsert);
             }
         }
-
-        // Provide a success message
+    
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    }
+    
+    private function validateAndPrepareEmail($email, $studentId) {
+        $email = trim($email);
+        $existingUser = User::where('email', $email)->first();
+        if ($existingUser) {
+            $email = $studentId . $email . '@lmmu.ac.zm';
+        } elseif($email == null) {
+            $email = $studentId . '@lmmu.ac.zm';
+        }
+        return $email;
+    }
+    
+    private function sendEmailToStudent($email, $studentId, $maxAttempts, $mail) {
+        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'registration@lmmu.ac.zm';
+        $attempts = 0;
+        while ($attempts < $maxAttempts) {
+            try {
+                Mail::to($sendingEmail)->send($mail);
+                break;
+            } catch (\Exception $e) {
+                error_log('Unable to send email: ' . $e->getMessage());
+                $attempts++;
+                if ($attempts === $maxAttempts) {
+                    error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+                }
+                sleep(1);
+            }
+        }
     }
 
     public function importSingleStudent(){
@@ -194,6 +105,7 @@ class StudentsController extends Controller
     }
 
     public function uploadSingleStudent(Request $request){
+        $maxAttempts = 10; // Define max attempts for email sending
         $studentId = $request->input('studentId');
         $results = $this->checkIfStudentIsRegistered($studentId)->exists();
         if ($results) {
@@ -205,23 +117,15 @@ class StudentsController extends Controller
         }
         $email = trim($results->PrivateEmail);
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            // $email is a valid email address
-            // $sendingEmail = $email;
             $sendingEmail = $email;
         } else {
-            // $email is not a valid email address
-            // $sendingEmail = $email . $studentId . '@lmmu.ac.zm';
             $sendingEmail = 'registration@lmmu.ac.zm';
         }
         $student = Student::where('student_number', $studentId)->first();
         if ($student) {
-            // If the student number exists, update its status
             $student->update(['status' => 4]);
-
-            // Send email to existing student
-            Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
+            $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($student));
         } else {
-            // If the student number doesn't exist, prepare to insert the student
             Student::create([
                 'student_number' => $studentId,
                 'academic_year' => 2024,
@@ -230,9 +134,8 @@ class StudentsController extends Controller
             ]);
             $existingUsers = User::where('name', $studentId)->get()->keyBy('name');
             if (!isset($existingUsers[$studentId])) {
-                // If a user account doesn't exist, create it
                 $this->createUserAccount($studentId);
-                Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+                $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
             }            
         }           
         return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
@@ -242,12 +145,7 @@ class StudentsController extends Controller
         // Get the student's email from BasicInformation
         $basicInfo = BasicInformation::find($studentId);
         $email = trim($basicInfo->PrivateEmail);
-        $existingUser = User::where('email', $email)->first();
-        if ($existingUser) {
-            $email = $studentId . $email . '@lmmu.ac.zm';
-        }elseif($email == null){
-            $email = $studentId . '@lmmu.ac.zm';
-        }
+        $email =  $this->validateAndPrepareEmail($email, $studentId);
         try {
             $user = User::create([
                 'name' => $studentId,
