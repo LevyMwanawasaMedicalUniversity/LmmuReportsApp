@@ -30,7 +30,7 @@ class DefSupDocket extends Mailable
         $studentDetails = BasicInformation::find($this->studentId);
         
         return $this
-            ->from('registrar@lmmu.ac.zm')
+            ->from('registration@lmmu.ac.zm')
             ->subject('Exam Docket For Deffered and Supplementary Exams')
             ->view('emails.defandsup', compact('studentDetails'))
             ->attach($this->pdfPath, [

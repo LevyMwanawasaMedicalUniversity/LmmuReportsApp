@@ -30,7 +30,7 @@ class SendMailNmcz extends Mailable
         $studentDetails = BasicInformation::find($this->studentId);
         
         return $this
-            ->from('registrar@lmmu.ac.zm')
+            ->from('registration@lmmu.ac.zm')
             ->subject('Exam Docket For Unregistered Student')
             ->view('emails.test', compact('studentDetails'))
             ->attach($this->pdfPath, [

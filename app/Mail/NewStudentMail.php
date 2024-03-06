@@ -31,7 +31,7 @@ class NewStudentMail extends Mailable
         $studentLocalDetails = User::where('name', $this->studentId)->first();
         
         return $this
-            ->from('registrar@lmmu.ac.zm')
+            ->from('registration@lmmu.ac.zm')
             ->subject('COURSE REGISTRATION ON SIS REPORTS')
             ->view('emails.newStudentMail', compact('studentDetails','studentLocalDetails'));
     }

@@ -35,7 +35,7 @@ class SendAnEmail extends Mailable
         $studentLocalDetails = User::where('name', $this->studentId)->first();
         
         return $this
-            ->from('registrar@lmmu.ac.zm')
+            ->from('registration@lmmu.ac.zm')
             ->subject('Password Reset Notification')
             ->view('emails.test', compact('studentDetails','studentLocalDetails'));
         
