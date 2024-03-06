@@ -26,7 +26,8 @@ class StudentsController extends Controller
         set_time_limit(12000000);
         // Join BasicInformation with GradesPublished and select the student IDs
         $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
-
+        $maxAttempts = 5;
+        $attempts = 0;
         // Split studentIds into chunks to avoid MySQL placeholder limit
         $studentIdsChunks = array_chunk($studentIds, 1000); // Adjust the chunk size as needed
 
@@ -40,6 +41,10 @@ class StudentsController extends Controller
                         ->where('status', 4)
                         ->exists();
                 if ($ifStudentExistsOnRequiredStatus) {
+                    if (!isset($existingUsers[$studentId])) {
+                        // If a user account doesn't exist, create it
+                        $this->createUserAccount($studentId);
+                    }
                     continue;
                 }
                 $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
@@ -121,6 +126,7 @@ class StudentsController extends Controller
     }
 
     public function uploadSingleStudent(Request $request){
+        $maxAttempts = 10;
         $studentId = $request->input('studentId');
         $results = $this->checkIfStudentIsRegistered($studentId)->exists();
         if ($results) {
@@ -146,7 +152,23 @@ class StudentsController extends Controller
             $student->update(['status' => 4]);
 
             // Send email to existing student
-            Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
+            
+            $attempts = 0;
+            while ($attempts < $maxAttempts) {
+                try {
+                    Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
+                    break; // If the email was sent successfully, break the loop
+                } catch (\Exception $e) {
+                    // Log the exception or handle it as you wish
+                    error_log('Unable to send email: ' . $e->getMessage());
+                    $attempts++;
+                    if ($attempts === $maxAttempts) {
+                        error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+                    }
+                    // Wait for 1 second before the next attempt
+                    sleep(1);
+                }
+            }
         } else {
             // If the student number doesn't exist, prepare to insert the student
             Student::create([
@@ -159,7 +181,22 @@ class StudentsController extends Controller
             if (!isset($existingUsers[$studentId])) {
                 // If a user account doesn't exist, create it
                 $this->createUserAccount($studentId);
-                Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+                $attempts = 0;
+                while ($attempts < $maxAttempts) {
+                    try {
+                        Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+                        break; // If the email was sent successfully, break the loop
+                    } catch (\Exception $e) {
+                        // Log the exception or handle it as you wish
+                        error_log('Unable to send email: ' . $e->getMessage());
+                        $attempts++;
+                        if ($attempts === $maxAttempts) {
+                            error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+                        }
+                        // Wait for 1 second before the next attempt
+                        sleep(1);
+                    }
+                }
             }            
         }           
         return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
