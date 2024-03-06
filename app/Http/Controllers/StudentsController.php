@@ -46,14 +46,16 @@ class StudentsController extends Controller
                 $studentAlreadyCreatedAndUpdated = Student::where('student_number', $studentId)->where('status', 4)->exists();
                 if ($studentAlreadyCreatedAndUpdated) {
                     $studentAccount->update(['email' => $email]);
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
+                    $emailType = 1;
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                     continue;
                 } 
     
                 if ($student) {
                     $student->update(['status' => 4]);
                     $studentAccount->update(['email' => $email]);
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
+                    $emailType = 1;
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 } else {
                     Student::create([
                         'student_number' => $studentId,
@@ -61,7 +63,8 @@ class StudentsController extends Controller
                         'term' => 1,
                         'status' => 4
                     ]);
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
+                    $emailType = 2;
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 }
             }
         }
@@ -80,12 +83,12 @@ class StudentsController extends Controller
         return $email;
     }
     
-    private function sendEmailToStudent($email, $studentId, $maxAttempts, $mail) {
+    private function sendEmailToStudent($email, $studentId, $maxAttempts) {
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'registration@lmmu.ac.zm';
         $attempts = 0;
         while ($attempts < $maxAttempts) {
-            try {
-                Mail::to($sendingEmail)->send($mail);
+            try {                
+                Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));                
                 break;
             } catch (\Exception $e) {
                 error_log('Unable to send email: ' . $e->getMessage());
