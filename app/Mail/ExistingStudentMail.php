@@ -33,6 +33,6 @@ class ExistingStudentMail extends Mailable
         return $this
             ->from('registration@lmmu.ac.zm')
             ->subject('COURSE REGISTRATION ON SIS REPORTS')
-            ->view('emails.existingStudentMail', compact('studentDetails','studentLocalDetails'));
+            ->view('emails.existingStudentMail', compact('studentDetails','studentLocalDetails','studentId'));
     }
 }

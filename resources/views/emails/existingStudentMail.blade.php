@@ -6,7 +6,7 @@
 <title>Course Registration Information</title>
 </head>
 <body>
-    <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }} ( {{ $studentLocalDetails->name }} ),</p>
+    <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }} ( {{ $studentId }} ),</p>
     <p>We are delighted to inform you that course registration for the 2024 academic year is now open on the <a href="http://sisreports.lmmu.ac.zm/">SIS Reports system</a>. You can easily complete your course registration by logging into your account with your <strong>{{ $studentLocalDetails->email }}</strong> email address as your username and the password is"12345678" if and only if you have not update it. Simply navigate to the Course Registration section on the menu after logging in and submit your preferred courses for registration.</p>
 
     <p><strong>Please note:</strong> To access the course registration feature, you must have paid at least 25% of your invoice for the year 2024. Your registration will be processed based on payments made in 2024 only.</p>
