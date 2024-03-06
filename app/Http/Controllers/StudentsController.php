@@ -77,7 +77,7 @@ class StudentsController extends Controller
                 }
                 $results = BasicInformation::find($studentId);          
                 
-                $email = $results->PrivateEmail;
+                $email = trim($results->PrivateEmail);
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     // $email is a valid email address
                     // $sendingEmail = $email;
