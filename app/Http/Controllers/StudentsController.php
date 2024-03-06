@@ -81,7 +81,7 @@ class StudentsController extends Controller
                     $student->update(['status' => 4]);
 
                     // Send email to existing student
-                    Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
+                    Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
                 } else {
                     // If the student number doesn't exist, prepare to insert the student
                     Student::create([
