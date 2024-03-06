@@ -20,25 +20,25 @@
           <p>{{ __('Dashboard') }}</p>
         </a>
       </li>
-      @if ((auth()->user()->hasRole('Student')))
-      <li class = "@if ($activePage == 'studentCourseRegistration') active @endif">
-        <a href="{{ route('student.coursesRegistration', auth()->user()->name) }}">
-          <i class="now-ui-icons gestures_tap-01"></i>
-          <p>{{ __('Course Registration') }}</p>
-        </a>
-      </li>
-      <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
-        <a href="#">
-          <i class="now-ui-icons education_paper"></i>
-          <p>{{ __('Docket') }}</p>
-        </a>
-      </li>
-      <li class = "@if ($activePage == 'studentExaminationResults') active @endif">
-        <a href="{{ url('students/exam/results/' . auth()->user()->name) }}">
-          <i class="now-ui-icons education_hat"></i>
-          <p>{{ __('Exam Results') }}</p>
-        </a>
-      </li>
+      @if (auth()->user()->hasRole('Student') && !auth()->user()->hasAnyRole(['Administrator', 'Developer', 'Dosa', 'Examination', 'Academic', 'Finance']))
+        <li class = "@if ($activePage == 'studentCourseRegistration') active @endif">
+          <a href="{{ route('student.coursesRegistration', auth()->user()->name) }}">
+            <i class="now-ui-icons gestures_tap-01"></i>
+            <p>{{ __('Course Registration') }}</p>
+          </a>
+        </li>
+        <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
+          <a href="#">
+            <i class="now-ui-icons education_paper"></i>
+            <p>{{ __('Docket') }}</p>
+          </a>
+        </li>
+        <li class = "@if ($activePage == 'studentExaminationResults') active @endif">
+          <a href="{{ url('students/exam/results/' . auth()->user()->name) }}">
+            <i class="now-ui-icons education_hat"></i>
+            <p>{{ __('Exam Results') }}</p>
+          </a>
+        </li>
       @endif
       @if ((auth()->user()->hasRole('Academics')) || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Dosa')) || (auth()->user()->hasRole('Developer')))
       <li class = "@if ($activePage == 'registrationCheck') active @endif">
