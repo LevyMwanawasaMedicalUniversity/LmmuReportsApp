@@ -64,12 +64,19 @@ class StudentsController extends Controller
                 if ($results) {
                     continue;
                 }
+
+                // Check if a user account exists for the student
+                if (!isset($existingUsers[$studentId])) {
+                    // If a user account doesn't exist, create it
+                    $this->createUserAccount($studentId);
+                }
                 $results = BasicInformation::find($studentId);          
                 
                 $email = $results->PrivateEmail;
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     // $email is a valid email address
                     // $sendingEmail = $email;
+                    
                     $sendingEmail = $email;
                 } else {
                     // $email is not a valid email address
@@ -79,6 +86,8 @@ class StudentsController extends Controller
                 if ($student) {
                     // If the student number exists, update its status
                     $student->update(['status' => 4]);
+                    
+
 
                     // Send email to existing student
                     Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
@@ -94,11 +103,7 @@ class StudentsController extends Controller
                     Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
                 }
 
-                // Check if a user account exists for the student
-                if (!isset($existingUsers[$studentId])) {
-                    // If a user account doesn't exist, create it
-                    $this->createUserAccount($studentId);
-                }
+                
             }
 
             // Batch insert new students
