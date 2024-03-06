@@ -203,7 +203,7 @@ class StudentsController extends Controller
         if (!$results) {
             return redirect()->back()->with('error', 'Student not found on Edurole.');
         }
-        $email = $results->PrivateEmail;
+        $email = trim($results->PrivateEmail);
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
             // $sendingEmail = $email;
