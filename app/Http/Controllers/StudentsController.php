@@ -32,7 +32,6 @@ class StudentsController extends Controller
         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
     
         foreach ($studentIdsChunks as $studentIdsChunk) {
-            $studentsToInsert = [];
             foreach ($studentIdsChunk as $studentId) {
                 $student = Student::where('student_number', $studentId)->first();
     
@@ -41,17 +40,20 @@ class StudentsController extends Controller
                 }
     
                 $privateEmail = BasicInformation::find($studentId);
-                if ($privateEmail) {
-                    $email = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
-                    User::where('name', $studentId)->update(['email' => $email]);
-                    $this->sendEmailToStudent($email, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
-                }
+                $sendingEmail = trim($privateEmail->PrivateEmail);
+                $email = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+                $studentAccount = User::where('name', $studentId)->first();
+                $studentAlreadyCreatedAndUpdated = Student::where('student_number', $studentId)->where('status', 4)->exists();
+                if ($studentAlreadyCreatedAndUpdated) {
+                    $studentAccount->update(['email' => $email]);
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
+                    continue;
+                } 
     
                 if ($student) {
                     $student->update(['status' => 4]);
-                    $emailAccount = User::where('name', $studentId)->first()->email;
-                    $trimmedEmail = trim($emailAccount);
-                    $student->email->update(['email' => $trimmedEmail]);
+                    $studentAccount->update(['email' => $email]);
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($studentId));
                 } else {
                     Student::create([
                         'student_number' => $studentId,
@@ -59,12 +61,8 @@ class StudentsController extends Controller
                         'term' => 1,
                         'status' => 4
                     ]);
-                    $this->sendEmailToStudent($email, $studentId, $maxAttempts, new NewStudentMail($studentId));
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
                 }
-            }
-    
-            if (!empty($studentsToInsert)) {
-                Student::insert($studentsToInsert);
             }
         }
     
