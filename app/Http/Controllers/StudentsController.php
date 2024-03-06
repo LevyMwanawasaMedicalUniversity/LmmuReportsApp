@@ -46,8 +46,18 @@ class StudentsController extends Controller
                         $this->createUserAccount($studentId);
                     }
                     $privateEmail = BasicInformation::find($studentId);
+
+                    
                     if ($privateEmail) {
                         $email = trim($privateEmail->PrivateEmail);
+                        $existingUser = User::where('email', $email)->first();
+                        if ($existingUser) {
+                            $email = $studentId . $email . '@lmmu.ac.zm';
+                        }elseif($email == null){
+                            $email = $studentId . '@lmmu.ac.zm';
+                        }
+                        User::where('name', $studentId)->update(['email' => $email]);
+                        
                         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                             // $email is a valid email address
                             $sendingEmail = $email;
@@ -119,9 +129,10 @@ class StudentsController extends Controller
                 if ($student) {
                     // If the student number exists, update its status
                     $student->update(['status' => 4]);
-                    
-
-
+                    $tudentAccount = User::where('name', $studentId)->first();  
+                    $emailAccount = $tudentAccount->email;
+                    $trimmedEmail = trim($emailAccount);
+                    $student->email->update(['email' => $trimmedEmail]);
                     // Send email to existing student
                     $attempts = 0;
                     while ($attempts < $maxAttempts) {
@@ -165,7 +176,6 @@ class StudentsController extends Controller
                         }
                     }
                 }
-
                 
             }
 
@@ -231,7 +241,7 @@ class StudentsController extends Controller
     private function createUserAccount($studentId){
         // Get the student's email from BasicInformation
         $basicInfo = BasicInformation::find($studentId);
-        $email = $basicInfo->PrivateEmail;
+        $email = trim($basicInfo->PrivateEmail);
         $existingUser = User::where('email', $email)->first();
         if ($existingUser) {
             $email = $studentId . $email . '@lmmu.ac.zm';
