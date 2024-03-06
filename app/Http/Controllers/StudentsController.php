@@ -23,7 +23,7 @@ use Spatie\Permission\Models\Role;
 class StudentsController extends Controller
 {
     public function importStudentsFromBasicInformation(){
-        set_time_limit(12000000);
+        set_time_limit(120000000);
         $maxAttempts = 10;
     
         $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
