@@ -34,18 +34,49 @@
                             </div>
                         @endif
                     </div>
-                </div>            
+                </div> 
                 <div class="card-body">
-                    <form action="{{ route('students.uploadSingleStudent') }}" method="POST">
-                        @csrf
-                        <div class="form-group">
-                            <label for="studentId">Student ID</label>
-                            <div class="col-md-4">
-                                <input type="number" name="studentId" class="form-control" id="studentId">
-                            </div>                            
+                    <div class="row">
+                        
+                        <div class="col-md-6">
+                            <div class="card">  
+                                <div class="card-header">
+                                    <h4 class="card-title">Upload Single Student</h4>
+                                </div> 
+                                <div class="card-body">                
+                                    <form action="{{ route('students.uploadSingleStudent') }}" method="POST">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="studentId">Student ID</label>
+                                            <div class="col-md-8">
+                                                <input type="number" name="studentId" class="form-control" id="studentId">
+                                            </div>                            
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">IMPORT</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>                
+                        <div class="col-md-6">
+                            <div class="card">  
+                                <div class="card-header">
+                                    <h4 class="card-title">BULK UPLOAD STUDENTS</h4>
+                                </div> 
+                                <div class="card-body">
+                                    <form action="{{ route('students.import') }}" method="POST" onsubmit="return confirm('Are you sure you want to import students from Edurole?')">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="studentId">Bulk Import</label>
+                                            <div class="col-md-12">
+                                                <p>CLICK THE BUTTON BELOW TO IMPORT STUDENTS FROM EDUROLE</p>
+                                            </div>                            
+                                        </div>
+                                        <button type="submit" class="btn btn-warning">BULK IMPORT</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">UPLOAD</button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>

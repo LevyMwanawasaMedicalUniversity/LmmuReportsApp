@@ -59,7 +59,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::patch('/{user}/update', 'UserController@update')->name('users.update');
                 Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
                 Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
-                Route::get('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
+                Route::post('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
                 Route::get('/import/single/students', 'StudentsController@importSingleStudent')->name('students.importSingleStudent');
                 Route::post('/upload/single/students', 'StudentsController@uploadSingleStudent')->name('students.uploadSingleStudent');
                 Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');

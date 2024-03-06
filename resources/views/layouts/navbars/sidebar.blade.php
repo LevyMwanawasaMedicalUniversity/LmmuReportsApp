@@ -199,16 +199,16 @@
                 <p> {{ __("View Students") }} </p>
               </a>
             </li> 
-            <li class="@if ($activePage == 'students.import') active @endif">
+            <!-- <li class="@if ($activePage == 'students.import') active @endif">
               <a href="{{ route('students.import') }}">
                 <i class="now-ui-icons arrows-1_cloud-upload-94"></i>
                 <p> {{ __("Bulk Import Students") }} </p>
               </a>
-            </li> 
+            </li>  -->
             <li class="@if ($activePage == 'students.importSingleStudent') active @endif">
               <a href="{{ route('students.importSingleStudent') }}">
                 <i class="now-ui-icons arrows-1_share-66"></i>
-                <p> {{ __("Add A Student") }} </p>
+                <p> {{ __("Import Students") }} </p>
               </a>
             </li>       
           </ul>
