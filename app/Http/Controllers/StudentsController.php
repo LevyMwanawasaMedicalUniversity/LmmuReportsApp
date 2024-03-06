@@ -42,9 +42,37 @@ class StudentsController extends Controller
                         ->exists();
                 if ($ifStudentExistsOnRequiredStatus) {
                     if (!isset($existingUsers[$studentId])) {
-                    // If a user account doesn't exist, create it
-                    $this->createUserAccount($studentId);
-                }
+                        // If a user account doesn't exist, create it
+                        $this->createUserAccount($studentId);
+                    }
+                    $privateEmail = BasicInformation::find($studentId);
+                    if ($privateEmail) {
+                        $email = trim($privateEmail->PrivateEmail);
+                        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            // $email is a valid email address
+                            $sendingEmail = $email;
+                        } else {
+                            // $email is not a valid email address
+                            $sendingEmail = 'registration@lmmu.ac.zm';
+                        }
+                        $attempts = 0;
+                        while ($attempts < $maxAttempts) {
+                            try {
+                                Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
+                                break; // If the email was sent successfully, break the loop
+                            } catch (\Exception $e) {
+                                // Log the exception or handle it as you wish
+                                error_log('Unable to send email: ' . $e->getMessage());
+                                $attempts++;
+                                if ($attempts === $maxAttempts) {
+                                    error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+                                }
+                                // Wait for 1 second before the next attempt
+                                sleep(1);
+                            }
+                        }
+                    }
+                    
                     continue;
                 }
                 $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
