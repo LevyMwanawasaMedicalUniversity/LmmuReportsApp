@@ -70,10 +70,10 @@ class StudentsController extends Controller
                 if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                     // $email is a valid email address
                     // $sendingEmail = $email;
-                    $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+                    $sendingEmail = $email;
                 } else {
                     // $email is not a valid email address
-                    $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+                    $sendingEmail = 'registration@lmmu.ac.zm';
                 }
                 $student = Student::where('student_number', $studentId)->first();
                 if ($student) {
@@ -81,7 +81,7 @@ class StudentsController extends Controller
                     $student->update(['status' => 4]);
 
                     // Send email to existing student
-                    // Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
+                    Mail::to($sendingEmail)->send(new ExistingStudentMail($student));
                 } else {
                     // If the student number doesn't exist, prepare to insert the student
                     Student::create([
@@ -91,7 +91,7 @@ class StudentsController extends Controller
                         'status' => 4
                     ]);
                     // Send email to new student
-                    // Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
+                    Mail::to($sendingEmail)->send(new NewStudentMail($studentId));
                 }
 
                 // Check if a user account exists for the student
@@ -129,11 +129,11 @@ class StudentsController extends Controller
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
             // $email is a valid email address
             // $sendingEmail = $email;
-            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+            $sendingEmail = $email;
         } else {
             // $email is not a valid email address
             // $sendingEmail = $email . $studentId . '@lmmu.ac.zm';
-            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+            $sendingEmail = 'registration@lmmu.ac.zm';
         }
         $student = Student::where('student_number', $studentId)->first();
         if ($student) {
