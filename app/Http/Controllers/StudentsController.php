@@ -202,7 +202,7 @@ class StudentsController extends Controller
         $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
         // return $studentInformation;
 
-        return view('allStudents.studentIDCard',compact('studentInformation'));
+        return view('allStudents.printIdCard',compact('studentInformation'));
     }
 
     public function viewDocket(){
