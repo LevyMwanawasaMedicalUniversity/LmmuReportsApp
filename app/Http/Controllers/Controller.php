@@ -344,7 +344,7 @@ class Controller extends BaseController
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
                     ->from('grades')
-                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE']);
+                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','EX']);
             })
             ->where('StudentNo', $studentId)
             ->orderBy('StudentNo')
@@ -368,7 +368,7 @@ class Controller extends BaseController
                     ->where('StudentNo', $student)
                     ->where('CourseNo', $course)
                     ->whereNotIn('AcademicYear', ['2024'])
-                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])
+                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','EX'])
                     ->orderBy('Grade')
                     ->get();
     
@@ -383,7 +383,7 @@ class Controller extends BaseController
                         $course2 = $row2->CourseNo;
                         $grade2 = $row2->Grade;
     
-                        if (!in_array($grade2, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])) {
+                        if (!in_array($grade2, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','EX'])) {
                             $failedCourses[] = [
                                 'Student' => $student2,
                                 'Program' => $program2, // Replace with the program
@@ -394,7 +394,7 @@ class Controller extends BaseController
                     }
                 }
             } else {
-                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','NE'])) {
+                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG','EX'])) {
                     $failedCourses[] = [
                         'Student' => $student,
                         'Program' => $program, // Replace with the program
