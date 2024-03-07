@@ -56,6 +56,7 @@ class StudentsController extends Controller
                 if ($studentsProgramme->isEmpty()) {
                     continue;
                 }
+
                 if ($student) {
                     //If a user account doesn't exist, create it
                     if (!isset($existingUsers[$studentId])) {
@@ -72,7 +73,8 @@ class StudentsController extends Controller
                     }
                     
                     continue;
-                }              
+                } 
+                
     
                 // Check if student is registered
                 if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
@@ -370,8 +372,11 @@ class StudentsController extends Controller
         $failed = $registrationResults['failed'];
         
         $coursesArray = $courses->pluck('Course')->toArray();
-    
+        $coursesNamesArray = $courses->pluck('Program')->toArray();
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        if($studentsProgramme->isEmpty()){
+            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+        }
     
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {
