@@ -1431,6 +1431,16 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $courses){
+        $results = $this->queryAllCoursesAttachedToProgrammeForAStudent($studentId)
+                    ->where(function($query) use ($courses) {
+                        foreach ($courses as $course) {
+                            $query->orWhere('courses.CourseDescription', 'LIKE', '%' . $course . '%');
+                        }
+                    });
+        return $results;
+    }
+
     public function getAllCoursesAttachedToProgrammeForAStudent($studentId){
         $results = $this->queryAllCoursesAttachedToProgrammeForAStudent($studentId);
         return $results;
