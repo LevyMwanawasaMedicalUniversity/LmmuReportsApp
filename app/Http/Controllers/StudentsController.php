@@ -39,35 +39,34 @@ class StudentsController extends Controller
         foreach ($studentIdsChunks as $studentIdsChunk) {
             foreach ($studentIdsChunk as $studentId) {
                 // Check if student exists with required status
-                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-                $courses = $registrationResults['dataArray'];
-                $coursesArray = $courses->pluck('Course')->toArray();
-                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-                if ($studentsProgramme->isEmpty()) {
-                    continue;
-                }
-                
                 $student = Student::where('student_number', $studentId)
                     ->where('status', 4)
                     ->first();
     
                 if ($student) {
                     // If a user account doesn't exist, create it
-                    if (!isset($existingUsers[$studentId])) {
-                        $this->createUserAccount($studentId);
-                    }
+                    // if (!isset($existingUsers[$studentId])) {
+                    //     $this->createUserAccount($studentId);
+                    // }
     
-                    // Get and prepare student's private email
-                    $privateEmail = $basicInformations[$studentId] ?? null;
-                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
+                    // // Get and prepare student's private email
+                    // $privateEmail = $basicInformations[$studentId] ?? null;
+                    // $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
     
-                    // Send email to existing student if not already registered
-                    if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
-                        $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                    }
+                    // // Send email to existing student if not already registered
+                    // if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
+                    //     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+                    // }
                     
                     continue;
                 }
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if ($studentsProgramme->isEmpty()) {
+                    continue;
+                }               
     
                 // Check if student is registered
                 if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
