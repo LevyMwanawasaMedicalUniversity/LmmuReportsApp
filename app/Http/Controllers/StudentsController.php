@@ -34,11 +34,19 @@ class StudentsController extends Controller
         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
     
         // Eager load BasicInformation for all students
-        $basicInformations = BasicInformation::whereIn('student_id', $studentIds)->get()->keyBy('student_id');
+        $basicInformations = BasicInformation::whereIn('ID', $studentIds)->get()->keyBy('ID');
     
         foreach ($studentIdsChunks as $studentIdsChunk) {
             foreach ($studentIdsChunk as $studentId) {
                 // Check if student exists with required status
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if ($studentsProgramme->isEmpty()) {
+                    continue;
+                }
+                
                 $student = Student::where('student_number', $studentId)
                     ->where('status', 4)
                     ->first();
