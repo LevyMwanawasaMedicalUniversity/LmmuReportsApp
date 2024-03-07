@@ -104,22 +104,20 @@ class StudentsController extends Controller
         // Check if the email is empty
         if (empty($email)) {
             $email = $studentId . '@lmmu.ac.zm';
-        } else {
-            $email = trim($email);
-    
-            // Check if the email already exists for another user
-            $existingUser = User::where('email', $email)->where('name', '!=', $studentId)->first();
-    
-            if ($existingUser) {
-                // If the email exists for another user, append the student ID
-                $email = $studentId . $email . '@lmmu.ac.zm';
-            } elseif (!User::where('name', $studentId)->where('email', $email)->exists()) {
-                // If the email doesn't exist for the current user, update it
-                User::where('name', $studentId)->update(['email' => $email]);
-            } else {
-                // If the email exists for the current user, do nothing
-            }
         }
+
+        $email = trim($email);
+        // Check if the email already exists for another user
+        $existingUser = User::where('email', $email)->where('name', '!=', $studentId)->exists();
+        if($existingUser){
+            $email = $studentId . $email . '@lmmu.ac.zm';
+            User::where('name', $studentId)->update(['email' => $email]);
+        }            
+        $checkIfUserAlreadyHasEmail = User::where('name', $studentId)->where('email', $email)->exists();   
+        if (!$checkIfUserAlreadyHasEmail) {
+            // If the email doesn't exist for the current user, update it
+            User::where('name', $studentId)->update(['email' => $email]);
+        }     
     
         return $email;
     }
