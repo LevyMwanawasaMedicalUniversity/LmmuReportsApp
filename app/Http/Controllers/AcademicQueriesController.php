@@ -136,7 +136,7 @@ class AcademicQueriesController extends Controller
             if(count($results) === 0){
                 return view('academics.registrationCheck', compact('results'))->with('error', 'Student not registered');
             }else{
-                return $results;
+                return view('academics.registrationCheck', compact('results'))->with('error', 'Student not registered');
             }
         }else{
             $results = 0;
