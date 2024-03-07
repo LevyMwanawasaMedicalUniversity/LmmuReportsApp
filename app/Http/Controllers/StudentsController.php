@@ -123,7 +123,7 @@ class StudentsController extends Controller
     private function sendEmailToStudent($email, $studentId, $maxAttempts) {
         Log::info('Email sent to ' . $email . ' for student ' . $studentId);
         $email = trim($email);
-        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
+        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'registration@lmmu.ac.zm';
         // $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         $attempts = 0;
         $studentId = $studentId;
