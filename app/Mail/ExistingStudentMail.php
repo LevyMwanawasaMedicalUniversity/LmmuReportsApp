@@ -29,6 +29,7 @@ class ExistingStudentMail extends Mailable
     {
         $studentDetails = BasicInformation::find($this->studentId);
         $studentLocalDetails = User::where('name', $this->studentId)->first();
+        $studentId = $this->studentId;
         
         return $this
             ->from('registration@lmmu.ac.zm')

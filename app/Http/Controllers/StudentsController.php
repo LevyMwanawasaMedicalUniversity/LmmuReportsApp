@@ -23,81 +23,214 @@ use Spatie\Permission\Models\Role;
 class StudentsController extends Controller
 {
     public function importStudentsFromBasicInformation(){
-        set_time_limit(120000000);
+        set_time_limit(12000000);
         $maxAttempts = 10;
-    
+        
+        // Get student IDs to import
         $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
         $studentIdsChunks = array_chunk($studentIds, 1000);
     
+        // Get existing users
         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
+    
+        // Eager load BasicInformation for all students
+        $basicInformations = BasicInformation::whereIn('student_id', $studentIds)->get()->keyBy('student_id');
     
         foreach ($studentIdsChunks as $studentIdsChunk) {
             foreach ($studentIdsChunk as $studentId) {
-                $student = Student::where('student_number', $studentId)->first();
+                // Check if student exists with required status
+                $student = Student::where('student_number', $studentId)
+                    ->where('status', 4)
+                    ->first();
     
+                if ($student) {
+                    // If a user account doesn't exist, create it
+                    if (!isset($existingUsers[$studentId])) {
+                        $this->createUserAccount($studentId);
+                    }
+    
+                    // Get and prepare student's private email
+                    $privateEmail = $basicInformations[$studentId] ?? null;
+                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
+    
+                    // Send email to existing student if not already registered
+                    if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
+                        $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+                    }
+                    
+                    continue;
+                }
+    
+                // Check if student is registered
+                if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
+                    continue;
+                }
+    
+                // If a user account doesn't exist, create it
                 if (!isset($existingUsers[$studentId])) {
                     $this->createUserAccount($studentId);
                 }
     
-                $privateEmail = BasicInformation::find($studentId);
-                $sendingEmail = trim($privateEmail->PrivateEmail);
-                $email = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
-                $studentAccount = User::where('name', $studentId)->first();
-                $studentAlreadyCreatedAndUpdated = Student::where('student_number', $studentId)->where('status', 4)->exists();
-                if ($studentAlreadyCreatedAndUpdated) {
-                    $studentAccount->update(['email' => $email]);
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                    continue;
-                } 
+                // Get and prepare student's private email
+                $privateEmail = $basicInformations[$studentId] ?? null;
+                $email = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
     
-                if ($student) {
-                    $student->update(['status' => 4]);
-                    $studentAccount->update(['email' => $email]);
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                } else {
-                    Student::create([
-                        'student_number' => $studentId,
-                        'academic_year' => 2024,
-                        'term' => 1,
-                        'status' => 4
-                    ]);
-                    
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                }
+                // Create or update student record
+                Student::updateOrCreate(
+                    ['student_number' => $studentId],
+                    ['academic_year' => 2024, 'term' => 1, 'status' => 4]
+                );
+    
+                // Send email to new student
+                $this->sendEmailToStudent($email, $studentId, $maxAttempts);
             }
         }
     
+        // Provide a success message
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
     
     private function validateAndPrepareEmail($email, $studentId) {
         $email = trim($email);
-        $existingUser = User::where('email', $email)->first();
-        if ($existingUser) {
-            $email = $studentId . $email . '@lmmu.ac.zm';
-        } elseif($email == null) {
+        // Check if the email is empty
+        if (empty($email)) {
             $email = $studentId . '@lmmu.ac.zm';
+        } else {
+            // Clean the email
+            $email = trim($email);
+    
+            // Check if the email already exists for another user
+            $existingUser = User::where('email', $email)->where('name', '!=', $studentId)->first();
+            if ($existingUser) {
+                // Append the student ID to make it unique
+                $email = $studentId . $email . '@lmmu.ac.zm';
+            } else {
+                // Update the email for existing users if not the current student
+                User::where('name', $studentId)->update(['email' => $email]);
+            }
         }
         return $email;
     }
-    
+
     private function sendEmailToStudent($email, $studentId, $maxAttempts) {
-        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'registration@lmmu.ac.zm';
+        Log::info('Email sent to ' . $email . ' for student ' . $studentId);
+        $email = trim($email);
+        $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
         $attempts = 0;
+        $studentId = $studentId;
         while ($attempts < $maxAttempts) {
-            try {                
-                Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));                
+            try {
+                Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
+                Log::info('Email sent to ' . $sendingEmail . ' for student ' . $studentId);
                 break;
             } catch (\Exception $e) {
-                error_log('Unable to send email: ' . $e->getMessage());
+                error_log('Unable to send email: '. $maxAttempts . ' attempts.' .$studentId . $e->getMessage());
                 $attempts++;
                 if ($attempts === $maxAttempts) {
-                    error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+                    error_log('Failed to send email after ' . $maxAttempts . ' attempts.' .$studentId);
                 }
                 sleep(1);
             }
         }
     }
+    
+    // private function sendEmailToStudent($email, $studentId, $maxAttempts) {
+    //     $email = trim($email);
+    //     $email = 'azwel.simwinga@lmmu.ac.zm';
+    //     $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
+    //     $attempts = 0;
+    //     while ($attempts < $maxAttempts) {
+    //         try {
+    //             Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));
+    //             Log::info('Email sent to ' . $sendingEmail . ' for student ' . $studentId);
+    //             break;
+    //         } catch (\Exception $e) {
+    //             error_log('Unable to send email: ' . $e->getMessage());
+    //             $attempts++;
+    //             if ($attempts === $maxAttempts) {
+    //                 error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+    //             }
+    //             sleep(1);
+    //         }
+    //     }
+    // }
+    
+    // public function importStudentsFromBasicInformation(){
+    //     set_time_limit(120000000);
+    //     $maxAttempts = 10;
+    
+    //     $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
+    //     $studentIdsChunks = array_chunk($studentIds, 1000);
+    
+    //     $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
+    
+    //     foreach ($studentIdsChunks as $studentIdsChunk) {
+    //         foreach ($studentIdsChunk as $studentId) {
+    //             $student = Student::where('student_number', $studentId)->first();
+    
+    //             if (!isset($existingUsers[$studentId])) {
+    //                 $this->createUserAccount($studentId);
+    //             }
+    
+    //             $privateEmail = BasicInformation::find($studentId);
+    //             $sendingEmail = trim($privateEmail->PrivateEmail);
+    //             $email = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+    //             $studentAccount = User::where('name', $studentId)->first();
+    //             $studentAlreadyCreatedAndUpdated = Student::where('student_number', $studentId)->where('status', 4)->exists();
+    //             if ($studentAlreadyCreatedAndUpdated) {
+    //                 $studentAccount->update(['email' => $email]);
+    //                 $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    //                 continue;
+    //             } 
+    
+    //             if ($student) {
+    //                 $student->update(['status' => 4]);
+    //                 $studentAccount->update(['email' => $email]);
+    //                 $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    //             } else {
+    //                 Student::create([
+    //                     'student_number' => $studentId,
+    //                     'academic_year' => 2024,
+    //                     'term' => 1,
+    //                     'status' => 4
+    //                 ]);
+                    
+    //                 $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    //             }
+    //         }
+    //     }
+    
+    //     return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    // }
+    
+    // private function validateAndPrepareEmail($email, $studentId) {
+    //     $email = trim($email);
+    //     $existingUser = User::where('email', $email)->first();
+    //     if ($existingUser) {
+    //         $email = $studentId . $email . '@lmmu.ac.zm';
+    //     } elseif($email == null) {
+    //         $email = $studentId . '@lmmu.ac.zm';
+    //     }
+    //     return $email;
+    // }
+    
+    // private function sendEmailToStudent($email, $studentId, $maxAttempts) {
+    //     $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'registration@lmmu.ac.zm';
+    //     $attempts = 0;
+    //     while ($attempts < $maxAttempts) {
+    //         try {                
+    //             Mail::to($sendingEmail)->send(new ExistingStudentMail($studentId));                
+    //             break;
+    //         } catch (\Exception $e) {
+    //             error_log('Unable to send email: ' . $e->getMessage());
+    //             $attempts++;
+    //             if ($attempts === $maxAttempts) {
+    //                 error_log('Failed to send email after ' . $maxAttempts . ' attempts.');
+    //             }
+    //             sleep(1);
+    //         }
+    //     }
+    // }
 
     public function importSingleStudent(){
         return view('allStudents.importSingleStudent');
@@ -389,7 +522,7 @@ class StudentsController extends Controller
         
         $coursesArray = $courses->pluck('Course')->toArray();
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        
+        return $studentsProgramme;
         // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {
