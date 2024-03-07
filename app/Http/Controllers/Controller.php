@@ -489,7 +489,7 @@ class Controller extends BaseController
         $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($studentID);
     
         // Dispatch the email sending job to the queue
-        // dispatch(new SendEmailJob($sendingEmail, $mailClass));
+        dispatch(new SendEmailJob($sendingEmail, $mailClass));
     
         if ($pdfPath) {
             unlink($pdfPath);
