@@ -10,5 +10,5 @@ class Grades extends Model
     use HasFactory;
 
     protected $connection = 'edurole_database';
-    protected $table = 'grades';
+    protected $table = 'grades-published';
 }

@@ -709,7 +709,7 @@ class Controller extends BaseController
     {    
         // Perform the query to get grades
         $gradesCheck = Grades::query()
-            ->where('grades.StudentNo', $studentId)
+            ->where('grades-published.StudentNo', $studentId)
             ->whereNotIn('AcademicYear', ['2024'])
             ->get();
 
