@@ -110,7 +110,7 @@ class StudentsController extends Controller
         // Check if the email already exists for another user
         $existingUser = User::where('email', $email)->where('name', '!=', $studentId)->exists();
         if($existingUser){
-            $email = $studentId . $email . '@lmmu.ac.zm';
+            $email = $studentId . $email;
             User::where('name', $studentId)->update(['email' => $email]);
         }            
         $checkIfUserAlreadyHasEmail = User::where('name', $studentId)->where('email', $email)->exists();   
