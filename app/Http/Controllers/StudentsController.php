@@ -116,6 +116,7 @@ class StudentsController extends Controller
         Log::info('Email sent to ' . $email . ' for student ' . $studentId);
         $email = trim($email);
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
+        $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         $attempts = 0;
         $studentId = $studentId;
         while ($attempts < $maxAttempts) {
@@ -522,7 +523,7 @@ class StudentsController extends Controller
         
         $coursesArray = $courses->pluck('Course')->toArray();
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        return $studentsProgramme;
+        // return $studentsProgramme;
         // If the student number starts with 190, replace 2023 with 2019 in CodeRegisteredUnder
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {
