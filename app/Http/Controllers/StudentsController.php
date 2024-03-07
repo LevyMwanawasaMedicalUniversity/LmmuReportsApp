@@ -42,7 +42,23 @@ class StudentsController extends Controller
                 $student = Student::where('student_number', $studentId)
                     ->where('status', 4)
                     ->first();
+                if ($student) {
+                    //If a user account doesn't exist, create it
+                    // if (!isset($existingUsers[$studentId])) {
+                    //     $this->createUserAccount($studentId);
+                    // }
     
+                    // Get and prepare student's private email
+                    $privateEmail = $basicInformations[$studentId] ?? null;
+                    // $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
+                    $sendingEmail = trim($privateEmail->PrivateEmail);
+                    // Send email to existing student if not already registered
+                    if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
+                        $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+                    }
+                    
+                    continue;
+                } 
                 
                 $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
                 $courses = $registrationResults['dataArray'];
@@ -55,26 +71,7 @@ class StudentsController extends Controller
 
                 if ($studentsProgramme->isEmpty()) {
                     continue;
-                }
-
-                if ($student) {
-                    //If a user account doesn't exist, create it
-                    if (!isset($existingUsers[$studentId])) {
-                        $this->createUserAccount($studentId);
-                    }
-    
-                    // Get and prepare student's private email
-                    $privateEmail = $basicInformations[$studentId] ?? null;
-                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
-    
-                    // Send email to existing student if not already registered
-                    if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
-                        $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                    }
-                    
-                    continue;
-                } 
-                
+                }             
     
                 // Check if student is registered
                 if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
