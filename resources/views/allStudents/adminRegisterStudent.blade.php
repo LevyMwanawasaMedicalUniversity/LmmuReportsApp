@@ -40,6 +40,10 @@
                             <h4 class="card-title">ALL COURSES</h4>
                         </div>
                         <div class="card-body"> 
+                            @php
+                                $registrationFees = [];
+                                $totalFees = [];
+                            @endphp
                             @foreach($allCourses->groupBy('CodeRegisteredUnder') as $programme => $courses)                       
                             <div class="accordion" id="coursesAccordion{{$loop->index}}">
                                 <div class="accordion-item">
@@ -50,6 +54,10 @@
                                                 $sisInvoices = \App\Models\SisReportsSageInvoices::where('InvoiceDescription','=',$programme)->first();
                                                 $course = $courses->first();
                                                 $amount = $sisInvoices ? $sisInvoices->InvoiceAmount : 0;
+
+                                                $index = $loop->index;
+                                                $registrationFees[$index] = round($amount * 0.25, 2);
+                                                $totalFees[$index] = round($amount, 2);
                                             @endphp
                                     @isset($sisInvoices)
                                             <span class="ms-auto registrationFee" id="registrationFee{{$loop->index}}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
@@ -92,6 +100,10 @@
                                 </div>
                             </div>
                             @endforeach
+                            <script>
+                                var registrationFeesArray = {!! json_encode($registrationFees) !!};
+                                var totalFeesArray = {!! json_encode($totalFees) !!};
+                            </script>
                         </div>
                     </div> 
                     <!-- </div> -->

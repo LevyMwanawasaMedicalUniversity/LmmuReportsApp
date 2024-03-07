@@ -3,11 +3,9 @@ $(document).ready(function() {
         e.preventDefault();
 
         var index = $(this).attr('id').replace('registerButton', '');
-        var registrationFeeText = $('#registrationFee' + index).text();
-        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
-        var totalFeeText = $('#totalFee' + index).text();
-        var totalFee = parseFloat(totalFeeText.replace(/[^0-9\.]/g, ''));
-        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
+        var registrationFee = registrationFeesArray[index];
+        var totalFee = totalFeesArray[index];
+        // var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
         // Store the courses in a variable
         var courses = [];
         $('input[id^="course' + index + '"]:checked').each(function() {
@@ -45,11 +43,10 @@ $(document).ready(function() {
         e.preventDefault();
 
         var index = $(this).attr('id').replace('registerButtonRepeat', '');
-        var registrationFeeText = $('#registrationFeeRepeat' + index).text();
-        var registrationFee = parseFloat(registrationFeeText.replace(/[^0-9\.]/g, ''));
-        var totalFeeText = $('#totalFeeRepeat' + index).text();
-        var totalFee = parseFloat(totalFeeText.replace(/[^0-9\.]/g, ''));
-        var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
+        
+        var registrationFee = registrationFeesRepeatArray[index];
+        var totalFee = totalFeeArrayRepeat[index];
+        // var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
         // Store the courses in a variable
         var coursesRepeat = [];
         $('input[id^="courseRepeat' + index + '"]:checked').each(function() {
@@ -57,6 +54,7 @@ $(document).ready(function() {
         });
         console.log(coursesRepeat);
         console.log(registrationFee);
+        console.log(totalFee);
         console.log(payments2024);
 
         // Show the modal

@@ -8,6 +8,10 @@
         @endif
     </div>
     <div class="card-body">  
+        @php
+            $registrationFeesRepeat = [];
+            $totalFeesRepeat = [];
+        @endphp
         @foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $courses)
         <div class="accordion" id="coursesAccordion{{$loop->index}}{{ $studentId }}"> <!-- Concatenate 2024 with loop index -->
             <div class="accordion-item">
@@ -25,8 +29,12 @@
                                 $numberOfRepeatCourses = $currentStudentsCourses->count();
                                 $amount = ($tuitionFee * $numberOfRepeatCourses) + $otherFee;
                             }
+                            $index = $loop->index . $studentId;
+                            $registrationFeesRepeat[$index] = round($amount * 0.25, 2);
+                            $totalFeesRepeat[$index] = round($amount, 2);
                         @endphp
                 @isset($sisInvoices)
+                    
                         <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat{{$loop->index}}{{ $studentId }}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
                         <span class="ms-auto totalFeeRepeat" id="totalFeeRepeat{{$loop->index}}{{ $studentId }}">Total Invoice = K{{ number_format($amount,0) }}</span>
                     </button>
@@ -67,6 +75,10 @@
             </div>
         </div>
         @endforeach
+        <script>
+            var registrationFeesRepeatArray = {!! json_encode($registrationFeesRepeat) !!};
+            var totalFeeArrayRepeat = {!! json_encode($totalFeesRepeat) !!};
+        </script>
     </div>
 </div> 
 <!-- </div> -->

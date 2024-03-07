@@ -7,6 +7,9 @@
             <p style="font-weight:bold; color: red;">Note that your Outstanding balance should be cleared by September 2024</p>
         @endif
     </div>
+    <script>
+        var payments2024 = {{ $studentsPayments->TotalPayment2024 }};
+    </script>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table">
