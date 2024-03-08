@@ -39,9 +39,28 @@ class StudentsController extends Controller
         foreach ($studentIdsChunks as $studentIdsChunk) {
             foreach ($studentIdsChunk as $studentId) {
                 // Check if student exists with required status
+                
+                
+                
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $coursesNamesArray = $courses->pluck('Program')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if($studentsProgramme->isEmpty()){
+                    $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+                }
+
+                if ($studentsProgramme->isEmpty()) {
+                    Student::updateOrCreate(
+                        ['student_number' => $studentId],
+                        ['academic_year' => 2024, 'term' => 1, 'status' => 3]
+                    );
+                    continue;
+                }  
                 $student = Student::where('student_number', $studentId)
                     ->where('status', 4)
-                    ->first();
+                    ->first();   
                 if ($student) {
                     //If a user account doesn't exist, create it
                     // if (!isset($existingUsers[$studentId])) {
@@ -58,20 +77,7 @@ class StudentsController extends Controller
                     }
                     
                     continue;
-                } 
-                
-                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-                $courses = $registrationResults['dataArray'];
-                $coursesArray = $courses->pluck('Course')->toArray();
-                $coursesNamesArray = $courses->pluck('Program')->toArray();
-                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-                if($studentsProgramme->isEmpty()){
-                    $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
-                }
-
-                if ($studentsProgramme->isEmpty()) {
-                    continue;
-                }             
+                }         
     
                 // Check if student is registered
                 if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
