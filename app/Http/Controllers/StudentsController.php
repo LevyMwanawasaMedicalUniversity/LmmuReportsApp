@@ -50,14 +50,14 @@ class StudentsController extends Controller
                 if($studentsProgramme->isEmpty()){
                     $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
                 }
-
-                if ($studentsProgramme->isEmpty()) {
+                $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+                if ($studentsProgramme->isEmpty() || $isStudentRegistered) {
                     Student::updateOrCreate(
                         ['student_number' => $studentId],
                         ['academic_year' => 2023, 'term' => 1, 'status' => 3]
                     );
                     continue;
-                }  
+                }
                 $student = Student::where('student_number', $studentId)
                     ->where('status', 4)
                     ->first();   
@@ -79,10 +79,7 @@ class StudentsController extends Controller
                     continue;
                 }         
     
-                // Check if student is registered
-                if ($this->checkIfStudentIsRegistered($studentId)->exists()) {
-                    continue;
-                }
+                
     
                 // If a user account doesn't exist, create it
                 if (!isset($existingUsers[$studentId])) {
