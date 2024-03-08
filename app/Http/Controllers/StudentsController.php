@@ -39,7 +39,27 @@ class StudentsController extends Controller
         foreach ($studentIdsChunks as $studentIdsChunk) {
             foreach ($studentIdsChunk as $studentId) {
                 // Check if student exists with required status
-                
+                $student = Student::where('student_number', $studentId)
+                    ->where('status', 4)
+                    ->first(); 
+                if ($student) {
+                    //If a user account doesn't exist, create it
+                    // if (!isset($existingUsers[$studentId])) {
+                    //     $this->createUserAccount($studentId);
+                    // }
+    
+                    // Get and prepare student's private email
+                    // $privateEmail = BasicInformation::find($studentId);
+                    // $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
+                    // //remio
+                    
+                    // // Send email to existing student if not already registered
+                    // if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
+                    //     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+                    // }
+                    
+                    continue;
+                } 
                 
                 
                 $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
@@ -57,30 +77,7 @@ class StudentsController extends Controller
                         ['academic_year' => 2023, 'term' => 1, 'status' => 3]
                     );
                     continue;
-                }
-                $student = Student::where('student_number', $studentId)
-                    ->where('status', 4)
-                    ->first();   
-                if ($student) {
-                    //If a user account doesn't exist, create it
-                    // if (!isset($existingUsers[$studentId])) {
-                    //     $this->createUserAccount($studentId);
-                    // }
-    
-                    // Get and prepare student's private email
-                    $privateEmail = BasicInformation::find($studentId);
-                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-                    //remio
-                    
-                    // Send email to existing student if not already registered
-                    if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
-                        $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-                    }
-                    
-                    continue;
-                }         
-    
-                
+                }                                  
     
                 // If a user account doesn't exist, create it
                 if (!isset($existingUsers[$studentId])) {
