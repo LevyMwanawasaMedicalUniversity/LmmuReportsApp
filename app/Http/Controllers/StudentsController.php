@@ -54,7 +54,7 @@ class StudentsController extends Controller
                 if ($studentsProgramme->isEmpty()) {
                     Student::updateOrCreate(
                         ['student_number' => $studentId],
-                        ['academic_year' => 2024, 'term' => 1, 'status' => 3]
+                        ['academic_year' => 2023, 'term' => 1, 'status' => 3]
                     );
                     continue;
                 }  
