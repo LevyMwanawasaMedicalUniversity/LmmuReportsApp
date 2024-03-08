@@ -70,7 +70,7 @@ class StudentsController extends Controller
                     // Get and prepare student's private email
                     $privateEmail = BasicInformation::find($studentId);
                     $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-                    
+                    //remio
                     
                     // Send email to existing student if not already registered
                     if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
