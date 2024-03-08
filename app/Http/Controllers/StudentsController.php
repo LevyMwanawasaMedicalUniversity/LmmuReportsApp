@@ -70,6 +70,7 @@ class StudentsController extends Controller
                     // Get and prepare student's private email
                     $privateEmail = BasicInformation::find($studentId);
                     $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
+                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                     
                     // Send email to existing student if not already registered
                     if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
@@ -97,7 +98,7 @@ class StudentsController extends Controller
                 );
     
                 // Send email to new student
-                $this->sendEmailToStudent($email, $studentId, $maxAttempts);
+                $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
             }
         }
     
