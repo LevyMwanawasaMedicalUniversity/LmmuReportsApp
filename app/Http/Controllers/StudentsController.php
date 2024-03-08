@@ -63,9 +63,9 @@ class StudentsController extends Controller
                     ->first();   
                 if ($student) {
                     //If a user account doesn't exist, create it
-                    if (!isset($existingUsers[$studentId])) {
-                        $this->createUserAccount($studentId);
-                    }
+                    // if (!isset($existingUsers[$studentId])) {
+                    //     $this->createUserAccount($studentId);
+                    // }
     
                     // Get and prepare student's private email
                     $privateEmail = BasicInformation::find($studentId);
