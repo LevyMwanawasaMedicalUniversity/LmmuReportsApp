@@ -68,8 +68,8 @@ class StudentsController extends Controller
                     }
     
                     // Get and prepare student's private email
-                    $privateEmail = $basicInformations[$studentId] ?? null;
-                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
+                    $privateEmail = BasicInformation::find($studentId);
+                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
                     
                     // Send email to existing student if not already registered
                     if (!$this->checkIfStudentIsRegistered($studentId)->exists()) {
@@ -87,8 +87,8 @@ class StudentsController extends Controller
                 }
     
                 // Get and prepare student's private email
-                $privateEmail = $basicInformations[$studentId] ?? null;
-                $email = $this->validateAndPrepareEmail($privateEmail ? $privateEmail->PrivateEmail : '', $studentId);
+                $privateEmail = BasicInformation::find($studentId);
+                $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
     
                 // Create or update student record
                 Student::updateOrCreate(
