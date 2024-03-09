@@ -27,8 +27,17 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        if(Auth::user()->hasRole('Student')){
+            return view('home');
+        } else {
+            return redirect()->route('landing.page');
+        }       
     } 
+
+    public function landingPage(){
+        
+        return view('landing');
+    }
     
     
 
