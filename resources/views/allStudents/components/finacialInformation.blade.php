@@ -8,7 +8,7 @@
         @endif
     </div>
     <script>
-        var payments2024 = {{ $studentsPayments->TotalPayment2024 }};
+        var payments2024 = {{ isset($studentsPayments->TotalPayment2024) ? $studentsPayments->TotalPayment2024 : '0' }};
     </script>
     <div class="card-body">
         <div class="table-responsive">
