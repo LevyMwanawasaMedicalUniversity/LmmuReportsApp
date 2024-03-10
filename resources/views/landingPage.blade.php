@@ -110,19 +110,25 @@
             var chart = new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Newly Admitted', 'Returning'],
+                    labels: ['New Edurole', 'Returning Edulrole', 'Returning SISReports', 'New SISReports'],
                     datasets: [{
-                        data: [
+                      data: [
                             {{ $eduroleRegisteredStudents->where('StudentType', 'NEWLY ADMITTED')->count() }},
-                            {{ $eduroleRegisteredStudents->where('StudentType', 'RETURNING STUDENT')->count() }} + {{ $sisReportsRegisteredStudents->where('StudentType', 'RETURNING STUDENT')->count()}}
+                            {{ $eduroleRegisteredStudents->where('StudentType', 'RETURNING STUDENT')->count() }},
+                            {{ $sisReportsRegisteredStudents->where('StudentType', 'RETURNING STUDENT')->count()}},
+                            {{ $sisReportsRegisteredStudents->where('StudentType', 'NEWLY ADMITTED')->count() }} 
                         ],
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)', // color for 'Newly Admitted'
-                            'rgba(54, 162, 235, 0.2)'  // color for 'Returning'
+                            'rgba(255, 99, 132, 0.2)', // color for 'New Edurole'
+                            'rgba(54, 162, 235, 0.2)', // color for 'Returning Edulrole'
+                            'rgba(255, 206, 86, 0.2)', // color for 'Returning SISReports'
+                            'rgba(75, 192, 192, 0.2)'  // color for 'New SISReports'
                         ],
                         borderColor: [
-                            'rgba(255, 99, 132, 1)', // color for 'Newly Admitted'
-                            'rgba(54, 162, 235, 1)'  // color for 'Returning'
+                            'rgba(255, 99, 132, 1)', // color for 'New Edurole'
+                            'rgba(54, 162, 235, 1)', // color for 'Returning Edulrole'
+                            'rgba(255, 206, 86, 1)', // color for 'Returning SISReports'
+                            'rgba(75, 192, 192, 1)'  // color for 'New SISReports'
                         ],
                         borderWidth: 1
                     }]
