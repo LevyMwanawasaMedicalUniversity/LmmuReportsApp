@@ -25,7 +25,7 @@
                 <tr>
                     <td style="color:#f96332;"><strong>Fulltime</strong></td>
                     
-                    <td style="color:#f5f5f5;">334</td>
+                    <td style="color:#f5f5f5;">{{ $edurole }}</td>
                     <td style="color:#f5f5f5;">334</td>
                     <td style="background-color: #f5f5f5;">1002</td>
                 </tr>

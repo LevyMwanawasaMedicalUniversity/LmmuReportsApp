@@ -34,12 +34,6 @@ INNER JOIN courses c ON ce.CourseID = c.ID
 INNER JOIN `program-course-link` pcl ON pcl.CourseID = c.ID
 INNER JOIN programmes p ON p.ID = pcl.ProgramID
 WHERE
-    LENGTH(bi.ID) > 7    
---     AND (
---         bi.ID LIKE '190%'
---         OR bi.ID LIKE '210%'
---         OR bi.ID LIKE '220%'
---         OR bi.ID LIKE '230%'
---     )
+    LENGTH(bi.ID) > 7     
 GROUP BY
     bi.ID;

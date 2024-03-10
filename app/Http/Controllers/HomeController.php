@@ -35,7 +35,18 @@ class HomeController extends Controller
 
     public function landingPage(){
         // return "here";
-        return view('landingPage');
+        $academicYear = 2024;
+        $students = Student::query()
+            ->join('course_registration', 'students.student_number', '=', 'course_registration.StudentID')
+            ->where('course_registration.Year', $academicYear)
+            ->get();
+            // return $students;
+        $studentsArray = $students->pluck('student_number')->toArray();
+        // return $studentsArray;
+        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($studentsArray)->get();
+        $eduroleRegisteredStudents = $this->getRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
+        // return $sisReportsRegisteredStudents;
+        return view('landingPage', compact('eduroleRegisteredStudents', 'sisReportsRegisteredStudents'));
         
     }
     

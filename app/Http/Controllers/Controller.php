@@ -9,6 +9,7 @@ use App\Mail\SendAnEmail;
 use App\Mail\SendMailNmcz;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\EduroleCourses;
 use App\Models\Grade;
@@ -1487,6 +1488,96 @@ class Controller extends BaseController
     public function getCoursesInASpecificProgrammeCode($programmeCode){
         $results = $this->queryCoursesInASpecificProgrammeCode($programmeCode);
         return $results;
+    }
+
+    public function getRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents( $academicYear){
+        $results = $this->queryRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents( $academicYear);
+        return $results;
+    }
+
+    private function queryRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear){
+        $results = BasicInformation::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.ID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            DB::raw('study.Name AS ProgrammeName'),
+            DB::raw('study.ShortName AS ProgrammeCode'),
+            DB::raw('schools.Description AS School'),
+            'basic-information.StudyType',
+            DB::raw("
+                CASE 
+                    WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
+                    ELSE 'RETURNING STUDENT'
+                END AS 'StudentType'
+            "),
+            DB::raw("
+                CASE 
+                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                    ELSE 'NO REGISTRATION'
+                END AS YearOfStudy
+            ")
+        )
+        ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+        ->join('study', 'student-study-link.StudyID', '=', 'study.ID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID')
+        ->join('course-electives', function ($join) use ($academicYear) {
+            $join->on('basic-information.ID', '=', 'course-electives.StudentID')
+                ->where('course-electives.Year', '=', $academicYear);
+        })
+        ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+        ->join('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->join('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->whereRaw('LENGTH(`basic-information`.ID) > 7')
+        ->groupBy('basic-information.ID');
+
+        return $results;
+    }
+
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students){
+        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students);
+        return $results;
+    }
+
+    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents( $students) {
+        $results = BasicInformation::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.ID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            DB::raw('study.Name AS ProgrammeName'),
+            DB::raw('study.ShortName AS ProgrammeCode'),
+            DB::raw('schools.Description AS School'),
+            'basic-information.StudyType',
+            DB::raw("
+                CASE 
+                    WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
+                    ELSE 'RETURNING STUDENT'
+                END AS 'Student Type'
+            "),            
+        )
+        ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+        ->join('study', 'student-study-link.StudyID', '=', 'study.ID')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID')        
+        ->whereRaw('LENGTH(`basic-information`.ID) > 7')
+        ->whereIn('basic-information.ID', $students)
+        ->groupBy('basic-information.ID');
+    
+        return $results;
+        
     }
 
     private function queryCoursesInASpecificProgrammeCode($programmeCode){        
