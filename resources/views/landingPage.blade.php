@@ -16,6 +16,11 @@
                 font-weight: bold;
                 text-transform: uppercase;
             }
+            /* .table thead {
+                background-color: #f96332;
+;
+                color: #fff;
+            } */
         
             .table tbody tr td:first-child {
                 font-weight: bold;
@@ -28,12 +33,12 @@
             }
           </style>
           <table class="table table-striped table-hover">
-            <thead class="thead-dark">
+            <thead class="thead">
                 <tr>
-                    <th><strong>Study Mode</strong></th>
-                    <th><strong>Edurole</strong></th>
-                    <th><strong>Sis Reports</strong></th>
-                    <th><strong>Total </strong></th>
+                  <th style="color: #fff; font-weight: bold;"><strong>Study Mode</strong></th>
+                  <th style="color: #fff; font-weight: bold;"><strong>Edurole</strong></th>
+                  <th style="color: #fff; font-weight: bold;"><strong>Sis Reports</strong></th>
+                  <th style="color: #fff; font-weight: bold;"><strong>Total </strong></th>
                 </tr>
                 @php
                   $totalFulltimeRegistrations = $eduroleRegisteredStudents->where('StudyType', 'Fulltime')->count() + $sisReportsRegisteredStudents->where('StudyType', 'Fulltime')->count();
