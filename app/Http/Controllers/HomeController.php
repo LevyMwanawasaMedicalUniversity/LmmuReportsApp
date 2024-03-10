@@ -25,18 +25,18 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
-    public function index()
-    {
-        if(Auth::user()->hasRole('Student')){
+    public function index(){
+        if(Auth::user()->hasRole('Student') || Auth::user()->hasRole('Dosa') || Auth::user()->hasRole('Examination')) {
             return view('home');
         } else {
             return redirect()->route('landing.page');
         }       
-    } 
+    }
 
     public function landingPage(){
+        // return "here";
+        return view('landingPage');
         
-        return view('landing');
     }
     
     
