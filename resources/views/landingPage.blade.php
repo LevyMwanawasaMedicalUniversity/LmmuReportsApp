@@ -141,7 +141,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Chart.js Pie Chart'
+                            text: ''
                         }
                     }
                 },
@@ -210,7 +210,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Chart.js Pie Chart'
+                            text: ''
                         }
                     }
                 },
@@ -284,7 +284,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Chart.js Pie Chart'
+                            text: ''
                         }
                     }
                 },
@@ -345,7 +345,7 @@
                         },
                         title: {
                             display: true,
-                            text: 'Chart.js Bar Chart'
+                            text: ''
                         }
                     },
                     scales: {
