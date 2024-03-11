@@ -100,7 +100,7 @@
             </div> --}}
           </div>
           <div class="card-body" style="height: 400px;">
-            <div class="chart-area" style="height: 100%;">
+            <div class="chart-area" style="width:100%;height: 100%;">
                 <canvas id="pieChartExample"></canvas>
             </div>
           </div>
@@ -140,7 +140,7 @@
                             position: 'top',
                         },
                         title: {
-                            display: true,
+                            display: false,
                             text: ''
                         }
                     }
@@ -209,7 +209,7 @@
                             position: 'top',
                         },
                         title: {
-                            display: true,
+                            display: false,
                             text: ''
                         }
                     }
@@ -283,7 +283,7 @@
                             position: 'top',
                         },
                         title: {
-                            display: true,
+                            display: false,
                             text: ''
                         }
                     }
@@ -344,7 +344,7 @@
                             position: 'top',
                         },
                         title: {
-                            display: true,
+                            display: false,
                             text: ''
                         }
                     },
