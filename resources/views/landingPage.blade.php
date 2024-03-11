@@ -119,16 +119,16 @@
                             {{ $sisReportsRegisteredStudents->where('StudentType', 'NEWLY ADMITTED')->count() }} 
                         ],
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)', // color for 'New Edurole'
-                            'rgba(54, 162, 235, 0.6)', // color for 'Returning Edulrole'
-                            'rgba(255, 206, 86, 0.6)', // color for 'Returning SISReports'
-                            'rgba(75, 192, 192, 0.6)'  // color for 'New SISReports'
-                        ],
-                        borderColor: [
                             'rgba(255, 99, 132, 1)', // color for 'New Edurole'
                             'rgba(54, 162, 235, 1)', // color for 'Returning Edulrole'
                             'rgba(255, 206, 86, 1)', // color for 'Returning SISReports'
                             'rgba(75, 192, 192, 1)'  // color for 'New SISReports'
+                        ],
+                        borderColor: [
+                            'rgba(255, 255, 255, 1)',  // White
+                            'rgba(255, 255, 255, 1)', // color for 'Returning Edulrole'
+                            'rgba(255, 255, 255, 1)',  // White
+                            'rgba(255, 255, 255, 1)'  // color for 'New SISReports'
                         ],
                         borderWidth: 1
                     }]
@@ -192,12 +192,12 @@
                             {{ $totalDistanceRegistrations }}
                         ],
                         backgroundColor: [
-                          'rgba(75, 192, 192, 0.6)', // color for 'Fulltime'
-                          'rgba(153, 102, 255, 0.6)'  // color for 'Distance'
-                      ],
-                      borderColor: [
                           'rgba(75, 192, 192, 1)', // color for 'Fulltime'
                           'rgba(153, 102, 255, 1)'  // color for 'Distance'
+                      ],
+                      borderColor: [
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)'  // color for 'Distance'
                       ],
                         borderWidth: 1
                     }]
@@ -256,20 +256,20 @@
                             {{ $totalSchoolsSOHS }}
                         ],
                         backgroundColor: [
-                          'rgba(255, 99, 132, 0.6)',  // Red
-                          'rgba(255, 159, 64, 0.6)',  // Orange
-                          'rgba(255, 205, 86, 0.6)',  // Yellow
-                          'rgba(75, 192, 192, 0.6)',  // Green
-                          'rgba(54, 162, 235, 0.6)',  // Blue
-                          'rgba(153, 102, 255, 0.6)'  // Purple
-                      ],
-                      borderColor: [
                           'rgba(255, 99, 132, 1)',  // Red
                           'rgba(255, 159, 64, 1)',  // Orange
                           'rgba(255, 205, 86, 1)',  // Yellow
                           'rgba(75, 192, 192, 1)',  // Green
                           'rgba(54, 162, 235, 1)',  // Blue
                           'rgba(153, 102, 255, 1)'  // Purple
+                      ],
+                      borderColor: [
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)'   // White
                       ],
                         borderWidth: 1
                     }]
@@ -321,32 +321,32 @@
                 data: {
                     labels: ['YEAR 1', 'YEAR 2', 'YEAR 3', 'YEAR 4', 'YEAR 5', 'YEAR 6'],
                     datasets: [{
-                        data: [
-                            {{ $totalEduroleYear1 }},
-                            {{ $totalEduroleYear2 }},
-                            {{ $totalEduroleYear3 }},
-                            {{ $totalEduroleYear4 }},
-                            {{ $totalEduroleYear5 }},
-                            {{ $totalEduroleYear6 }}
-                        ],
-                        backgroundColor: [
-                            'rgba(255, 99, 132, 0.6)',  // Red
-                            'rgba(255, 159, 64, 0.6)',  // Orange
-                            'rgba(255, 205, 86, 0.6)',  // Yellow
-                            'rgba(75, 192, 192, 0.6)',  // Green
-                            'rgba(54, 162, 235, 0.6)',  // Blue
-                            'rgba(153, 102, 255, 0.6)'  // Purple
-                        ],
-                        borderColor: [
-                            'rgba(255, 99, 132, 1)',  // Red
-                            'rgba(255, 159, 64, 1)',  // Orange
-                            'rgba(255, 205, 86, 1)',  // Yellow
-                            'rgba(75, 192, 192, 1)',  // Green
-                            'rgba(54, 162, 235, 1)',  // Blue
-                            'rgba(153, 102, 255, 1)'  // Purple
-                        ],
-                        borderWidth: 1
-                    }]
+                      data: [
+                          {{ $totalEduroleYear1 }},
+                          {{ $totalEduroleYear2 }},
+                          {{ $totalEduroleYear3 }},
+                          {{ $totalEduroleYear4 }},
+                          {{ $totalEduroleYear5 }},
+                          {{ $totalEduroleYear6 }}
+                      ],
+                      backgroundColor: [
+                          'rgba(255, 99, 132, 1)',  // Red
+                          'rgba(255, 159, 64, 1)',  // Orange
+                          'rgba(255, 205, 86, 1)',  // Yellow
+                          'rgba(75, 192, 192, 1)',  // Green
+                          'rgba(54, 162, 235, 1)',  // Blue
+                          'rgba(153, 102, 255, 1)'  // Purple
+                      ],
+                      borderColor: [
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)',  // White
+                          'rgba(255, 255, 255, 1)'   // White
+                      ],
+                      borderWidth: 1
+                  }]
                 },
                 options: {
                     responsive: true,
