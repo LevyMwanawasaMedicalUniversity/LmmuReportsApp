@@ -26,10 +26,10 @@ class HomeController extends Controller
      * @return \Illuminate\Contracts\Support\Renderable
      */
     public function index(){
-        if(Auth::user()->hasRole('Student') || Auth::user()->hasRole('Dosa') || Auth::user()->hasRole('Examination')) {
-            return view('home');
-        } elseif(Auth::user()->hasRole('Administrator') || Auth::user()->hasRole('Academics') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Developer')) {
+        if(Auth::user()->hasRole('Administrator') || Auth::user()->hasRole('Academics') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Developer')) {
             return redirect()->route('landing.page');
+        } elseif(Auth::user()->hasRole('Student') || Auth::user()->hasRole('Dosa') || Auth::user()->hasRole('Examination')) {
+            return view('home');
         }       
     }
 
