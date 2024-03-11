@@ -82,7 +82,7 @@
   </div>
   <div class="content">
     <div class="row">
-      <div class="col-lg-3">
+      <div class="col-lg-3 col-md-6">
         <div class="card card-chart">
           <div class="card-header">
             <h3 class="card-category"></h3>
