@@ -398,14 +398,14 @@
                     datasets: [{
                         label: 'Edurole',
                         data: @json($eduroleProgrammeCounts->values()),
-                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 1)',
+                        borderColor: 'rgba(255, 255, 255, 1)',
                         borderWidth: 1
                     }, {
                         label: 'SIS Reports',
                         data: @json($sisReportsProgrammeCounts->values()),
-                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
-                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 1)',
+                        borderColor: 'rgba(255, 255, 255, 1)', 
                         borderWidth: 1
                     }]
                 },
