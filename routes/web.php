@@ -17,9 +17,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     if (Auth::check()) {
         // If user is logged in, redirect to a different page
-        if(!Auth::user()->hasRole('Student')){
+        if(Auth::user()->hasRole('Administrator') || Auth::user()->hasRole('Academics') || Auth::user()->hasRole('Finance')) {
             return redirect()->route('landing.page');
-        }else{
+        } else {
             return redirect('/home');
         }
     } else {

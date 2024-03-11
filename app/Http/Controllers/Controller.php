@@ -1566,7 +1566,7 @@ class Controller extends BaseController
                 CASE 
                     WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
-                END AS 'Student Type'
+                END AS 'StudentType'
             "),            
         )
         ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
