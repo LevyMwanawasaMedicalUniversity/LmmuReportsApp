@@ -119,10 +119,10 @@
                             {{ $sisReportsRegisteredStudents->where('StudentType', 'NEWLY ADMITTED')->count() }} 
                         ],
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)', // color for 'New Edurole'
-                            'rgba(54, 162, 235, 0.2)', // color for 'Returning Edulrole'
-                            'rgba(255, 206, 86, 0.2)', // color for 'Returning SISReports'
-                            'rgba(75, 192, 192, 0.2)'  // color for 'New SISReports'
+                            'rgba(255, 99, 132, 0.6)', // color for 'New Edurole'
+                            'rgba(54, 162, 235, 0.6)', // color for 'Returning Edulrole'
+                            'rgba(255, 206, 86, 0.6)', // color for 'Returning SISReports'
+                            'rgba(75, 192, 192, 0.6)'  // color for 'New SISReports'
                         ],
                         borderColor: [
                             'rgba(255, 99, 132, 1)', // color for 'New Edurole'
@@ -192,8 +192,8 @@
                             {{ $totalDistanceRegistrations }}
                         ],
                         backgroundColor: [
-                          'rgba(75, 192, 192, 0.2)', // color for 'Fulltime'
-                          'rgba(153, 102, 255, 0.2)'  // color for 'Distance'
+                          'rgba(75, 192, 192, 0.6)', // color for 'Fulltime'
+                          'rgba(153, 102, 255, 0.6)'  // color for 'Distance'
                       ],
                       borderColor: [
                           'rgba(75, 192, 192, 1)', // color for 'Fulltime'
@@ -256,12 +256,12 @@
                             {{ $totalSchoolsSOHS }}
                         ],
                         backgroundColor: [
-                          'rgba(255, 99, 132, 0.2)',  // Red
-                          'rgba(255, 159, 64, 0.2)',  // Orange
-                          'rgba(255, 205, 86, 0.2)',  // Yellow
-                          'rgba(75, 192, 192, 0.2)',  // Green
-                          'rgba(54, 162, 235, 0.2)',  // Blue
-                          'rgba(153, 102, 255, 0.2)'  // Purple
+                          'rgba(255, 99, 132, 0.6)',  // Red
+                          'rgba(255, 159, 64, 0.6)',  // Orange
+                          'rgba(255, 205, 86, 0.6)',  // Yellow
+                          'rgba(75, 192, 192, 0.6)',  // Green
+                          'rgba(54, 162, 235, 0.6)',  // Blue
+                          'rgba(153, 102, 255, 0.6)'  // Purple
                       ],
                       borderColor: [
                           'rgba(255, 99, 132, 1)',  // Red
@@ -330,12 +330,12 @@
                             {{ $totalEduroleYear6 }}
                         ],
                         backgroundColor: [
-                            'rgba(255, 99, 132, 0.2)',  // Red
-                            'rgba(255, 159, 64, 0.2)',  // Orange
-                            'rgba(255, 205, 86, 0.2)',  // Yellow
-                            'rgba(75, 192, 192, 0.2)',  // Green
-                            'rgba(54, 162, 235, 0.2)',  // Blue
-                            'rgba(153, 102, 255, 0.2)'  // Purple
+                            'rgba(255, 99, 132, 0.6)',  // Red
+                            'rgba(255, 159, 64, 0.6)',  // Orange
+                            'rgba(255, 205, 86, 0.6)',  // Yellow
+                            'rgba(75, 192, 192, 0.6)',  // Green
+                            'rgba(54, 162, 235, 0.6)',  // Blue
+                            'rgba(153, 102, 255, 0.6)'  // Purple
                         ],
                         borderColor: [
                             'rgba(255, 99, 132, 1)',  // Red
@@ -398,13 +398,13 @@
                     datasets: [{
                         label: 'Edurole',
                         data: @json($eduroleProgrammeCounts->values()),
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
                     }, {
                         label: 'SIS Reports',
                         data: @json($sisReportsProgrammeCounts->values()),
-                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.7)',
                         borderColor: 'rgba(153, 102, 255, 1)',
                         borderWidth: 1
                     }]
