@@ -347,6 +347,14 @@ class StudentsController extends Controller
     }
 
     public function studentRegisterForCourses($studentId) {
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
+        if (!$isStudentsStatus4) {
+            return redirect()->back()->with('error', 'Student can not register.');
+        }
+        if ($isStudentRegistered) {
+            return redirect()->back()->with('error', 'Student already registered On Edurole.');
+        }
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
             ->where('Year', 2024)
             ->where('Semester', 1)
@@ -416,6 +424,14 @@ class StudentsController extends Controller
     }
 
     public function registerStudent($studentId) {
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
+        if (!$isStudentsStatus4) {
+            return redirect()->back()->with('error', 'Student can not register.');
+        }
+        if ($isStudentRegistered) {
+            return redirect()->back()->with('error', 'Student already registered On Edurole.');
+        }
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
             ->where('Year', 2024)
             ->where('Semester', 1)
