@@ -82,7 +82,7 @@
   </div>
   <div class="content">
     <div class="row">
-      <div class="col-lg-4">
+      <div class="col-lg-3">
         <div class="card card-chart">
           <div class="card-header">
             <h3 class="card-category"></h3>
@@ -154,7 +154,7 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <div class="card card-chart">
           <div class="card-header">
             <h5 class="card-category"></h5>
@@ -217,13 +217,11 @@
             });
         </script>
           <div class="card-footer">
-            {{-- <div class="stats">
-              <i class="now-ui-icons arrows-1_refresh-69"></i> Just Updated
-            </div> --}}
+            
           </div>
         </div>
       </div>
-      <div class="col-lg-4 col-md-6">
+      <div class="col-lg-3 col-md-6">
         <div class="card card-chart">
           <div class="card-header">
             <h5 class="card-category"></h5>
@@ -297,6 +295,80 @@
           </div>
         </div>
       </div>
+      <div class="col-lg-3 col-md-6">
+        <div class="card card-chart">
+          <div class="card-header">
+            <h5 class="card-category"></h5>
+            <h4 class="card-title">Year Of Study</h4>
+          </div>
+          @php
+          $totalEduroleYear1 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 1')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 1')->count();
+          $totalEduroleYear2 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 2')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 2')->count();
+          $totalEduroleYear3 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 3')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 3')->count();
+          $totalEduroleYear4 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 4')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 4')->count();
+          $totalEduroleYear5 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 5')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 5')->count();
+          $totalEduroleYear6 = $eduroleRegisteredStudents->where('YearOfStudy', 'YEAR 6')->count() + $sisReportsRegisteredStudents->where('YearOfStudy',  'YEAR 6')->count();
+          @endphp
+          <div class="card-body" style="height: 400px;">
+            <div class="chart-area" style="height: 100%;">
+              <canvas id="barChartSimpleGradientsNumbersYearOfStudy"></canvas>
+            </div>
+          </div>
+          <script>
+            var ctx = document.getElementById('barChartSimpleGradientsNumbersYearOfStudy').getContext('2d');
+            var chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['YEAR 1', 'YEAR 2', 'YEAR 3', 'YEAR 4', 'YEAR 5', 'YEAR 6'],
+                    datasets: [{
+                        data: [
+                            {{ $totalEduroleYear1 }},
+                            {{ $totalEduroleYear2 }},
+                            {{ $totalEduroleYear3 }},
+                            {{ $totalEduroleYear4 }},
+                            {{ $totalEduroleYear5 }},
+                            {{ $totalEduroleYear6 }}
+                        ],
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.2)',  // Red
+                            'rgba(255, 159, 64, 0.2)',  // Orange
+                            'rgba(255, 205, 86, 0.2)',  // Yellow
+                            'rgba(75, 192, 192, 0.2)',  // Green
+                            'rgba(54, 162, 235, 0.2)',  // Blue
+                            'rgba(153, 102, 255, 0.2)'  // Purple
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',  // Red
+                            'rgba(255, 159, 64, 1)',  // Orange
+                            'rgba(255, 205, 86, 1)',  // Yellow
+                            'rgba(75, 192, 192, 1)',  // Green
+                            'rgba(54, 162, 235, 1)',  // Blue
+                            'rgba(153, 102, 255, 1)'  // Purple
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false,
+                            text: ''
+                        }
+                    }
+                },
+            });
+          </script>
+          <div class="card-footer">
+            <div class="stats">
+              {{-- <i class="now-ui-icons ui-2_time-alarm"></i> Last 7 days --}}
+            </div>
+          </div>
+        </div>
+      </div> 
     </div>
     <div class="row">
       <div class="col-md-12">
@@ -357,113 +429,10 @@
             });
         </script>
           <div class="card-footer ">
-            <hr>
-            {{-- <div class="stats">
-              <i class="now-ui-icons loader_refresh spin"></i> Updated 3 minutes ago
-            </div> --}}
+            <hr>            
           </div>
         </div>
-      </div>
-      {{-- <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            <h5 class="card-category">All Persons List</h5>
-            <h4 class="card-title"> Employees Stats</h4>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table">
-                <thead class=" text-primary">
-                  <th>
-                    Name
-                  </th>
-                  <th>
-                    Country
-                  </th>
-                  <th>
-                    City
-                  </th>
-                  <th class="text-right">
-                    Salary
-                  </th>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      Dakota Rice
-                    </td>
-                    <td>
-                      Niger
-                    </td>
-                    <td>
-                      Oud-Turnhout
-                    </td>
-                    <td class="text-right">
-                      $36,738
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Minerva Hooper
-                    </td>
-                    <td>
-                      Curaçao
-                    </td>
-                    <td>
-                      Sinaai-Waas
-                    </td>
-                    <td class="text-right">
-                      $23,789
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Sage Rodriguez
-                    </td>
-                    <td>
-                      Netherlands
-                    </td>
-                    <td>
-                      Baileux
-                    </td>
-                    <td class="text-right">
-                      $56,142
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Doris Greene
-                    </td>
-                    <td>
-                      Malawi
-                    </td>
-                    <td>
-                      Feldkirchen in Kärnten
-                    </td>
-                    <td class="text-right">
-                      $63,542
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      Mason Porter
-                    </td>
-                    <td>
-                      Chile
-                    </td>
-                    <td>
-                      Gloucester
-                    </td>
-                    <td class="text-right">
-                      $78,615
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div> --}}
+      </div>           
     </div>
   </div>
 @endsection

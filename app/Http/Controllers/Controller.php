@@ -1544,12 +1544,12 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students){
-        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students);
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray){
+        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray);
         return $results;
     }
 
-    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents( $students) {
+    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students, $registeredCoursesArray) {
         $results = BasicInformation::select(
             'basic-information.FirstName',
             'basic-information.MiddleName',
@@ -1567,17 +1567,34 @@ class Controller extends BaseController
                     WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
                 END AS 'StudentType'
-            "),            
+            "), 
+            DB::raw("
+                CASE 
+                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                    ELSE 'NO REGISTRATION'
+                END AS YearOfStudy
+            ")           
         )
         ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
         ->join('study', 'student-study-link.StudyID', '=', 'study.ID')
-        ->join('schools', 'study.ParentID', '=', 'schools.ID')        
-        ->whereRaw('LENGTH(`basic-information`.ID) > 7')
+        ->join('schools', 'study.ParentID', '=', 'schools.ID') 
+        ->join('study-program-link', 'study.ID', '=', 'study-program-link.StudyID') 
+        ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
+        ->join('program-course-link', 'programmes.ID', '=', 'program-course-link.ProgramID')
+        ->join('courses', 'program-course-link.CourseID', '=', 'courses.ID')       
         ->whereIn('basic-information.ID', $students)
+        ->whereIn('courses.Name', $registeredCoursesArray)
         ->groupBy('basic-information.ID');
-    
-        return $results;
         
+        
+        return $results;
     }
 
     private function queryCoursesInASpecificProgrammeCode($programmeCode){        

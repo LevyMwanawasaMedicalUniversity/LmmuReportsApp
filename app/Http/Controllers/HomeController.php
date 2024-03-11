@@ -42,8 +42,10 @@ class HomeController extends Controller
             ->get();
             // return $students;
         $studentsArray = $students->pluck('student_number')->toArray();
+        $registeredCoursesArray = $students->pluck('CourseID')->toArray();
+        // return
         // return $studentsArray;
-        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($studentsArray)->get();
+        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($studentsArray,$registeredCoursesArray)->get();
         $eduroleRegisteredStudents = $this->getRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
         // return $sisReportsRegisteredStudents;
         return view('landingPage', compact('eduroleRegisteredStudents', 'sisReportsRegisteredStudents'));
