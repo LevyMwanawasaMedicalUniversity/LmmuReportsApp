@@ -51,9 +51,9 @@
                                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}" aria-expanded="false" aria-controls="collapse{{$loop->index}}">
                                             {{ $programme }}
                                             @php
-                                                $sisInvoices = \App\Models\SisReportsSageInvoices::where('InvoiceDescription','=',$programme)->first();
+                                                $sisInvoices = \App\Models\SageInvoice::where('Description','=',$programme)->first();
                                                 $course = $courses->first();
-                                                $amount = $sisInvoices ? $sisInvoices->InvoiceAmount : 0;
+                                                $amount = $sisInvoices ? $sisInvoices->InvTotExclDEx : 0;
 
                                                 $index = $loop->index;
                                                 $registrationFees[$index] = round($amount * 0.25, 2);

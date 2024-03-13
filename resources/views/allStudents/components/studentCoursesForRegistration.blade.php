@@ -19,14 +19,14 @@
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}{{ $studentId }}" aria-expanded="false" aria-controls="collapse{{$loop->index}}{{ $studentId }}">
                         {{ $programme }}
                         @php
-                            $sisInvoices = \App\Models\SisReportsSageInvoices::where('InvoiceDescription','=',$programme)->first();
+                            $sisInvoices = \App\Models\SageInvoice::where('Description','=',$programme)->first();
                             $course = $courses->first();
-                            $amount = $sisInvoices ? $sisInvoices->InvoiceAmount : 0;
+                            $amount = $sisInvoices ? $sisInvoices->InvTotExclDEx : 0;
                             $otherFee = 2625;
 
                             if($failed == 1){
                                 $tuitionFee = ($amount - $otherFee) / $theNumberOfCourses;
-                                $numberOfRepeatCourses = $currentStudentsCourses->count();
+                                $numberOfRepeatCourses = $courses->count();
                                 $amount = ($tuitionFee * $numberOfRepeatCourses) + $otherFee;
                             }
                             $index = $loop->index . $studentId;
@@ -36,6 +36,7 @@
                 @isset($sisInvoices)
                     
                         <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat{{$loop->index}}{{ $studentId }}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
+                        <p>{{$numberOfRepeatCourses}}</p>
                         <span class="ms-auto totalFeeRepeat" id="totalFeeRepeat{{$loop->index}}{{ $studentId }}">Total Invoice = K{{ number_format($amount,0) }}</span>
                     </button>
                 </h2>
