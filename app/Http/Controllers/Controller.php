@@ -1539,12 +1539,12 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray){
-        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray);
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray,$eduroleArray){
+        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray,$eduroleArray);
         return $results;
     }
 
-    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students, $registeredCoursesArray) {
+    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students, $registeredCoursesArray,$eduroleArray) {
         $results = BasicInformation::select(
             'basic-information.FirstName',
             'basic-information.MiddleName',
@@ -1586,6 +1586,7 @@ class Controller extends BaseController
         ->join('courses', 'program-course-link.CourseID', '=', 'courses.ID')       
         ->whereIn('basic-information.ID', $students)
         ->whereIn('courses.Name', $registeredCoursesArray)
+        ->whereNotIn('basic-information.ID', $eduroleArray)
         ->groupBy('basic-information.ID');
         
         
