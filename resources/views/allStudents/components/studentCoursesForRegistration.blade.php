@@ -36,7 +36,7 @@
                 @isset($sisInvoices)
                     
                         <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat{{$loop->index}}{{ $studentId }}">Registration Fee = K{{ number_format($amount * 0.25, 2) }}</span>
-                        <p>{{$numberOfRepeatCourses}}</p>
+                        {{-- <p>{{$numberOfRepeatCourses}}</p> --}}
                         <span class="ms-auto totalFeeRepeat" id="totalFeeRepeat{{$loop->index}}{{ $studentId }}">Total Invoice = K{{ number_format($amount,0) }}</span>
                     </button>
                 </h2>
