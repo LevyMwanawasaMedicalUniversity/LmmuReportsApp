@@ -347,6 +347,12 @@ class StudentsController extends Controller
     }
 
     public function studentRegisterForCourses($studentId) {
+        $todaysDate = date('Y-m-d');
+        $deadLine = '2024-03-16'; 
+        if($todaysDate > $deadLine){
+            return redirect()->back()->with('error', 'Registration Deadline has passed.');
+        }
+        
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
         if (!$isStudentsStatus4) {
@@ -424,6 +430,13 @@ class StudentsController extends Controller
     }
 
     public function registerStudent($studentId) {
+        $todaysDate = date('Y-m-d');
+        $deadLine = '2024-03-16'; 
+        if($todaysDate > $deadLine){
+            return redirect()->back()->with('error', 'Registration Deadline has passed.');
+        }
+        $todaysDate = date('Y-m-d'); 
+        return $todaysDate;
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
         if (!$isStudentsStatus4) {
