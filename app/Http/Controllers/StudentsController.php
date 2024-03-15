@@ -435,8 +435,7 @@ class StudentsController extends Controller
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
         }
-        $todaysDate = date('Y-m-d'); 
-        return $todaysDate;
+        // return $todaysDate;
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
         if (!$isStudentsStatus4) {
