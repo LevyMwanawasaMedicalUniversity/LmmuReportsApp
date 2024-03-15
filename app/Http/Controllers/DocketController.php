@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ExistingStudentMail;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\Courses;
@@ -14,6 +15,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -651,9 +653,16 @@ class DocketController extends Controller
             $username = $user->name;
             try {
                 $this->sendTestEmail($username);
+                
                 $privateEmail = BasicInformation::find($username)->PrivateEmail;
                 if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
                     $privateEmail = $username . '@lmmu.ac.zm';
+                }
+                $student = Student::where('student_number', $studentId)
+                    ->where('status', 4)
+                    ->first();
+                if ($student) {
+                    Mail::to($privateEmail)->send(new ExistingStudentMail($studentId));
                 }
                 $user->update([
                     'email' => $privateEmail,

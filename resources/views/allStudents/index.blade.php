@@ -17,7 +17,7 @@
                     @if($courseName)
                     <h4 class="card-title">{{ $courseName }} Students </h4>
                     @else
-                    <h4 class="card-title">All STUDENTS </h4>
+                    <h4 class="card-title">ALL STUDENTS </h4>
                     @endif
                     <div class="col-md-12">
                         @if (session('success'))
