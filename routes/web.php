@@ -44,6 +44,7 @@ Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTe
 // Route::get('/home', 'App\Http\Controllers\HomeController@index')->name('home');
 
 Route::group(['middleware' => 'auth'], function () {
+    Route::get('/moodle', 'App\Http\Controllers\MoodleController@index')->name('home');
     Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
         Route::get('/landing', [App\Http\Controllers\HomeController::class, 'landingPage'])->name('landing.page');
     });

@@ -2,15 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MoodelUsers;
+use App\Models\MoodleCourses;
+use App\Models\MoodleUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class MoodleController extends Controller
 {
+    public function index(){
+        $moodleUsers = MoodleUsers::take(500)->get();
+        $moodelCourses = MoodleCourses::take(500)->get();
+        $courseContextId = $this->getCourseContextId(3043);
+        return $moodelCourses;
+    }
+    
     public function createUsersAndEnroll(Request $request){
         // Extract user details and course enrollment data from the request
         $userData = $request->input('user');
-        $courseData = $request->input('course');
+        $courseDatas = $request->input('course');
 
         // Construct payload for creating users
         $userPayload = [
@@ -29,11 +39,13 @@ class MoodleController extends Controller
             $user = $userResponse->json()[0]; // Assuming the response contains the created user's details
             $userId = $user['id'];
 
-            // Assign role to the user
-            $this->assignUserRole($userId);
+            foreach($courseDatas as $courseData){
+                // Assign role to the user
+                $this->assignUserRole($userId, $courseData['courseId']);
 
-            // Enroll user in courses
-            $this->enrollUserIntoCourses($userId, $courseData);
+                // Enroll user in courses
+                $this->enrollUserIntoCourses($userId, $courseData);
+            }
 
             return response()->json(['message' => 'User created, role assigned, and enrolled in course(s) successfully'], 200);
         } else {
@@ -100,10 +112,10 @@ class MoodleController extends Controller
             $firstSection = $courseContents[0];
             $courseContextId = $firstSection['id'];
 
-            return $courseContextId;
+            return $courseContents;
         } else {
             // Error fetching course contents
-            return false;
+            return $response->json();
         }
     }
 

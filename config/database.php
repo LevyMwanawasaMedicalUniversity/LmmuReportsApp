@@ -48,6 +48,19 @@ return [
             'strict' => false,
         ],
 
+        'moodle_database' => [
+            'driver' => 'mysql',
+            'host' => '192.168.20.29',
+            'port' => '3306',
+            'database' => 'moodle_lmmu',
+            'username' => 'azwel',
+            'password' => 'Lm@2023Paxre1#',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DATABASE_URL'),
