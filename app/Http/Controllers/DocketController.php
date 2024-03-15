@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ExistingStudentMail;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\SisCourses;
 use App\Models\Student;
@@ -493,13 +494,19 @@ class DocketController extends Controller
         $studentNumbers = [$studentNumber];
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
         $student = $studentsDetails->first();
+        $isStudentRegisteredOnEdurole = $this->checkIfStudentIsRegistered($studentNumber)->exists();
+        $allResults = $this->getAllStudentExamResults($studentNumber);
 
-        if($student->RegistrationStatus == 'NO REGISTRATION'){
-            $results = $this->getStudent2023ExamResults($studentNumber,$academicYear);
-            return view('docket.examinationResults', compact('results','studentNumber'));
-        }else{
-            return back()->with('error', 'UNAUTHORIZED ACCESS');
-        }
+        // return $allResults;
+        // return "we here";
+        $isStudentRegisteredOnSisReports = CourseRegistration::where('StudentID', $studentNumber)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
+        
+        $results = $this->getStudent2023ExamResults($studentNumber,$academicYear);
+        return view('docket.examinationResults', compact('results','studentNumber','allResults','isStudentRegisteredOnEdurole','isStudentRegisteredOnSisReports'));
+        
     }
 
     public function createAccountsForStudentsNotInUsersTableAndSendEmails(){

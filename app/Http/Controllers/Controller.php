@@ -154,6 +154,20 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getAllStudentExamResults($studentNumber){
+        $results = $this->queryAllStudentResults($studentNumber);
+        return $results;
+    }
+
+    private function queryAllStudentResults($studentNumber){
+        $results = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade','AcademicYear')
+            ->where('StudentNo', $studentNumber)
+            
+            ->get();
+    
+        return $results;
+    }
+
     private function queryStudentResults($studentNumber, $academicYear){
         $results = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
             ->where('StudentNo', $studentNumber)
