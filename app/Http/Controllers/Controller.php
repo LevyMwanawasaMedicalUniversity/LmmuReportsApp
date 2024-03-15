@@ -346,7 +346,7 @@ class Controller extends BaseController
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
                     ->from('grades')
-                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG', 'EX']);
+                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX']);
             })
             ->where('StudentNo', $studentId)
             ->orderBy('StudentNo')
@@ -373,7 +373,7 @@ class Controller extends BaseController
                 $cleared = Grade::where('StudentNo', $student)
                     ->where('CourseNo', $course)
                     ->where('AcademicYear', '<', '2024') // Consider only previous academic years
-                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG', 'EX'])
+                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'])
                     ->orderBy('Grade')
                     ->get();
     
@@ -390,7 +390,7 @@ class Controller extends BaseController
                 }
             } else {
                 // If the course is not repeated, check if the grade is failing and add it to the failed courses list
-                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'CHANG', 'EX'])) {
+                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'])) {
                     $failedCourses[] = [
                         'Student' => $student,
                         'Program' => $program, // Use program from original failed instance
