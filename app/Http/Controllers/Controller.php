@@ -400,6 +400,26 @@ class Controller extends BaseController
                 }
             }
         }
+        $coursesArray = [];
+        if (!empty($failedCourses)) {
+            foreach ($failedCourses as $failedCourse) {
+                $coursesArray[] = $failedCourse['Course'];
+            }
+        }
+        $coursesNamesArray = [];
+        if (!empty($failedCourses)) {
+            foreach ($failedCourses as $failedCourse) {
+                $coursesNamesArray[] = $failedCourse['Program'];
+            }
+        }
+
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        if($studentsProgramme->isEmpty()){
+            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+        }
+        if($studentsProgramme->isEmpty()){
+            $failedCourses = [];
+        }
     
         return $failedCourses;
     }
