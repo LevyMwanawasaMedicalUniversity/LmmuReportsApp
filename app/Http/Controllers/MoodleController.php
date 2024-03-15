@@ -117,7 +117,7 @@ class MoodleController extends Controller
                 [
                     'roleid' => 5, // Replace with the appropriate role ID (e.g., Student)
                     'userid' => $userId,
-                    'courseid' => YOUR_COURSE_ID, // Replace with the ID of the course to enroll the user in
+                    'courseid' => 1, // Replace with the ID of the course to enroll the user in
                 ]
             ]
             // Include other necessary parameters for enrolling users into courses
