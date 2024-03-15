@@ -642,9 +642,6 @@ class Controller extends BaseController
         }
     }
 
-
-
-
     public function getStudentResults($studentId){
         // try{
             
@@ -721,8 +718,7 @@ class Controller extends BaseController
     }
 
     
-    public function findUnregisteredStudentCourses($studentId)
-    {    
+    public function findUnregisteredStudentCourses($studentId) {    
         // Perform the query to get grades
         $gradesCheck = Grades::query()
             ->where('grades-published.StudentNo', $studentId)
@@ -747,42 +743,28 @@ class Controller extends BaseController
             ->where('ssl2.StudentID', $studentId)
             ->select('courses.Name','courses.CourseDescription')
             ->get();
-
-            // $courses = BasicInformation::join('student-study-link as ssl2', 'basic-information.ID', '=', 'ssl2.StudentID')
-            // ->join('study as s', 'ssl2.StudyID', '=', 's.ID')
-            // ->join('study-program-link as spl', 's.ID', '=', 'spl.StudyID')
-            // ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
-            // ->join('program-course-link as pcl', 'p.ID', '=', 'pcl.ProgramID')
-            // ->join('courses as c', 'pcl.CourseID', '=', 'c.ID')
-            // ->where('p.ProgramName', 'like', $level)
-            // ->where('basic-information.ID', $studentId)
-            // ->select('basic-information.ID', 'c.Name','c.CourseDescription')
-            // ->get();
         
-        
-            if(count($courses) >0){
-                foreach ($courses as $course) {
-                    $studentCourses[] = [
-                        'Student' => $studentId,
-                        'Program' => $course->CourseDescription, // You mentioned to replace with the program
-                        'Course' => $course->Name,
-                        'Grade' => null, // You need to define $grade2 here
-                    ];
-                }
-
-                return $studentCourses;
-            }else{
+        if(count($courses) >0){
+            foreach ($courses as $course) {
                 $studentCourses[] = [
                     'Student' => $studentId,
-                    'Program' => "NO VALUE", // You mentioned to replace with the program
-                    'Course' => "NO VALUE",
-                    'Grade' => "NO VALUE", // You need to define $grade2 here
+                    'Program' => $course->CourseDescription, // You mentioned to replace with the program
+                    'Course' => $course->Name,
+                    'Grade' => null, // You need to define $grade2 here
                 ];
-                return $studentCourses;
             }
-            
-            
-        }
+
+            return $studentCourses;
+        }else{
+            $studentCourses[] = [
+                'Student' => $studentId,
+                'Program' => "NO VALUE", // You mentioned to replace with the program
+                'Course' => "NO VALUE",
+                'Grade' => "NO VALUE", // You need to define $grade2 here
+            ];
+            return $studentCourses;
+        }           
+    }
     
 
     private function queryRegisteredAndUnregisteredPerYear($academicYear) {
@@ -936,8 +918,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    private function queryRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeNumber, $programmeName)
-    {
+    private function queryRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeNumber, $programmeName){
         $query = $this->queryStudentsFromSpecificIntakeYearTakingAProgramme($intakeNumber, $programmeName);
         $results = $query->join('course-electives AS ce', 'ce.StudentID', '=', 'ssl2.StudentID')
                 ->join('courses AS c', 'ce.CourseID', '=', 'c.ID')
@@ -972,8 +953,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function exportDataFromArray($headers, $rowData, $results, $filename)
-    {
+    public function exportDataFromArray($headers, $rowData, $results, $filename){
         $filePath = storage_path('app/' . $filename);
 
         $writer = WriterEntityFactory::createXLSXWriter();
@@ -1263,8 +1243,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    private function querySumOfAllTransactionsOfEachStudent()
-    {
+    private function querySumOfAllTransactionsOfEachStudent(){
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
             ->where('Description', 'like', '%-%-%')
             ->where('Debit', '>', 0)
@@ -1663,25 +1642,6 @@ class Controller extends BaseController
 
         return $results;
     }
-
-    
-
-
-    // private function querySumOfAllTransactionsOfEachStudent(){
-
-    //     // Perform the first query using get() to get a collection
-    //     $payments = SagePostAR::get();
-    
-    //     // Perform the second query
-    //     $students = BasicInformation::paginate(50);
-    
-    //     // Use the join method to join the results based on the condition
-    //     $result = $payments->join('basic_informations', 'payments.Account', '=', 'basic_informations.ID')
-    //         ->select('payments.*', 'basic_informations.*')
-    //         ->paginate(50);
-    
-    //     return $result;
-    // }
 
     
 }
