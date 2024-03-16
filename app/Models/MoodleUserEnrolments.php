@@ -11,4 +11,14 @@ class MoodleUserEnrolments extends Model
 
     protected $connection = 'moodle_database';
     protected $table = 'mdl_user_enrolments';
+
+    protected $fillable = [
+        'enrolid',
+        'userid',
+        'timestart',
+        'timeend',
+        'modifierid',
+        'timecreated',
+        'timemodified',
+    ];
 }

@@ -11,4 +11,23 @@ class MoodleUsers extends Model
 
     protected $connection = 'moodle_database';
     protected $table = 'mdl_user';
+
+    protected $fillable = [
+        'confirmed',
+        'policyagreed',
+        'deleted',
+        'suspended',
+        'mnethostid',
+        'username',
+        'idnumber',
+        'firstname',
+        'lastname',
+        'email',
+        'emailstop',
+        'calendertype',
+        'auth',
+        'lang',
+        'timemodified',
+        'timecreated',
+    ];
 }

@@ -568,13 +568,7 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Courses submitted successfully.');
     }
 
-    private function getStudentRegistration($studentId){
-        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-                ->where('Year', 2024)
-                ->where('Semester', 1)
-                ->get();
-        return $checkRegistration;
-    }
+    
 
     public function viewAllStudents(Request $request){
         $academicYear= 2024;

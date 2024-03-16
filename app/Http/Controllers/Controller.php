@@ -86,6 +86,14 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudentRegistration($studentId){
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+                ->where('Year', 2024)
+                ->where('Semester', 1)
+                ->get();
+        return $checkRegistration;
+    }
+
     public function setAndSaveTheCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
     
