@@ -15,14 +15,15 @@ use Illuminate\Support\Facades\Log;
 
 class MoodleController extends Controller
 {
-    public function index(){
-        $moodleUsers = MoodleUsers::take(500)->get();
-        $moodelCourses = MoodleCourses::take(500)->get();
-        $courseContextId = $this->getCourseContextId(3043);
-        return $moodelCourses;
-    }
+    // public function index(){
+    //     $moodleUsers = MoodleUsers::take(500)->get();
+    //     $moodelCourses = MoodleCourses::take(500)->get();
+    //     $courseContextId = $this->getCourseContextId(3043);
+    //     return $moodelCourses;
+    // }
 
-    public function addStudentsToMoodleAndEnrollInCourses($studentIds){       
+    public function addStudentsToMoodleAndEnrollInCourses($studentIds){   
+        set_time_limit(12000000);    
         foreach($studentIds as $studentId){            
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistration($studentId);
@@ -36,6 +37,7 @@ class MoodleController extends Controller
     }
 
     private function createUserAccountIfDoesNotExist($student){
+        set_time_limit(12000000);
         try {
             $existingUser = MoodleUsers::where('username', $student->ID)->first();
             
@@ -68,6 +70,7 @@ class MoodleController extends Controller
     }
     
     private function assignUserToRoleIfNotAssigned($courseIds, $userId){
+        set_time_limit(12000000);
         try {
             $roleId = 5; // Assuming role ID 5 is the default role
             
@@ -83,7 +86,6 @@ class MoodleController extends Controller
                             'roleid' => $roleId,
                             'contextid' => $course->id,
                             'timemodified' => time(),
-                            'timecreated' => time(),
                         ]);
                     }
                 }
@@ -93,17 +95,28 @@ class MoodleController extends Controller
         }
     }
     
-    private function enrollUserIntoCourses($courseIds, $userId){
+    private function enrollUserIntoCourses($courses, $userId){
+        set_time_limit(12000000);
+        $existingUserEnrollment = MoodleUserEnrolments::where('userid', $userId)->first();
+
+        if($existingUserEnrollment){
+            MoodleUserEnrolments::where('userid', $userId)->delete();
+        }
         try {
-            foreach($courseIds as $courseId){
-                $enrolId = MoodleEnroll::where('idnumber', $courseId)->value('id');
+            foreach($courses as $course){
+                $course = MoodleCourses::where('idnumber', $course)->first();
+                $courseId = $course->id;
+
+                $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
+                Log::info($enrolId);
                 
                 if ($enrolId) {
                     MoodleUserEnrolments::create([
-                        'enrolid' => $enrolId,
+                        'enrolid' => $enrolId->id,
+                        'status' => 0, // Assuming status 0 is 'active
                         'userid' => $userId,
                         'timestart' => time(),
-                        'timeend' => mktime(0, 0, 0, 12, 30, date("Y")),
+                        'timeend' => 1720959606,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),

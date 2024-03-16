@@ -11,10 +11,12 @@ class MoodleUserEnrolments extends Model
 
     protected $connection = 'moodle_database';
     protected $table = 'mdl_user_enrolments';
+    public $timestamps = false;
 
     protected $fillable = [
         'enrolid',
         'userid',
+        'status',
         'timestart',
         'timeend',
         'modifierid',

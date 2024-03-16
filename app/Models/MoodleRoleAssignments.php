@@ -11,6 +11,7 @@ class MoodleRoleAssignments extends Model
 
     protected $connection = 'moodle_database';
     protected $table = 'mdl_role_assignments';
+    public $timestamps = false;
 
     protected $fillable = [
         'userid',

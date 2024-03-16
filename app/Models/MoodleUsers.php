@@ -11,6 +11,7 @@ class MoodleUsers extends Model
 
     protected $connection = 'moodle_database';
     protected $table = 'mdl_user';
+    public $timestamps = false;
 
     protected $fillable = [
         'confirmed',

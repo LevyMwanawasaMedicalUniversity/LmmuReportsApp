@@ -532,7 +532,8 @@ class StudentsController extends Controller
         $studentId = $request->input('studentNumber');
         $courses = explode(',', $request->input('courses'));
         $academicYear = 2024;
-        
+
+        $moodleController = new MoodleController();       
 
         // Insert into CourseRegistration table
         foreach ($courses as $course) {
@@ -544,6 +545,7 @@ class StudentsController extends Controller
                 'Semester' => 1,
             ]);
         }
+        $moodleController->addStudentsToMoodleAndEnrollInCourses([$studentId]);
 
         return redirect()->back()->with('success', 'Courses submitted successfully.');
     }  
@@ -553,7 +555,7 @@ class StudentsController extends Controller
         $courses = explode(',', $request->input('courses'));
         $academicYear = 2024;
         
-
+        $moodleController = new MoodleController();  
         // Insert into CourseRegistration table
         foreach ($courses as $course) {
             CourseRegistration::create([
@@ -565,7 +567,19 @@ class StudentsController extends Controller
             ]);
         }
 
+        $moodleController->addStudentsToMoodleAndEnrollInCourses([$studentId]);
+
         return redirect()->back()->with('success', 'Courses submitted successfully.');
+    }
+
+    public function bulkEnrollOnMooodle(Request $request){
+        set_time_limit(12000000);
+        $studentIds = CourseRegistration::pluck('StudentID')
+                                ->unique()
+                                ->toArray();
+        $moodleController = new MoodleController();
+        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIds);
+        return redirect()->back()->with('success', 'Students enrolled successfully.');
     }
 
     
