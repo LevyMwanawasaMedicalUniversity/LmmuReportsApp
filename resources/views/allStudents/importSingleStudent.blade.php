@@ -48,7 +48,7 @@
                                         @csrf
                                         <div class="form-group">
                                             <label for="studentId">Student ID</label>
-                                            <div class="col-md-8">
+                                            <div class="col-md-12">
                                                 <input type="number" name="studentId" class="form-control" id="studentId">
                                             </div>                            
                                         </div>
@@ -71,7 +71,7 @@
                                                 <p>CLICK THE BUTTON BELOW TO IMPORT STUDENTS FROM EDUROLE</p>
                                             </div>                            
                                         </div>
-                                        <button type="submit" class="btn btn-warning">BULK IMPORT</button>
+                                        <button type="submit" class="btn btn-warning">SIS REPORTS IMPORT</button>
                                     </form>
                                 </div>
                             </div>
@@ -79,18 +79,18 @@
                         <div class="col-md-4">
                             <div class="card">  
                                 <div class="card-header">
-                                    <h4 class="card-title">BULK IMPORT TO MOODLE</h4>
+                                    <h4 class="card-title">BULK EXPORT TO MOODLE</h4>
                                 </div> 
                                 <div class="card-body">
                                     <form action="{{ route('bulkEnrollOnMooodle') }}" method="POST" onsubmit="return confirm('Are you sure you want to add registered students to moodle?')">
                                         @csrf
                                         <div class="form-group">
-                                            <label for="studentId">Moodle Import</label>
+                                            <label for="studentId">Moodle Export</label>
                                             <div class="col-md-12">
                                                 <p>CLICK THE BUTTON ENROLL REGISTERED STUDENTS ON MOODLE</p>
                                             </div>                            
                                         </div>
-                                        <button type="submit" class="btn btn-warning">BULK IMPORT</button>
+                                        <button type="submit" class="btn btn-warning">MOODLE EXPORT</button>
                                     </form>
                                 </div>
                             </div>
