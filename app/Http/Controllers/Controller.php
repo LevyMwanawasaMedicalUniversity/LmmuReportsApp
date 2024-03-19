@@ -784,6 +784,64 @@ class Controller extends BaseController
         }
     }
 
+    // public function findUnregisteredNewStudentCourses($studentId) {    
+    //     // Perform the query to get grades
+    //     $gradesCheck = Grades::query()
+    //         ->where('grades-published.StudentNo', $studentId)
+    //         ->whereNotIn('AcademicYear', ['2023'])
+    //         ->get();
+
+    //     // Extract course numbers from the results
+    //     $courseNumbers = $gradesCheck->pluck('CourseNo')->toArray();
+    //     $getProgramme = EduroleCourses::select('p.ProgramName')
+    //         ->join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+    //         ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+    //         ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+    //         ->join('study as s', 'spl.StudyID', '=', 's.ID')
+    //         ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+    //         ->join('grades-published as gp', 'gp.StudentNo', '=', 'ssl2.StudentID')
+    //         ->where('ssl2.StudentID', $studentId)
+    //         ->whereIn('courses.Name', $courseNumbers)            
+    //         ->first();   
+    //     $programmeName = $getProgramme->ProgramName;
+    //     // Calculate the current year of study
+    //     $currentYearOfStudy = $this->getYearOfStudy($courseNumbers);        
+
+        
+    //     $level = '%' . $currentYearOfStudy;
+
+    //     $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+    //         ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+    //         ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+    //         ->join('study as s', 'spl.StudyID', '=', 's.ID')
+    //         ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+    //         ->where('p.ProgramName',  $programmeName)
+    //         ->where('ssl2.StudentID', $studentId)
+    //         ->select('courses.Name','courses.CourseDescription')
+    //         ->get();
+        
+    //     if(count($courses) >0){
+    //         foreach ($courses as $course) {
+    //             $studentCourses[] = [
+    //                 'Student' => $studentId,
+    //                 'Program' => $course->CourseDescription, // You mentioned to replace with the program
+    //                 'Course' => $course->Name,
+    //                 'Grade' => null, // You need to define $grade2 here
+    //             ];
+    //         }
+
+    //         return $studentCourses;
+    //     }else{
+    //         $studentCourses[] = [
+    //             'Student' => $studentId,
+    //             'Program' => "NO VALUE", // You mentioned to replace with the program
+    //             'Course' => "NO VALUE",
+    //             'Grade' => "NO VALUE", // You need to define $grade2 here
+    //         ];
+    //         return $studentCourses;
+    //     }           
+    // }
+
     
     public function findUnregisteredStudentCourses($studentId) {    
         // Perform the query to get grades
