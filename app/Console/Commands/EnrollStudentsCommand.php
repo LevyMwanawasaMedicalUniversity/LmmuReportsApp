@@ -6,6 +6,7 @@ use App\Http\Controllers\MoodleController;
 use App\Http\Controllers\StudentsController;
 use App\Models\CourseElectives;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
 
 class EnrollStudentsCommand extends Command
 {
@@ -22,5 +23,6 @@ class EnrollStudentsCommand extends Command
         $moodleController = new MoodleController();
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);
         $this->info('Students enrolled successfully.');
+        Log::info('Students enrolled successfully.');
     }
 }
