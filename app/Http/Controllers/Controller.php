@@ -88,12 +88,12 @@ class Controller extends BaseController
     }
 
     public function getStudentRegistrationFromEdurole($studentId){
-        $checkRegistration = CourseElectives::select('courses.name')
-            ->join('courses', 'course_electives.course_id', '=', 'courses.id')
-            ->where('course_electives.student_id', $studentId)
-            ->where('course_electives.year', 2024)
-            ->where('course_electives.status', 1)
-            ->get();
+        $checkRegistration = CourseElectives::select('courses.Name')
+                ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+                ->where('course-electives.StudentID', $studentId)
+                ->where('course-electives.Year', 2024)
+                ->where('course-electives.Status', 1)
+                ->get();
         return $checkRegistration;
     }
 
