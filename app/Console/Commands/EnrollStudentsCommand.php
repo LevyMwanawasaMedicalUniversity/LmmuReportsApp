@@ -18,14 +18,14 @@ class EnrollStudentsCommand extends Command
 
     public function handle()
     {
+        Mail::to('azwel.simwinga@lmmu.ac.zm')->send(new CronJobEmail());
+        Mail::to('honest.phiri@lmmu.ac.zm')->send(new CronJobEmail());
         set_time_limit(12000000);
         $studentIds = CourseElectives::pluck('StudentID')
                         ->unique()
                         ->toArray();
         $moodleController = new MoodleController();
-        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);
-        Mail::to('azwel.simwinga@lmmu.ac.zm')->send(new CronJobEmail());
-        Mail::to('honest.phiri@lmmu.ac.zm')->send(new CronJobEmail());
+        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);       
         $this->info('Students enrolled successfully.');
 
         Log::info('Students enrolled successfully.');
