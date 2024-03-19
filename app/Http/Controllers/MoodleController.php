@@ -110,13 +110,11 @@ class MoodleController extends Controller
     }
     
     private function enrollUserIntoCourses($courses, $userId){
-        set_time_limit(12000000);
-        $existingUserEnrollment = MoodleUserEnrolments::where('userid', $userId)->first();
-        $unixTimestamp = strtotime("31 December 2024");
-        if($existingUserEnrollment){
-            MoodleUserEnrolments::where('userid', $userId)->delete();
-        }
+        set_time_limit(12000000);        
+    
         try {
+            $enrolIds = [];
+
             foreach($courses as $course){
                 $course = MoodleCourses::where('idnumber', $course)->first();
                 $courseId = $course->id;
@@ -137,7 +135,11 @@ class MoodleController extends Controller
                         'timemodified' => time(),
                     ]);
                 }
+
+                $enrolIds[] = $enrolId->id;
             }
+            // Delete all enrollments where enrolid is not in $enrolIds
+            MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
         } catch (\Exception $e) {
             Log::error('Error enrolling user into courses: ' . $e->getMessage());
         }
