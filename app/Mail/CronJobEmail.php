@@ -28,7 +28,7 @@ class CronJobEmail extends Mailable
     {       
         return $this
             ->from('registration@lmmu.ac.zm')
-            ->subject('SIS REPORTS MOODLE CRON JON')
+            ->subject('SIS REPORTS MOODLE CRON JOB')
             ->view('emails.cronJobEmail');
     }
 }
