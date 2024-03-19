@@ -9,9 +9,14 @@ use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\EduroleCourses;
+use App\Models\MoodleCourses;
+use App\Models\MoodleEnroll;
+use App\Models\MoodleUserEnrolments;
+use App\Models\MoodleUsers;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\User;
+use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -101,6 +106,49 @@ class StudentsController extends Controller
     
         // Provide a success message
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    }
+
+    public function exportAllStudents(){
+        set_time_limit(12000000);
+        $maxAttempts = 10;
+        
+        // Get student IDs to import
+        $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
+        $studentIdsChunks = array_chunk($studentIds, 1000);
+    
+        // Create a writer and open it
+        $filePath = storage_path('app/students.xlsx');
+        $writer = WriterEntityFactory::createXLSXWriter();
+        $writer->openToFile($filePath);
+    
+        // Write the header row to the CSV file
+        $headerRow = WriterEntityFactory::createRowFromArray(['Student ID', 'Courses', 'Programs']);
+        $writer->addRow($headerRow);
+    
+        foreach ($studentIdsChunks as $studentIdsChunk) {
+            foreach ($studentIdsChunk as $studentId) {
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $coursesNamesArray = $courses->pluck('Program')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if($studentsProgramme->isEmpty()){
+                    $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+                }
+    
+                // Only write the student data to the CSV file if there are courses and programs
+                if (!empty($coursesArray) && !empty($coursesNamesArray) && !$studentsProgramme->isEmpty()) {
+                    $dataRow = WriterEntityFactory::createRowFromArray([$studentId, implode(', ', $coursesArray), implode(', ', $coursesNamesArray)]);
+                    $writer->addRow($dataRow);
+                }
+            }
+        }
+    
+        // Close the writer
+        $writer->close();
+    
+        // Provide a success message
+        return response()->download($filePath, 'students.xlsx')->deleteFileAfterSend();
     }
     
     private function validateAndPrepareEmail($email, $studentId) {
@@ -324,12 +372,14 @@ class StudentsController extends Controller
     public function deleteEntireRegistration(Request $request){
         $studentId = $request->input('studentId');
         $year = $request->input('year');
-        
-    
-        CourseRegistration::where('StudentID', $studentId)
+        $courses = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', $year)
+            ->get();
+        $coursesArray = $courses->pluck('CourseID')->toArray();
+        $this->deletCoursesFromMoodleEnrollment($studentId,$coursesArray);       
+        $courses = CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
             ->delete();
-    
         return redirect()->back()->with('success', 'Registration deleted successfully');
     }
 
@@ -337,13 +387,26 @@ class StudentsController extends Controller
         $studentId = $request->input('studentId');
         $year = $request->input('year');
         $courseId = $request->input('courseId');
-        
+        $courseArray = [$courseId];
+        $this->deletCoursesFromMoodleEnrollment($studentId,$courseArray);
         CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
             ->where('CourseID', $courseId)
             ->delete();
-    
         return redirect()->back()->with('success', 'Registration deleted successfully');
+    }
+
+    private function deletCoursesFromMoodleEnrollment($studentId,$coursesArray){        
+        foreach ($coursesArray as $course) {
+            $existingUser = MoodleUsers::where('username', $studentId)->first();
+            if($existingUser){
+                $course = MoodleCourses::where('idnumber', $course)->first();
+                $courseId = $course->id;
+                $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
+                Log::info($enrolId);
+                MoodleUserEnrolments::where('userid', $existingUser->id)->where('enrolid', $enrolId->id)->delete();                
+            }
+        }
     }
 
     public function studentRegisterForCourses($studentId) {

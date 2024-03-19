@@ -253,6 +253,40 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudentsToImportToExportToCsv(){
+        $results = $this->queryStudentsToImportToExportToCsv();
+        return $results;
+    }
+
+    private function queryStudentsToImportToExportToCsv() {
+        $results = BasicInformation::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.Sex',
+            'basic-information.ID AS StudentID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            'applicants.Progress' // Include the Progress column from applicants table
+        )
+        ->leftJoin('grades-published', 'grades-published.StudentNo', '=', 'basic-information.ID')
+        ->leftJoin('applicants', 'applicants.StudentID', '=', 'basic-information.ID') // Left join applicants table
+        ->where(function($query) {
+            $query->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
+                ->where('grades-published.AcademicYear', 2023)
+                ->where('basic-information.StudyType', '!=', 'Staff')
+                ->groupBy('basic-information.ID');
+        })
+        // ->orWhere(function($query) {
+        //     $query->where('basic-information.ID', 'like', '240%')
+        //         ->where('applicants.Progress', 'Accepted');
+        // })
+        ->groupBy('basic-information.ID'); // Group by StudentID to ensure uniqueness
+        
+        return $results;
+    }
+
     private function queryStudentsToImport() {
         $results = BasicInformation::select(
             'basic-information.FirstName',
@@ -1353,6 +1387,9 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%-%\' THEN 0            
                 ELSE pa.Credit 
                 END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
             DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
             DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2024 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
             DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate')

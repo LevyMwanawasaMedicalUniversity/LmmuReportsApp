@@ -98,7 +98,7 @@ class MoodleController extends Controller
     private function enrollUserIntoCourses($courses, $userId){
         set_time_limit(12000000);
         $existingUserEnrollment = MoodleUserEnrolments::where('userid', $userId)->first();
-
+        $unixTimestamp = strtotime("31 December 2024");
         if($existingUserEnrollment){
             MoodleUserEnrolments::where('userid', $userId)->delete();
         }
@@ -109,14 +109,15 @@ class MoodleController extends Controller
 
                 $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
                 Log::info($enrolId);
-                
-                if ($enrolId) {
+                $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
+
+                if(!$checkIfUserIsEnrolled){
                     MoodleUserEnrolments::create([
                         'enrolid' => $enrolId->id,
                         'status' => 0, // Assuming status 0 is 'active
                         'userid' => $userId,
                         'timestart' => time(),
-                        'timeend' => 1720959606,
+                        'timeend' => 1720959600,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),

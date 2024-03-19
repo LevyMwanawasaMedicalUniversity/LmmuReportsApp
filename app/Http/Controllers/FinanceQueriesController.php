@@ -117,6 +117,9 @@ class FinanceQueriesController extends Controller
             '2023 Invoice Status',
             '2024 Invoice Status',
             'Latest Invoice Date',
+            'Total Credit',
+            'Total Debit',
+            'Total Balance'
             
         ];
         
@@ -142,7 +145,10 @@ class FinanceQueriesController extends Controller
             'TotalPayment2024',
             '2023InvoiceStatus',
             '2024InvoiceStatus',
-            'LatestInvoiceDate'
+            'LatestInvoiceDate',
+            'TotalCredit',
+            'TotalDebit',
+            'TotalBalance'
         ];
         
         $results = $this->getSumOfAllTransactionsOfEachStudent();        

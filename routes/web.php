@@ -29,11 +29,12 @@ Route::get('/', function () {
 });
 
 
-
+// Route::get('exportAllStudents', 'StudentsController@exportAllStudents')->name('students.exportAllStudents');
 Auth::routes(['register' => false]);
 Route::get('/verify/{studentNumber}', 'App\Http\Controllers\DocketController@verifyStudent')->name('docket.verify');
 Route::get('/verifyNmcz/{studentNumber}', 'App\Http\Controllers\DocketController@verifyStudentNmcz')->name('docket.verifyNmcz');
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Route::get('/exportAllStudents', [App\Http\Controllers\StudentsController::class, 'exportAllStudents'])->name('students.exportAllStudents');
 
 Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTestEmail');
 // Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
@@ -87,7 +88,7 @@ Route::group(['middleware' => 'auth'], function () {
 
         });
         
-    
+        
     });
 
     Route::middleware('can:Dosa')->group(function () {
