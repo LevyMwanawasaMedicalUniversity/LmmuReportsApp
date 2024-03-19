@@ -92,7 +92,7 @@ class Controller extends BaseController
                 ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
                 ->where('course-electives.StudentID', $studentId)
                 ->where('course-electives.Year', 2024)
-                ->where('course-electives.Status', 1)
+                ->where('course-electives.Approved', 1)
                 ->get();
         return $checkRegistration;
     }
