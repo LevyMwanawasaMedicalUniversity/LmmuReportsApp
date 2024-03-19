@@ -15,12 +15,10 @@ use Illuminate\Support\Facades\Log;
 
 class MoodleController extends Controller
 {
-    // public function index(){
-    //     $moodleUsers = MoodleUsers::take(500)->get();
-    //     $moodelCourses = MoodleCourses::take(500)->get();
-    //     $courseContextId = $this->getCourseContextId(3043);
-    //     return $moodelCourses;
-    // }
+    public function index(){
+        $homeController = new HomeController();
+        return $homeController->index();
+    }
 
     public function addStudentsToMoodleAndEnrollInCourses($studentIds){   
         set_time_limit(12000000);    
