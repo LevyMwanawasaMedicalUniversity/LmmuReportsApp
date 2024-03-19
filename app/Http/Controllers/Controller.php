@@ -9,6 +9,7 @@ use App\Mail\SendAnEmail;
 use App\Mail\SendMailNmcz;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\EduroleCourses;
@@ -84,6 +85,16 @@ class Controller extends BaseController
     public function getRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeName, $programmeName){
         $results = $this->queryRegisteredStudentsFromSpecificIntakeYearTakingAProgramme($intakeName, $programmeName);
         return $results;
+    }
+
+    public function getStudentRegistrationFromEdurole($studentId){
+        $checkRegistration = CourseElectives::select('courses.name')
+            ->join('courses', 'course_electives.course_id', '=', 'courses.id')
+            ->where('course_electives.student_id', $studentId)
+            ->where('course_electives.year', 2024)
+            ->where('course_electives.status', 1)
+            ->get();
+        return $checkRegistration;
     }
 
     public function getStudentRegistration($studentId){

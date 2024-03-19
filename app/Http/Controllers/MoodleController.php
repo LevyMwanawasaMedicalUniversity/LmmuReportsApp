@@ -36,6 +36,20 @@ class MoodleController extends Controller
         }
     }
 
+    public function addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds){   
+        set_time_limit(12000000);    
+        foreach($studentIds as $studentId){            
+            $student = BasicInformation::where('ID', $studentId)->first();
+            $courses = $this->getStudentRegistrationFromEdurole($studentId);
+            $courseIds = $courses->pluck('Name');
+            $user = $this->createUserAccountIfDoesNotExist($student);
+            if ($user) {
+                $this->assignUserToRoleIfNotAssigned($courseIds, $user->id);
+                $this->enrollUserIntoCourses($courseIds, $user->id);
+            }
+        }
+    }
+
     private function createUserAccountIfDoesNotExist($student){
         set_time_limit(12000000);
         try {

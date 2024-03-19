@@ -38,7 +38,7 @@
                 <div class="card-body">
                     <div class="row">
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card">  
                                 <div class="card-header">
                                     <h4 class="card-title">Upload Single Student</h4>
@@ -57,7 +57,7 @@
                                 </div>
                             </div>
                         </div>                
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card">  
                                 <div class="card-header">
                                     <h4 class="card-title">BULK UPLOAD STUDENTS</h4>
@@ -76,10 +76,10 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="card">  
                                 <div class="card-header">
-                                    <h4 class="card-title">BULK EXPORT TO MOODLE</h4>
+                                    <h4 class="card-title">BULK EXPORT SIS-REPORTS TO MOODLE</h4>
                                 </div> 
                                 <div class="card-body">
                                     <form action="{{ route('bulkEnrollOnMooodle') }}" method="POST" onsubmit="return confirm('Are you sure you want to add registered students to moodle?')">
@@ -87,7 +87,26 @@
                                         <div class="form-group">
                                             <label for="studentId">Moodle Export</label>
                                             <div class="col-md-12">
-                                                <p>CLICK THE BUTTON ENROLL REGISTERED STUDENTS ON MOODLE</p>
+                                                <p>CLICK THE BUTTON ENROLL REGISTERED SIS REPORTS STUDENTS ON MOODLE</p>
+                                            </div>                            
+                                        </div>
+                                        <button type="submit" class="btn btn-warning">MOODLE EXPORT</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">  
+                                <div class="card-header">
+                                    <h4 class="card-title">BULK EXPORT EDUROLE TO MOODLE</h4>
+                                </div> 
+                                <div class="card-body">
+                                    <form action="{{ route('bulkEnrollFromEduroleOnMooodle') }}" method="POST" onsubmit="return confirm('Are you sure you want to add registered students to moodle?')">
+                                        @csrf
+                                        <div class="form-group">
+                                            <label for="studentId">Moodle Export</label>
+                                            <div class="col-md-12">
+                                                <p>CLICK THE BUTTON ENROLL REGISTERED EDUROLE STUDENTS ON MOODLE</p>
                                             </div>                            
                                         </div>
                                         <button type="submit" class="btn btn-warning">MOODLE EXPORT</button>

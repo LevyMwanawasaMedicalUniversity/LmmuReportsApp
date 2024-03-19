@@ -645,7 +645,15 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Students enrolled successfully.');
     }
 
-    
+    public function bulkEnrollFromEduroleOnMooodle(Request $request){
+        set_time_limit(12000000);
+        $studentIds = CourseElectives::pluck('StudentID')
+                                ->unique()
+                                ->toArray();
+        $moodleController = new MoodleController();
+        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);
+        return redirect()->back()->with('success', 'Students enrolled successfully.');
+    }    
 
     public function viewAllStudents(Request $request){
         $academicYear= 2024;

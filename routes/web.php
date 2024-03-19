@@ -85,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
+            Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
 
         });
         
