@@ -42,7 +42,7 @@
                             <div id="percentage">0%</div>
                         <!-- You can add loading spinner or text here -->
                         Loading...
-                    </div>
+                        </div>
                         <div class="row">
                         <div class="col-md-4">
                             <div class="form-group">

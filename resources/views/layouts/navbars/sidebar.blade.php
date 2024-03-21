@@ -130,19 +130,23 @@
             </p>
           </a>
           <div class="collapse" id="academics">
-            <ul class="nav">   
-                        
+            <ul class="nav">                        
               <li class = "@if ($activePage == 'academics') active @endif">
                 <a href="{{ route('academics.index') }}">
                   <i class="now-ui-icons files_single-copy-04"></i>
                   <p>{{ __('Reports') }}</p>
                 </a>
               </li>
-              
               <li class="@if ($activePage == 'importGradesArchive') active @endif">
                 <a href="{{ route('academics.GradesArchiveImport') }}">
                   <i class="now-ui-icons arrows-1_share-66"></i>
                   <p>{{ __('Import to Grades Archive') }}</p>
+                </a>
+              </li>               
+              <li class="@if ($activePage == 'importGradesArchive') active @endif">
+                <a href="{{ route('academics.EmailAnnouncement') }}">
+                  <i class="now-ui-icons ui-1_email-85"></i>
+                  <p>{{ __('Send Email') }}</p>
                 </a>
               </li>    
               <li class="@if ($activePage == 'viewGradesArchive') active @endif">

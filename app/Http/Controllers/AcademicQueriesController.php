@@ -530,6 +530,10 @@ class AcademicQueriesController extends Controller
         return view('academics.reports.viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy',compact('results','academicYear','yearOfStudy','programmeName','schoolName'));
         
     }
+
+    public function emailAnnouncement(){
+        return view('academics.emailAnnouncement');
+    }
     
     public function viewRegisteredAndUnregisteredPerYear(Request $request){
         $academicYear = $request->input('academicYear');

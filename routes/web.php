@@ -153,7 +153,8 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::GET('/viewAllStudentsRegisteredInASpecificAcademicYear',  'AcademicQueriesController@viewAllStudentsRegisteredInASpecificAcademicYear')->name('viewAllStudentsRegisteredInASpecificAcademicYear');
             Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear/{academicYear}', 'AcademicQueriesController@exportAllStudentsRegisteredInASpecificAcademicYear')->name('exportAllStudentsRegisteredInASpecificAcademicYear');
-
+            
+            Route::get('/academicsEmailAnnouncement', 'AcademicQueriesController@emailAnnouncement')->name('academics.EmailAnnouncement');
             Route::GET('/viewAllProgrammesPerSchool',  'AcademicQueriesController@viewAllProgrammesPerSchool')->name('viewAllProgrammesPerSchool');
             Route::get('/exportAllProgrammesPerSchool/{schoolName}', 'AcademicQueriesController@exportAllProgrammesPerSchool')->name('exportAllProgrammesPerSchool');
 
