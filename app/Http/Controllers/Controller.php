@@ -864,7 +864,7 @@ class Controller extends BaseController
             ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
             ->join('study as s', 'spl.StudyID', '=', 's.ID')
             ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-            ->where('p.ProgramName', 'like', 3)
+            ->where('p.ProgramName', 'like', '%3')
             ->where('ssl2.StudentID', $studentId)
             ->select('courses.Name','courses.CourseDescription')
             ->get();
