@@ -163,16 +163,16 @@ class UserController extends Controller
         // Define your custom validation rules for the email and name fields
         $request->validate([
             'name' => ['required', 'min:3'],
-            'email' => [
-                'required',
-                'email',
-                Rule::unique((new User)->getTable())->ignore($userId),
-            ],
+            // 'email' => [
+            //     'required',
+            //     'email',
+            //     Rule::unique((new User)->getTable())->ignore($userId),
+            // ],
         ]);       
 
         $user = User::find($userId);
         $user->name = $request->input('name');
-        $user->email = $request->input('email');
+        // $user->email = $request->input('email');
         $user->save();
         
         $user->syncRoles($request->get('role'));
