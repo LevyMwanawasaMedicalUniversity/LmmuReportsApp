@@ -17,7 +17,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading{{$loop->index}}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}{{ $studentId }}" aria-expanded="false" aria-controls="collapse{{$loop->index}}{{ $studentId }}">
-                        {{ $programme }}
+                        <span class="ms-auto">{{ $programme }}</span>
                         @php
                             $sisInvoices = \App\Models\SageInvoice::where('Description','=',$programme)->first();
                             $course = $courses->first();
@@ -51,7 +51,7 @@
                                             <th>Select</th>
                                             <th>Course Code</th>
                                             <th class="text-end">Course Name</th>
-                                            <th class="text-end">Program</th>
+                                            {{-- <th class="text-end">Program</th> --}}
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -62,7 +62,7 @@
                                             </td>
                                             <td>{{$course->CourseCode}}</td>
                                             <td class="text-end">{{$course->CourseName}}</td>                                                            
-                                            <td class="text-end">{{$course->Programme}}</td>
+                                            {{-- <td class="text-end">{{$course->Programme}}</td> --}}
                                         </tr>
                                         @endforeach
                                     </tbody>
