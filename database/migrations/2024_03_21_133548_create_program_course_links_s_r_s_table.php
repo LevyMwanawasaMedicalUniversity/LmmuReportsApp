@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('program_course_links_s_r_s', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('program_id');
+            $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('mandatory')->default(0);
+            $table->unsignedBigInteger('year')->default(1);
             $table->timestamps();
         });
     }

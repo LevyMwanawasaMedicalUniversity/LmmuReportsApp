@@ -64,7 +64,8 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::get('/report', 'ReportController@registeredStudents')->name('registered.students');
     Route::get('/export-data', 'ReportController@exportRegisteredStudents')->name('export.data');
     
-    Route::middleware('can:Administrator')->group(function () {        
+    Route::middleware('can:Administrator')->group(function () {   
+        Route::GET('/importOrUpdateSisReportsEduroleData/Update', 'SisReportsEduroleDataManagementController@importOrUpdateSisReportsEduroleData')->name('importOrUpdatexSisReportsEduroleData.admin');     
         Route::group(['prefix' => 'user'], function () {
             Route::get('', 'UserController@index')->name('users.index');
             Route::get('/create', 'UserController@create')->name('users.create');
@@ -84,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
+            
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
 

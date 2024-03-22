@@ -13,6 +13,8 @@ return new class extends Migration
     {
         Schema::create('student_study_link_s_r_s', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('study_id');
             $table->timestamps();
         });
     }

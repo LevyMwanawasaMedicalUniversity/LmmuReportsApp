@@ -17,6 +17,8 @@ use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\GradesModified;
 use App\Models\GradesPublished;
+use App\Models\Program;
+use App\Models\ProgramCourseLink;
 use App\Models\SageClient;
 use App\Models\SageInvoice;
 use App\Models\SagePostAR;
@@ -24,6 +26,7 @@ use App\Models\Schools;
 use App\Models\SisCourses;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
+use App\Models\StudentStudyLink;
 use App\Models\Study;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
@@ -746,9 +749,33 @@ class Controller extends BaseController
     }
 
     public function getSisCourses(){
-
         $sisCourses = SisCourses::all();
         return $sisCourses;
+    }
+
+    public function getStudentStudyLink(){
+        $studentStudyLink = StudentStudyLink::all();
+        return $studentStudyLink;
+    }
+
+    public function getProgramCourseLink(){
+        $programCourseLink = ProgramCourseLink::all();
+        return $programCourseLink;
+    }
+    
+    public function getProgrammes(){
+        $programmes = Program::all();
+        return $programmes;
+    }
+
+    public function getStudy(){
+        $study = Study::all();
+        return $study;
+    }
+
+    public function getSchools(){
+        $schools = Schools::all();
+        return $schools;
     }
 
     public function getYearOfStudy($courseNos) {
