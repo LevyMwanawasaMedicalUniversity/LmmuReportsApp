@@ -48,7 +48,7 @@ class HomeController extends Controller
         $eduroleRegisteredStudents = $this->getRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
         $eduroleArray = $eduroleRegisteredStudents->pluck('ID')->toArray();
         // return $eduroleArray;
-        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($studentsArray,$registeredCoursesArray,$eduroleArray)->get();
+        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
         
         // return $sisReportsRegisteredStudents;
         return view('landingPage', compact('eduroleRegisteredStudents', 'sisReportsRegisteredStudents'));

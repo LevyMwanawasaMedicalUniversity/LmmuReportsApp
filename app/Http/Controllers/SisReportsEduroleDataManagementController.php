@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BasicInformationSR;
 use App\Models\CoursesSR;
 use App\Models\ProgramCourseLink;
 use App\Models\ProgramCourseLinksSR;
@@ -15,6 +16,7 @@ class SisReportsEduroleDataManagementController extends Controller
 {
     public function importOrUpdateSisReportsEduroleData(){
         set_time_limit(120000000);
+        $this->importBasicInformationFromEdurole();
         $this->importCoursesFromEdurole();
         $this->importStudentStudyLinkFromEdurole();
         $this->importProgramCourseLinkFromEdurole();
@@ -33,8 +35,8 @@ class SisReportsEduroleDataManagementController extends Controller
             CoursesSR::updateOrCreate(
                 ['course_id' => intval($course->ID)],
                 [
-                    'course_name' => $course->Name,
-                    'course_description' => $course->CourseDescription
+                    'course_name' => $course->Name ?? '',
+                    'course_description' => $course->CourseDescription ?? ''
                 ]
             );
         }            
@@ -76,7 +78,7 @@ class SisReportsEduroleDataManagementController extends Controller
             ProgramSR::updateOrCreate(
                 ['programme_id' => intval($programme->ID)],
                 [
-                    'program_name' => $programme->ProgramName
+                    'program_name' => $programme->ProgramName ?? ''
                 ]);
         }
     }
@@ -89,8 +91,8 @@ class SisReportsEduroleDataManagementController extends Controller
             StudySR::updateOrCreate(
                 ['study_id' => intval($study->ID)],
                 [
-                    'study_name' => $study->Name,
-                    'study_shortname' => $study->ShortName,
+                    'study_name' => $study->Name ?? '',
+                    'study_shortname' => $study->ShortName ?? '',
                     'parent_id' => intval($study->ParentID)
                 ]);
         }
@@ -104,7 +106,40 @@ class SisReportsEduroleDataManagementController extends Controller
             SchoolsSR::updateOrCreate(
                 ['school_id' => intval($school->ID)],
                 [
-                    'school_name' => $school->Name
+                    'school_name' => $school->Name ?? ''
+                ]);
+        }
+    }
+
+    private function importBasicInformationFromEdurole(){
+        set_time_limit(120000000);
+        $getBasicInformationFromSis = $this->getBasicInformation();
+
+        foreach($getBasicInformationFromSis as $basicInformation){
+            BasicInformationSR::updateOrCreate(
+                ['StudentID' => intval($basicInformation->ID)],
+                [
+                    'FirstName' => $basicInformation->FirstName ?? '',
+                    'MiddleName' => $basicInformation->MiddleName ?? '',
+                    'Surname' => $basicInformation->Surname ?? '',
+                    'Sex' => $basicInformation->Sex ?? '',
+                    'StudentID' => intval($basicInformation->ID),
+                    'GovernmentID' => $basicInformation->GovernmentID ?? '',
+                    'DateOfBirth' => $basicInformation->DateOfBirth ?? '',
+                    'PlaceOfBirth' => $basicInformation->PlaceOfBirth ?? '',
+                    'Nationality' => $basicInformation->Nationality ?? '',
+                    'StreetName' => $basicInformation->StreetName ?? '',
+                    'PostalCode' => $basicInformation->PostalCode ?? '',
+                    'Town' => $basicInformation->Town ?? '',
+                    'Country' => $basicInformation->Country ?? '',
+                    'HomePhone' => $basicInformation->HomePhone ?? '',
+                    'MobilePhone' => $basicInformation->MobilePhone ?? '',
+                    'Disability' => $basicInformation->Disability ?? '',
+                    'DisabilityType' => $basicInformation->DissabilityType ?? '',
+                    'PrivateEmail' => $basicInformation->PrivateEmail ?? '',
+                    'MaritalStatus' => $basicInformation->MaritalStatus ?? '',
+                    'StudyType' => $basicInformation->StudyType ?? '',
+                    'Status' => $basicInformation->Status ?? ''
                 ]);
         }
     }

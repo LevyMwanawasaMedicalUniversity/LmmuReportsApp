@@ -9,6 +9,7 @@ use App\Mail\SendAnEmail;
 use App\Mail\SendMailNmcz;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\BasicInformationSR;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
@@ -776,6 +777,19 @@ class Controller extends BaseController
     public function getSchools(){
         $schools = Schools::all();
         return $schools;
+    }
+
+    public function getBasicInformation(){
+        $basicInformation = BasicInformation::query()
+            ->where(function ($query) {
+                $query->where('StudyType', 'Fulltime')
+                    ->orWhere('StudyType', 'Distance');
+            })
+            ->where('StudyType', '!=', 'Staff')
+            ->whereRaw('LENGTH(`ID`) > 7')
+            ->where('Status','!=', 'Suspended')
+            ->get();
+        return $basicInformation;
     }
 
     public function getYearOfStudy($courseNos) {
@@ -1693,56 +1707,56 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray,$eduroleArray){
-        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students,$registeredCoursesArray,$eduroleArray);
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear){
+        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear);
         return $results;
     }
 
-    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($students, $registeredCoursesArray,$eduroleArray) {
-        $results = BasicInformation::select(
-            'basic-information.FirstName',
-            'basic-information.MiddleName',
-            'basic-information.Surname',
-            'basic-information.ID',
-            'basic-information.GovernmentID',
-            'basic-information.PrivateEmail',
-            'basic-information.MobilePhone',
-            DB::raw('study.Name AS ProgrammeName'),
-            DB::raw('study.ShortName AS ProgrammeCode'),
-            DB::raw('schools.Description AS School'),
-            'basic-information.StudyType',
+    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear) {
+        $results = BasicInformationSR::select(
+            'basic_information_s_r_s.FirstName',
+            'basic_information_s_r_s.MiddleName',
+            'basic_information_s_r_s.Surname',
+            'basic_information_s_r_s.StudentID as ID',
+            'basic_information_s_r_s.GovernmentID',
+            'basic_information_s_r_s.PrivateEmail',
+            'basic_information_s_r_s.MobilePhone',
+            DB::raw('study_s_r_s.study_name AS ProgrammeName'),
+            DB::raw('study_s_r_s.study_shortname AS ProgrammeCode'),
+            DB::raw('schools_s_r_s.school_name AS School'),
+            'basic_information_s_r_s.StudyType',
             DB::raw("
                 CASE 
-                    WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
+                    WHEN `basic_information_s_r_s`.StudentID LIKE '240%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
                 END AS 'StudentType'
             "), 
             DB::raw("
                 CASE 
-                    WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
-                    WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
-                    WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
-                    WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
-                    WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
-                    WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
-                    WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
-                    WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                    WHEN program_s_r_s.program_name LIKE '%y1' THEN 'YEAR 1'
+                    WHEN program_s_r_s.program_name LIKE '%y2' THEN 'YEAR 2'
+                    WHEN program_s_r_s.program_name LIKE '%y3' THEN 'YEAR 3'
+                    WHEN program_s_r_s.program_name LIKE '%y4' THEN 'YEAR 4'
+                    WHEN program_s_r_s.program_name LIKE '%y5' THEN 'YEAR 5'
+                    WHEN program_s_r_s.program_name LIKE '%y6' THEN 'YEAR 6'
+                    WHEN program_s_r_s.program_name LIKE '%y8' THEN 'YEAR 1'
+                    WHEN program_s_r_s.program_name LIKE '%y9' THEN 'YEAR 2'
                     ELSE 'NO REGISTRATION'
                 END AS YearOfStudy
             ")           
         )
-        ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
-        ->join('study', 'student-study-link.StudyID', '=', 'study.ID')
-        ->join('schools', 'study.ParentID', '=', 'schools.ID') 
-        ->join('study-program-link', 'study.ID', '=', 'study-program-link.StudyID') 
-        ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
-        ->join('program-course-link', 'programmes.ID', '=', 'program-course-link.ProgramID')
-        ->join('courses', 'program-course-link.CourseID', '=', 'courses.ID')       
-        ->whereIn('basic-information.ID', $students)
-        ->whereIn('courses.Name', $registeredCoursesArray)
-        ->whereNotIn('basic-information.ID', $eduroleArray)
-        ->groupBy('basic-information.ID');
-        
+        ->join('student_study_link_s_r_s', 'student_study_link_s_r_s.student_id', '=', 'basic_information_s_r_s.StudentID')
+        ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
+        ->join('schools_s_r_s', 'study_s_r_s.parent_id', '=', 'schools_s_r_s.school_id') 
+        ->join('course_registration', function ($join) use ($academicYear) {
+            $join->on('basic_information_s_r_s.StudentID', '=', 'course_registration.StudentID')
+                ->where('course_registration.Year', '=', $academicYear);
+        })
+        ->join('courses_s_r_s', 'course_registration.CourseID', '=', 'courses_s_r_s.course_name')
+        ->join('program_course_links_s_r_s', 'courses_s_r_s.course_id', '=', 'program_course_links_s_r_s.course_id')
+        ->join('program_s_r_s', 'program_course_links_s_r_s.program_id', '=', 'program_s_r_s.programme_id')
+        ->whereRaw('LENGTH(`basic_information_s_r_s`.StudentID) > 7')
+        ->distinct('basic_information_s_r_s.StudentID');
         
         return $results;
     }

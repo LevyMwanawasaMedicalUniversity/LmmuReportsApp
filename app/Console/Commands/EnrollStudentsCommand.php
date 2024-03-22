@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\MoodleController;
+use App\Http\Controllers\SisReportsEduroleDataManagementController;
 use App\Http\Controllers\StudentsController;
 use App\Mail\CronJobEmail;
 use App\Models\CourseElectives;
@@ -24,6 +25,9 @@ class EnrollStudentsCommand extends Command
                         ->unique()
                         ->toArray();
         $moodleController = new MoodleController();
+        $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
+        $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
+        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);       
         $this->info('Students enrolled successfully.');
 
