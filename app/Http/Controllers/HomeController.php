@@ -50,7 +50,7 @@ class HomeController extends Controller
         // return $eduroleArray;
         $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
         
-        return $sisReportsRegisteredStudents;
+        // return $sisReportsRegisteredStudents;
         return view('landingPage', compact('eduroleRegisteredStudents', 'sisReportsRegisteredStudents'));
         
     }
