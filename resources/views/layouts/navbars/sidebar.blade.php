@@ -71,16 +71,16 @@
                   <p> {{ __("Roles") }} </p>
                 </a>
               </li>
-              <li class="@if ($activePage == 'roles') active @endif">
-                <a href="{{ route('importOrUpdatexSisReportsEduroleData.admin') }}">
-                  <i class="now-ui-icons business_badge"></i>
-                  <p> {{ __("Import And Update") }} </p>
-                </a>
-              </li>
               <li class="@if ($activePage == 'permissions') active @endif">
                 <a href="{{ url('permissions') }}">
                   <i class="now-ui-icons objects_key-25"></i>
                   <p> {{ __("Permissions") }} </p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'roles') active @endif">
+                <a href="{{ route('importOrUpdatexSisReportsEduroleData.admin') }}">
+                  <i class="now-ui-icons loader_refresh"></i>
+                  <p> {{ __("Sync With Edurole") }} </p>
                 </a>
               </li>
             </ul>

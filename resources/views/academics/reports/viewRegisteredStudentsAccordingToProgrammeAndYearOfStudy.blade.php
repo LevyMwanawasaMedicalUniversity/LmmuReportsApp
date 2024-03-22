@@ -109,9 +109,9 @@
                                 <td>{{$result->MiddleName}}</td>
                                 <td>{{$result->Surname}}</td>
                                 <td>{{$result->Sex}}</td>
-                                <td>{{$result->StudentID}}</td>
+                                <td>{{$result->ID}}</td>
                                 <td>{{$result->GovernmentID}}</td>
-                                <td>{{$result->Name}}</td>
+                                <td>{{$result->ProgrammeName}}</td>
                                 <td>{{$result->StudyType}}</td>
                                 <td>{{$result->YearOfStudy}}</td>
                                 <!-- Add other table cells for additional properties -->

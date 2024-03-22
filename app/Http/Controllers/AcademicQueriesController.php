@@ -422,12 +422,12 @@ class AcademicQueriesController extends Controller
             'FirstName',
             'MiddleName',
             'Surname',
-            'StudentID',            
-            'Name',
+            'ID',            
+            'ProgrammeName',
             'StudyType',
             'Sex',
             'GovernmentID',
-            'Description'
+            'School'
         ];
 
         $results = $this->getRegisteredStudentsAccordingToProgrammeAndYearOfStudy($academicYear, $yearOfStudy,$programmeName)->get();
@@ -526,7 +526,7 @@ class AcademicQueriesController extends Controller
         } else {
             $results = $this->getRegisteredStudentsAccordingToProgrammeAndYearOfStudy($academicYear, $yearOfStudy,$programmeName)->paginate('20');
         }    
-
+        
         return view('academics.reports.viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy',compact('results','academicYear','yearOfStudy','programmeName','schoolName'));
         
     }

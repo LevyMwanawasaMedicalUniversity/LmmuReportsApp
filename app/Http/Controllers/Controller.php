@@ -984,11 +984,18 @@ class Controller extends BaseController
     }
 
     private function queryRegisteredStudentsAccordingToProgrammeAndYearOfStudy($academicYear, $yearOfStudy,$programmeName){
-        $query = $this->queryRegisteredStudentsPerYearInYearOfStudy($academicYear);
-        $results = $query->where('programmes.ProgramName', 'LIKE', '%' .$yearOfStudy)
-                        ->where('study.ShortName', '=',$programmeName) 
-                        ->groupBy('basic-information.ID');
-        return $results;
+        $queryEdurole = $this->queryRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear);
+        $querySisReports = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear);
+        $resultsSisReports = $querySisReports->where('program_s_r_s.program_name', 'LIKE', '%' .$yearOfStudy)
+                        ->where('study_s_r_s.study_shortname', '=',$programmeName);
+        $resultsEdurole = $queryEdurole->where('programmes.ProgramName', 'LIKE', '%' .$yearOfStudy)
+                        ->where('study.ShortName', '=',$programmeName);
+
+        $combinedResults = $resultsSisReports->unionAll($resultsEdurole);
+
+        return $resultsEdurole;
+        // $results = $resultsSisReports->merge($resultsEdurole);
+        // return $results;
     }
     
 
@@ -1664,6 +1671,7 @@ class Controller extends BaseController
             'basic-information.MiddleName',
             'basic-information.Surname',
             'basic-information.ID',
+            'basic-information.Sex',
             'basic-information.GovernmentID',
             'basic-information.PrivateEmail',
             'basic-information.MobilePhone',
@@ -1719,6 +1727,7 @@ class Controller extends BaseController
             'basic_information_s_r_s.Surname',
             'basic_information_s_r_s.StudentID as ID',
             'basic_information_s_r_s.GovernmentID',
+            'basic_information_s_r_s.Sex',
             'basic_information_s_r_s.PrivateEmail',
             'basic_information_s_r_s.MobilePhone',
             DB::raw('study_s_r_s.study_name AS ProgrammeName'),
