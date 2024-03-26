@@ -95,7 +95,10 @@ class Controller extends BaseController
         $checkRegistration = CourseElectives::select('courses.Name')
                 ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
                 ->where('course-electives.StudentID', $studentId)
-                ->where('course-electives.Year', 2024)
+                ->where(function ($query) {
+                    $query->where('course-electives.Year', 2024)
+                        ->orWhereNull('course-electives.Year');
+                })
                 ->where('course-electives.Approved', 1)
                 ->get();
         return $checkRegistration;
