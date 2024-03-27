@@ -75,6 +75,8 @@ class MoodleController extends Controller
                     'timecreated' => time(),
                 ]);
             }
+
+            return $existingUser;
         } catch (\Exception $e) {
             Log::error('Error creating user account: ' . $e->getMessage());
             return null;
@@ -87,20 +89,20 @@ class MoodleController extends Controller
             $roleId = 5; // Assuming role ID 5 is the default role
             
             // $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->first();
-            
-            
+
             foreach($courseIds as $courseId){
-                $course = MoodleCourses::where('idnumber', $courseId)->first();
-                $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->where('contextid',$course->id)->first();
-                if (!$existingUserRole) {
-                    if ($course) {
-                        MoodleRoleAssignments::create([
+                $course = MoodleCourses::where('idnumber', $courseId)->first();                
+                if ($course) {
+                    MoodleRoleAssignments::updateOrCreate(
+                        [
                             'userid' => $userId,
+                            'contextid' => $course->id
+                        ],
+                        [
                             'roleid' => $roleId,
-                            'contextid' => $course->id,
                             'timemodified' => time(),
-                        ]);
-                    }
+                        ]
+                    );
                 }
             }
             // }
@@ -121,20 +123,23 @@ class MoodleController extends Controller
 
                 $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
                 Log::info($enrolId);
-                $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
+                // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
 
-                if(!$checkIfUserIsEnrolled){
-                    MoodleUserEnrolments::create([
-                        'enrolid' => $enrolId->id,
-                        'status' => 0, // Assuming status 0 is 'active
+                
+                MoodleUserEnrolments::updateOrCreate(
+                    [
+                        'enrolid' => $enrolId->id,                        
                         'userid' => $userId,
+                    ],
+                    [
+                        'status' => 0, // Assuming status 0 is 'active
                         'timestart' => time(),
                         'timeend' => 1720959600,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),
-                    ]);
-                }
+                    ]
+                );                
 
                 $enrolIds[] = $enrolId->id;
             }
