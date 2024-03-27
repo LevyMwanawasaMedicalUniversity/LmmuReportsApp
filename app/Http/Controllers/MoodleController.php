@@ -137,7 +137,7 @@ class MoodleController extends Controller
                 $enrolIds[] = $enrolId->id;
             }
             // Delete all enrollments where enrolid is not in $enrolIds
-            MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
+            // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
         } catch (\Exception $e) {
             Log::error('Error enrolling user into courses: ' . $e->getMessage());
         }

@@ -97,7 +97,7 @@ class Controller extends BaseController
                 ->where('course-electives.StudentID', $studentId)
                 ->where(function ($query) {
                     $query->where('course-electives.Year', 2024)
-                        ->orWhereNull('course-electives.Year');
+                        ->orWhere('course-electives.EnrolmentDate', '>=', '2024-01-01');
                 })
                 ->where('course-electives.Approved', 1)
                 ->get();
@@ -107,7 +107,6 @@ class Controller extends BaseController
     public function getStudentRegistration($studentId){
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
                 ->where('Year', 2024)
-                ->where('Semester', 1)
                 ->get();
         return $checkRegistration;
     }
