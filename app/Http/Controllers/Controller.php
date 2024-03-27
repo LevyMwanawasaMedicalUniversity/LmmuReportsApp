@@ -99,7 +99,6 @@ class Controller extends BaseController
                     $query->where('course-electives.Year', 2024)
                         ->orWhere('course-electives.EnrolmentDate', '>=', '2024-01-01');
                 })
-                ->where('course-electives.Approved', 1)
                 ->get();
         return $checkRegistration;
     }
