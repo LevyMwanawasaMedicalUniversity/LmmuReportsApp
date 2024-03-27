@@ -18,15 +18,6 @@ class SisReportsEduroleDataManagementController extends Controller
 {
     public function importOrUpdateSisReportsEduroleData(){
         set_time_limit(120000000);
-        $studentIds = CourseElectives::pluck('StudentID')
-                        ->unique()
-                        ->toArray();
-        $studentIdSisReports = CourseRegistration::pluck('StudentID')
-                        ->unique()
-                        ->toArray();
-        $moodleController = new MoodleController();        
-        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
-        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
         $this->importBasicInformationFromEdurole();
         $this->importCoursesFromEdurole();
         $this->importStudentStudyLinkFromEdurole();
@@ -34,7 +25,15 @@ class SisReportsEduroleDataManagementController extends Controller
         $this->importProgrammesFromEdurole();
         $this->importStudyFromEdurole();
         $this->importSchoolsFromEdurole();
-        
+        // $studentIds = CourseElectives::pluck('StudentID')
+        //                 ->unique()
+        //                 ->toArray();
+        // $studentIdSisReports = CourseRegistration::pluck('StudentID')
+        //                 ->unique()
+        //                 ->toArray();
+        // $moodleController = new MoodleController();        
+        // $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
 
         return redirect()->back()->with('success', 'Data imported successfully');
     }
