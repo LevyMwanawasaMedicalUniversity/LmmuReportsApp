@@ -86,12 +86,13 @@ class MoodleController extends Controller
         try {
             $roleId = 5; // Assuming role ID 5 is the default role
             
-            $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->first();
+            // $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->first();
             
-            if (!$existingUserRole) {
-                foreach($courseIds as $courseId){
-                    $course = MoodleCourses::where('idnumber', $courseId)->first();
-                    
+            
+            foreach($courseIds as $courseId){
+                $course = MoodleCourses::where('idnumber', $courseId)->first();
+                $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->where('contextid',$course->id)->first();
+                if (!$existingUserRole) {
                     if ($course) {
                         MoodleRoleAssignments::create([
                             'userid' => $userId,
@@ -102,6 +103,7 @@ class MoodleController extends Controller
                     }
                 }
             }
+            // }
         } catch (\Exception $e) {
             Log::error('Error assigning user to role: ' . $e->getMessage());
         }
