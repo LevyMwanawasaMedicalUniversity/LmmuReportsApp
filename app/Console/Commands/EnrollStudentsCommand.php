@@ -30,7 +30,7 @@ class EnrollStudentsCommand extends Command
         //                 ->toArray();
         $moodleController = new MoodleController();
         $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
-        $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
+        // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);      
