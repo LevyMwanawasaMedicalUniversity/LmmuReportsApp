@@ -99,7 +99,6 @@ class Controller extends BaseController
                     $query->where('course-electives.Year', 2024)
                             ->orWhereNull('course-electives.Year');
                 })
-                ->where('course-electives.Approved', 1)
                 ->get();
         return $checkRegistration;
     }
