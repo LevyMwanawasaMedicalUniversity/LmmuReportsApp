@@ -91,7 +91,7 @@ class MoodleController extends Controller
             // $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->first();
 
             foreach($courseIds as $courseId){
-                $course = MoodleCourses::where('idnumber', $courseId)->first();                
+                $course = MoodleCourses::where('shortname', $courseId)->first();                
                 if ($course) {
                     MoodleRoleAssignments::updateOrCreate(
                         [
@@ -99,7 +99,7 @@ class MoodleController extends Controller
                             'contextid' => $course->id
                         ],
                         [
-                            'roleid' => $roleId,
+                            'roleid' => 5,
                             'timemodified' => time(),
                         ]
                     );
