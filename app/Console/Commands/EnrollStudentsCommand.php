@@ -25,15 +25,15 @@ class EnrollStudentsCommand extends Command
         $studentIds = CourseElectives::pluck('StudentID')
                         ->unique()
                         ->toArray();
-        $studentIdSisReports = CourseRegistration::pluck('StudentID')
-                        ->unique()
-                        ->toArray();
+        // $studentIdSisReports = CourseRegistration::pluck('StudentID')
+        //                 ->unique()
+        //                 ->toArray();
         $moodleController = new MoodleController();
         $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
-        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);      
+        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);      
         $this->info('Students enrolled successfully.');
         Log::info('Students enrolled successfully.');
     }
