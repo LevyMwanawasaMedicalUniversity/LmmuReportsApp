@@ -411,7 +411,7 @@ class StudentsController extends Controller
 
     public function studentRegisterForCourses($studentId) {
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-03-31'; 
+        $deadLine = '2024-04-15'; 
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
         }
@@ -494,7 +494,7 @@ class StudentsController extends Controller
 
     public function registerStudent($studentId) {
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-03-31'; 
+        $deadLine = '2024-04-15'; 
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
         }
