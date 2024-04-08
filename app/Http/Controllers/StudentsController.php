@@ -411,10 +411,7 @@ class StudentsController extends Controller
 
     public function studentRegisterForCourses($studentId) {
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-04-15'; 
-        if($todaysDate > $deadLine){
-            return redirect()->back()->with('error', 'Registration Deadline has passed.');
-        }
+        $deadLine = '2024-05-31';       
         
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
@@ -438,6 +435,9 @@ class StudentsController extends Controller
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
             return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+        }
+        if($todaysDate > $deadLine){
+            return redirect()->back()->with('error', 'Registration Deadline has passed.');
         }
     
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
@@ -494,10 +494,8 @@ class StudentsController extends Controller
 
     public function registerStudent($studentId) {
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-04-15'; 
-        if($todaysDate > $deadLine){
-            return redirect()->back()->with('error', 'Registration Deadline has passed.');
-        }
+        $deadLine = '2024-05-31'; 
+        
         // return $todaysDate;
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
@@ -521,6 +519,9 @@ class StudentsController extends Controller
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
             return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+        }
+        if($todaysDate > $deadLine){
+            return redirect()->back()->with('error', 'Registration Deadline has passed.');
         }
     
         $studentsPayments = $this->getStudentsPayments($studentId)->first();

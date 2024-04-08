@@ -34,4 +34,4 @@ JOIN course_registration ON basic_information_s_r_s.StudentID = course_registrat
 JOIN courses_s_r_s ON course_registration.CourseID = courses_s_r_s.course_name
 JOIN program_course_links_s_r_s ON courses_s_r_s.course_id = program_course_links_s_r_s.course_id
 JOIN program_s_r_s ON program_course_links_s_r_s.program_id = program_s_r_s.programme_id
-WHERE LENGTH(basic_information_s_r_s.StudentID) > 7 AND (study_s_r_s.study_name = 'bscBMS' OR study_s_r_s.study_name = 'DIPBMS');
+WHERE LENGTH(basic_information_s_r_s.StudentID) > 7;
