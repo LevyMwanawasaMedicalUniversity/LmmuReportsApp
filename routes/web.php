@@ -85,7 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
-            
+            Route::get('/nmczRegistration/{id?}', 'StudentsController@studentNMCZRegisterForRepeatCourses')->name('nmcz.registration');
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
 
@@ -119,14 +119,18 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/indexSupsAndDef/{id?}', 'DocketController@indexSupsAndDef')->name('docket.indexSupsAndDef');
             Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
             // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
-            Route::get('/docket.indexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
-            Route::get('/import', 'DocketController@import')->name('docket.import');
+            Route::get('/docketIndexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
+            Route::get('/docketIndexNmczRepeating/{id?}', 'DocketController@indexNmczRepeating')->name('docket.indexNmczRepeating');
             
+
+            Route::get('/import', 'DocketController@import')->name('docket.import');
+            Route::get('/importNMCZRepeat', 'DocketController@nmczRepeatImport')->name('docket.nmczRepeatImport');
             Route::get('/importSupsAndDef', 'DocketController@importSupsAndDef')->name('docket.importSupsAndDef');
             Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
             Route::get('/showStudent/{studentNumber}', 'DocketController@showStudent')->name('docket.showStudent');
             Route::get('/showStudentNmcz/{studentNumber}', 'DocketController@showStudentNmcz')->name('docket.showStudentNmcz');
             Route::post('/upload', 'DocketController@uploadStudents')->name('import.students');
+            Route::post('/uploadNMCZRepeatStudents', 'DocketController@uploadNMCZRepeatStudents')->name('import.uploadNMCZRepeatStudents');
             Route::post('/uploadSupsAndDef', 'DocketController@uploadStudentsSupsAndDef')->name('import.studentsSupsAndDef');
             Route::post('/uploadNmcz', 'DocketController@uploadStudentsNmcz')->name('import.studentsNmcz');
             Route::post('/updateCourses/{studentId}', 'DocketController@updateCoursesForStudent')->name('update.courses');

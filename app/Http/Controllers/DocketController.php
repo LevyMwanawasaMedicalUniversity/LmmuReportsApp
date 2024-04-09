@@ -7,6 +7,7 @@ use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
+use App\Models\NMCZRepeatCourses;
 use App\Models\SisCourses;
 use App\Models\Student;
 use App\Models\User;
@@ -95,8 +96,7 @@ class DocketController extends Controller
         return back()->with('success', 'Emails Users Updated. Failed updates exported to failed_updates.csv.');
     }
 
-    public function resetAllStudentsPasswords()
-    {
+    public function resetAllStudentsPasswords(){
         set_time_limit(1200000);
 
         $academicYear = 2023;
@@ -142,6 +142,95 @@ class DocketController extends Controller
             });
 
         return back()->with('success', 'Passwords reset successfully.');
+    }
+
+    public function uploadNMCZRepeatStudents(Request $request){
+        set_time_limit(1200000);
+        // Validate the form data
+        $request->validate([
+            'excelFile' => 'required|mimes:xls,xlsx,csv',
+            'academicYear' => 'required',
+            'term' => 'required',
+        ]);
+
+        // Get the academic year, term, and status from the form
+        $academicYear = $request->input('academicYear');
+        $term = $request->input('term');
+        $status = 5;
+
+        // Process the uploaded file
+        if ($request->hasFile('excelFile')) {
+            $file = $request->file('excelFile');
+
+            // Initialize the Box/Spout reader
+            $reader = ReaderEntityFactory::createXLSXReader();
+            $reader->open($file->getPathname());
+
+            $isHeaderRow = true; // Flag to identify the header row
+            $data = [];
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                foreach ($sheet->getRowIterator() as $row) {
+                    // Skip the header row
+                    if ($isHeaderRow) {
+                        $isHeaderRow = false;
+                        continue;
+                    }
+                    // Assuming the student number is in the first column (index 1)
+                    $studentNumber = $row->getCellAtIndex(0)->getValue();
+                    // Assuming the repeat courses are in the second column (index 2)
+                    $repeatCourses = explode(',', $row->getCellAtIndex(1)->getValue());
+
+                    $data[] = [
+                        'student_number' => $studentNumber,
+                        'repeat_courses' => $repeatCourses,
+                    ];
+                }
+            }
+
+            $reader->close();
+
+            try {
+                foreach ($data as $entry) {
+                    // Check if student exists
+                    $existingStudent = Student::where('student_number', $entry['student_number'])
+                        ->where('academic_year', $academicYear)
+                        ->where('term', $term)
+                        ->first();
+
+                    if ($existingStudent) {
+                        // Update status if needed
+                        if ($status == 3) {
+                            $existingStudent->update(['status' => 5]);
+                        }
+                    } else {
+                        // Insert new student
+                        $existingStudent = Student::create([
+                            'student_number' => $entry['student_number'],
+                            'academic_year' => $academicYear,
+                            'term' => $term,
+                            'status' => $status
+                        ]);
+                    }
+                    // Loop through repeat courses for the student
+                    foreach ($entry['repeat_courses'] as $course) {
+                        // Insert into NMCZRepeatCourses model
+                        NMCZRepeatCourses::create([
+                            'studnent_number' => $existingStudent->student_number,
+                            'course_code' => trim($course),
+                            'academic_year' => $academicYear,
+                        ]);
+                    }
+                }
+                // Provide a success message
+                return redirect()->back()->with('success', 'Students and their repeat courses imported successfully.');
+            } catch (\Throwable $e) {
+                // Handle any unexpected errors during import
+                return redirect()->back()->with('error', 'Failed to upload students and their repeat courses: ' . $e->getMessage());
+            }
+        }
+        // Handle errors or validation failures
+        return redirect()->back()->with('error', 'Failed to upload students and their repeat courses.');
     }
 
     public function uploadStudents(Request $request)
@@ -613,6 +702,29 @@ class DocketController extends Controller
         return view('docketNmcz.index', compact('results','courseName','courseId'));
     }
 
+    public function indexNmczRepeating(Request $request){
+        $academicYear= 2024;
+        $courseName = null;
+        $courseId = null;
+        if($request->input('student-number')){
+            $student = Student::query()
+                        ->where('student_number','=', $request->input('student-number'))
+                        ->where('status','=', 5)
+                        ->first();
+            if($student){
+                $getStudentNumber = $student->student_number;
+                $studentNumbers = [$getStudentNumber];
+                $results = $this->getAppealNMCZStudentDetails($academicYear, $studentNumbers)->paginate(15);
+            }else{
+                return back()->with('error', 'NOT FOUND.');               
+            }
+        }else{
+            $studentNumbers = Student::where('status', 5)->pluck('student_number')->toArray();
+            $results = $this->getAppealNMCZStudentDetails($academicYear, $studentNumbers)->paginate(15);
+        }
+        return view('docketNmcz.index', compact('results','courseName','courseId'));
+    }
+
     private function setAndSaveCourses($studentId) {
         $dataArray = $this->getCoursesForFailedStudents($studentId);
     
@@ -858,6 +970,10 @@ class DocketController extends Controller
 
     public function import(){
         return view('docket.import');
+    }
+
+    public function nmczRepeatImport(){
+        return view('docketNmcz.importRepeat');
     }
 
     public function allStudentsImport(){

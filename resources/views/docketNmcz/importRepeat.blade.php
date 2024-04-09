@@ -1,7 +1,7 @@
 @extends('layouts.app', [
     'class' => 'sidebar-mini ',
     'namePage' => 'Docket',
-    'activePage' => 'docket-import',
+    'activePage' => 'nmczRepeatImport',
     'activeNav' => '',
 ])
 
@@ -29,7 +29,7 @@
                     @endif
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('import.students') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('import.uploadNMCZRepeatStudents') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
                             <label for="excelFile" style="font-weight: bold; font-size: 16px;">Choose Excel (xlsx) File</label>
@@ -44,39 +44,28 @@
                         Loading...
                         </div>
                         <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="academicYear" style="font-weight: bold; font-size: 16px;">Academic Year</label>
-                                <select name="academicYear" class="form-control" required>
-                                    <option value="2023">2023</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2027">2027</option>
-                                </select>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="academicYear" style="font-weight: bold; font-size: 16px;">Academic Year</label>
+                                    <select name="academicYear" class="form-control" required>
+                                        <option value="2024">2024</option>
+                                        <option value="2025">2025</option>
+                                        <option value="2026">2026</option>
+                                        <option value="2027">2027</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="term" style="font-weight: bold; font-size: 16px;">Term</label>
-                                <select name="term" class="form-control" required>
-                                    <option value="Term-2">Term-2</option>
-                                    <option value="Term-1">Term-1</option>                                    
-                                    <option value="Term-3">Term-3</option>
-                                    <option value="Term-4">Term-4</option>
-                                </select>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="term" style="font-weight: bold; font-size: 16px;">Term</label>
+                                    <select name="term" class="form-control" required>
+                                        <option value="Term-2">Term-2</option>
+                                        <option value="Term-1">Term-1</option>                                    
+                                        <option value="Term-3">Term-3</option>
+                                        <option value="Term-4">Term-4</option>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="status" style="font-weight: bold; font-size: 16px;">Type Of Exam</label>
-                                <select name="status" class="form-control" required>
-                                    <option value="3">Deferred And Sups</option>
-                                    <option value="1">LMMU Exam</option>   
-                                    <option value="2">NMCZ Exam</option>                                                    
-                                </select>
-                            </div>
-                        </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Upload</button>
                     </form>

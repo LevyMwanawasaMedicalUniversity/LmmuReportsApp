@@ -13,6 +13,7 @@ use App\Models\MoodleCourses;
 use App\Models\MoodleEnroll;
 use App\Models\MoodleUserEnrolments;
 use App\Models\MoodleUsers;
+use App\Models\NMCZRepeatCourses;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\User;
@@ -407,6 +408,47 @@ class StudentsController extends Controller
                 MoodleUserEnrolments::where('userid', $existingUser->id)->where('enrolid', $enrolId->id)->delete();                
             }
         }
+    }
+
+    public function studentNMCZRegisterForRepeatCourses($studentId) {
+        $todaysDate = date('Y-m-d');
+        $deadLine = '2024-05-31';       
+        
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
+    
+        if ($checkRegistration) {
+            $checkRegistration = collect($this->getStudentRegistration($studentId));
+            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+            
+            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            
+            $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+            
+            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+        }
+        if($todaysDate > $deadLine){
+            return redirect()->back()->with('error', 'Registration Deadline has passed.');
+        }
+    
+        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+    
+        // $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $courses = NMCZRepeatCourses::where('studnent_number', $studentId)->get();
+        $failed = 1;
+        
+        $coursesArray = NMCZRepeatCourses::where('studnent_number', $studentId)->pluck('course_code')->toArray();
+        $coursesNamesArray = $courses->pluck('Program')->toArray();     
+    
+        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+            return [trim($item['InvoiceDescription']) => $item];
+        })->toArray();
+    
+        $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
+    
+        return view('allStudents.studentSelfNMCZRegistration', compact('studentDetails','courses', 'studentsPayments', 'failed', 'studentId'));
     }
 
     public function studentRegisterForCourses($studentId) {

@@ -294,10 +294,22 @@
                     </a>
                     <div class="collapse" id="docketNmczExamples">
                         <ul class="nav">
+                            <li class="@if ($activePage == 'nmczRepeatImport') active @endif">
+                                <a href="{{ route('docket.nmczRepeatImport') }}">
+                                    <i class="now-ui-icons arrows-1_share-66"></i>
+                                    <p> {{ __("Import Repeating Students") }} </p>
+                                </a>
+                            </li>
                             <li class="@if ($activePage == 'docket-indexNmcz') active @endif">
                                 <a href="{{ route('docket.indexNmcz') }}">
                                     <i class="now-ui-icons text_align-left"></i>
-                                    <p> {{ __("View Students") }} </p>
+                                    <p> {{ __("View Nmcz Students") }} </p>
+                                </a>
+                            </li>
+                            <li class="@if ($activePage == 'docket-indexNmczRepeating') active @endif">
+                                <a href="{{ route('docket.indexNmczRepeating') }}">
+                                    <i class="now-ui-icons text_align-left"></i>
+                                    <p> {{ __("View Repeating Students") }} </p>
                                 </a>
                             </li>
                         </ul>

@@ -174,6 +174,11 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getAppealNMCZStudentDetails($academicYear,$studentNumbers){
+        $results= $this->queryAppealNMCZStudentDetails($academicYear,$studentNumbers);
+        return $results;
+    }
+
     public function getStudent2023ExamResults($studentNumber,$academicYear){
         $results = $this->queryStudentResults($studentNumber,$academicYear);
         return $results;
@@ -333,6 +338,58 @@ class Controller extends BaseController
         return $results;
     }
 
+    private function queryAppealNMCZStudentDetails($academicYear, $studentNumbers) {
+        $results = Schools::select(
+            'basic-information.FirstName',
+            'basic-information.MiddleName',
+            'basic-information.Surname',
+            'basic-information.Sex',
+            'student-study-link.StudentID',
+            'basic-information.GovernmentID',
+            'basic-information.PrivateEmail',
+            'basic-information.MobilePhone',
+            'programmes.ProgramName AS "Programme Code"',
+            'study.Name',
+            'schools.Description',
+            'basic-information.StudyType',
+            'balances.Amount',
+            DB::raw("CASE
+                WHEN `course-electives`.StudentID IS NOT NULL THEN 'REGISTERED'
+                ELSE 'NO REGISTRATION'
+            END AS `RegistrationStatus`"),
+            DB::raw("CASE 
+                WHEN programmes.ProgramName LIKE '%1' THEN 'YEAR 1'
+                WHEN programmes.ProgramName LIKE '%2' THEN 'YEAR 2'
+                WHEN programmes.ProgramName LIKE '%3' THEN 'YEAR 3'
+                WHEN programmes.ProgramName LIKE '%4' THEN 'YEAR 4'
+                WHEN programmes.ProgramName LIKE '%5' THEN 'YEAR 5'
+                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'
+                WHEN programmes.ProgramName IS NULL THEN 'NO REGISTRATION'
+                ELSE 'NO REGISTRATION'
+            END AS `YearOfStudy`")
+        )
+        ->leftJoin('study', 'schools.ID', '=', 'study.ParentID')
+        ->leftJoin('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+        ->leftJoin('course-electives', function ($join) use ($academicYear) {
+            $join->on('student-study-link.StudentID', '=', 'course-electives.StudentID')
+                ->where('course-electives.Year', '=', $academicYear);
+        })
+        ->leftJoin('courses', 'course-electives.CourseID', '=', 'courses.ID')
+        ->leftJoin('program-course-link', 'courses.ID', '=', 'program-course-link.CourseID')
+        ->leftJoin('programmes', 'program-course-link.ProgramID', '=', 'programmes.ID')
+        ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')
+        ->leftJoin('balances','balances.StudentID','=','basic-information.ID')
+        ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
+        ->where(function ($query) use ($studentNumbers) {
+            $query->where('basic-information.StudyType', '=', 'Fulltime')
+                ->orWhere('basic-information.StudyType', '=', 'Distance');
+        })
+        ->where('basic-information.StudyType', '!=', 'Staff')
+        ->whereIn('student-study-link.StudentID', $studentNumbers)
+        ->groupBy('student-study-link.StudentID');
+    
+        return $results;
+    }
 
     private function queryAppealStudentDetails($academicYear, $studentNumbers) {
         $results = Schools::select(
