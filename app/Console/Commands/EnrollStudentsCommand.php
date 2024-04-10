@@ -35,6 +35,6 @@ class EnrollStudentsCommand extends Command
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);      
         $this->info('Students enrolled successfully.');
-        Log::info('Students enrolled successfully.');
+        // Log::info('Students enrolled successfully.');
     }
 }
