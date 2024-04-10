@@ -78,7 +78,7 @@ class MoodleController extends Controller
 
             return $existingUser;
         } catch (\Exception $e) {
-            Log::error('Error creating user account: ' . $e->getMessage());
+            // Log::error('Error creating user account: ' . $e->getMessage());
             return null;
         }
     }
@@ -107,7 +107,7 @@ class MoodleController extends Controller
             }
             // }
         } catch (\Exception $e) {
-            Log::error('Error assigning user to role: ' . $e->getMessage());
+            // Log::error('Error assigning user to role: ' . $e->getMessage());
         }
     }
     
@@ -122,7 +122,7 @@ class MoodleController extends Controller
                 $courseId = $course->id;
 
                 $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
-                Log::info($enrolId);
+                // Log::info($enrolId);
                 // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
 
                 
@@ -146,7 +146,7 @@ class MoodleController extends Controller
             // Delete all enrollments where enrolid is not in $enrolIds
             // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
         } catch (\Exception $e) {
-            Log::error('Error enrolling user into courses: ' . $e->getMessage());
+            // Log::error('Error enrolling user into courses: ' . $e->getMessage());
         }
     }    
 }

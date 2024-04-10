@@ -98,8 +98,8 @@
                                 <th>Student Number</th>
                                 <th>Email</th>
                                 <th>Programme</th>
-                                <th>Study Mode</th>
-                                <th>Year Of Study</th>
+                                {{-- <th>Study Mode</th> --}}
+                                {{-- <th>Year Of Study</th> --}}
                                 <th class="text-end">Action</th>
                                 <!-- Add other table headers for additional properties -->
                             </tr>
@@ -112,8 +112,8 @@
                                 <td>{{$result->StudentID}}</td>
                                 <td>{{$result->PrivateEmail}}</td>
                                 <td>{{$result->Name}}</td>
-                                <td>{{$result->StudyType}}</td>
-                                <td>{{$result->YearOfStudy}}</td>
+                                {{-- <td>{{$result->StudyType}}</td> --}}
+                                {{-- <td>{{$result->YearOfStudy}}</td> --}}
                                 <td class="text-end">
                                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                                         <a href="{{route('docket.resetStudent',$result->StudentID)}}" class="btn btn-info">Reset</a>
