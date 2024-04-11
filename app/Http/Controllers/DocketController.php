@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Mail\ExistingStudentMail;
+use App\Mail\NewStudentMail;
+use App\Mail\NMCZRepeatCourseEmail;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
 use App\Models\CourseRegistration;
@@ -17,6 +19,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
@@ -144,6 +147,31 @@ class DocketController extends Controller
         return back()->with('success', 'Passwords reset successfully.');
     }
 
+    public function sendNMCZRepeatCourseEmail($studentID){
+        $privateEmail = BasicInformation::find($studentID);
+    
+        if ($privateEmail) {
+            $email = trim($privateEmail->PrivateEmail);
+        } else {
+            // Handle the case where there's no BasicInformation record with the provided $studentID
+            // For example, you might want to log an error message and return
+            Log::error("No BasicInformation record found for student ID: $studentID");
+            return "No BasicInformation record found for student ID: $studentID";
+        }
+    
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // $email is a valid email address
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        } else {
+            // $email is not a valid email address
+            $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
+        }
+        Mail::to($sendingEmail)->send(new NMCZRepeatCourseEmail($studentID));        
+    
+        return "Test email sent successfully!";
+
+    }
+
     public function uploadNMCZRepeatStudents(Request $request){
         set_time_limit(1200000);
         // Validate the form data
@@ -221,6 +249,8 @@ class DocketController extends Controller
                     if (!$existingUsers) {
                         $studentController->createUserAccount($studentNumber);
                     }
+
+                    $this->sendNMCZRepeatCourseEmail($studentNumber);
                     // Loop through repeat courses for the student
                     foreach ($entry['repeat_courses'] as $course) {
                         // Insert into NMCZRepeatCourses model
