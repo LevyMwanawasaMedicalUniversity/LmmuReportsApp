@@ -197,6 +197,7 @@ class DocketController extends Controller
                         ->where('academic_year', $academicYear)
                         ->where('term', $term)
                         ->first();
+                    $existingUsers = User::where('name', $entry['student_number'])->exists();
 
                     if ($existingStudent) {
                         // Update status if needed
@@ -212,10 +213,18 @@ class DocketController extends Controller
                             'status' => $status
                         ]);
                     }
+
+                    $studentNumber = trim($entry['student_number']);
+
+                    $studentController = new StudentsController();
+
+                    if (!$existingUsers) {
+                        $studentController->createUserAccount($studentNumber);
+                    }
                     // Loop through repeat courses for the student
                     foreach ($entry['repeat_courses'] as $course) {
                         // Insert into NMCZRepeatCourses model
-                        NMCZRepeatCourses::create([
+                        NMCZRepeatCourses::updateOrCreate([
                             'studnent_number' => $existingStudent->student_number,
                             'course_code' => trim($course),
                             'academic_year' => $academicYear,

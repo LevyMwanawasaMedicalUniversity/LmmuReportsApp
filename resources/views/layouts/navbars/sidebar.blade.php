@@ -21,6 +21,7 @@
         </a>
       </li>
       @if (auth()->user()->hasRole('Student') && !auth()->user()->hasAnyRole(['Administrator', 'Developer', 'Dosa', 'Examination', 'Academic', 'Finance']))
+      
         <li class = "@if ($activePage == 'studentCourseRegistration') active @endif">
           <a href="{{ route('student.coursesRegistration', auth()->user()->name) }}">
             <i class="now-ui-icons gestures_tap-01"></i>

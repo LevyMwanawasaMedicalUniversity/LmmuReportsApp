@@ -13,7 +13,11 @@
         <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Registered Courses</h4>
+                @if($studentStatus != 5)
+                    <h4 class="card-title">Registered Courses</h4>
+                @else
+                    <h4 class="card-title">Registered NMCZ Courses</h4>
+                @endif
             </div>
                 <div class="col-md-12">
                     @if (session('success'))
@@ -80,7 +84,11 @@
                             <thead class="text-primary">
                                 <tr>
                                     <th>Course Code</th>
+                                    @if($studentStatus != 5)
                                     <th>Course Name</th>
+                                    @else
+                                    <th>Course Year</th>
+                                    @endif
                                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
                                     <th class="text-right">Action</th>
                                     @endif
@@ -89,6 +97,7 @@
                             <tbody>
                             @foreach($checkRegistration as $result)
                             <tr>
+                            @if($studentStatus != 5)
                                 <td>{{$result->Name}}</td>
                                 <td>{{ $result->CourseDescription }}  {{ $result->Year }}
                                 <td class="text-right">
@@ -97,12 +106,30 @@
                                         @csrf
                                         @method('DELETE')
                                         <input type="hidden" name="courseId" value="{{ $result->Name }}">
+                                        <input type="hidden" name="studentStatus" value="{{ $studentStatus }}">
                                         <input type="hidden" name="studentId" value="{{ $studentId }}">
                                         <input type="hidden" name="year" value="2024">
                                         <button type="submit" class="btn btn-danger">Delete</button>
                                     </form>
                                     @endif
                                 </td>
+                            @else
+                                <td>{{$result->CourseID}}</td>
+                                <td>{{ $result->Year }}
+                                <td class="text-right">
+                                    @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
+                                    <form method="POST" action="{{ route('deleteCourseInRegistration.student') }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <input type="hidden" name="courseId" value="{{ $result->CourseID }}">
+                                        <input type="hidden" name="studentStatus" value="{{ $studentStatus }}">                                        
+                                        <input type="hidden" name="studentId" value="{{ $studentId }}">
+                                        <input type="hidden" name="year" value="2024">
+                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                    </form>
+                                    @endif
+                                </td>
+                            @endif
                             </tr>
                             @endforeach
                             </tbody>

@@ -85,7 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
-            Route::get('/nmczRegistration/{id?}', 'StudentsController@studentNMCZRegisterForRepeatCourses')->name('nmcz.registration');
+            
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
 
@@ -108,6 +108,7 @@ Route::group(['middleware' => 'auth'], function () {
             // Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
             Route::get('/viewResults', 'StudentsController@viewResults')->name('student.viewResults');
             Route::get('/coursesRegistration/{studentId}', 'StudentsController@studentRegisterForCourses')->name('student.coursesRegistration');
+            Route::get('/nmczRegistration/{id?}', 'StudentsController@studentNMCZRegisterForRepeatCourses')->name('nmcz.registration');
             Route::post('/submitCourseRegistration', 'StudentsController@studentSubmitCourseRegistration')->name('student.submitCourseRegistration');
         });
 

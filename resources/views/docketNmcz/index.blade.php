@@ -17,7 +17,7 @@
                     @if($courseName)
                     <h4 class="card-title">{{ $courseName }} Students </h4>
                     @else
-                    <h4 class="card-title">NMCZ Students </h4>
+                    <h4 class="card-title">NMCZ Sfgfgtudents </h4>
                     @endif
                     @if (session('success'))
                         <div class="alert alert-success">
@@ -31,7 +31,7 @@
                         </div>
                     @endif
                     @if(!$courseName)
-                    <form action="{{ route('docket.indexNmcz') }}" method="GET">
+                    <form action="{{ route('docket.indexNmczRepeating') }}" method="GET">
                         @csrf
                         
                         <div class="form-group">

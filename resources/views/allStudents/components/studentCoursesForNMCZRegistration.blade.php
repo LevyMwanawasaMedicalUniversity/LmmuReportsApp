@@ -9,15 +9,28 @@
     </div>
     <div class="card-body">  
         @php
-            $registrationFeesRepeat = [];
-            $totalFeesRepeat = [];
+            $registrationFeesRepeat;
+            $totalFeesRepeat;
         @endphp
 
         <div class="accordion" id="coursesAccordion">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="headingOne">
+                @php
+                    $otherFee = 2625;
+
+                    if($failed == 1){
+                        $tuitionFee = ($amount - $otherFee) / $theNumberOfCourses;
+                        $numberOfRepeatCourses = $courses->count();
+                        $amount = ($tuitionFee * $numberOfRepeatCourses) + $otherFee;
+                    }
+                    $registrationFeesRepeat = round($amount * 0.25, 2);
+                    $totalFeesRepeat = round($amount, 2);
+                @endphp
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                        <span class="ms-auto">{{ $studentDetails->Name }}</span>
+                        <span class="ms-auto">{{ $programmeStudyCode }}</span>
+                        <span class="ms-auto registrationFeeRepeat" id="registrationFeeRepeat">Registration Fee : K{{ number_format($amount * 0.25, 2) }}</span>
+                        <span class="ms-auto totalFeeRepeat" id="totalFeeRepeat">Total Invoice = K{{ number_format($amount,0) }}</span>
                     </button>
                 </h2>
                 <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#coursesAccordion">
@@ -35,7 +48,7 @@
                                     @foreach($courses as $course)
                                     <tr>
                                         <td>
-                                            <input type="checkbox" name="courseRepeat[]" value="{{$course->CourseCode}}" class="courseRepeat" checked>
+                                            <input type="checkbox" name="coursesnmcz[]" value="{{$course->course_code}}" class="coursesnmcz" id="coursesnmcz" checked>
                                         </td>
                                         <td>{{$course->course_code}}</td>
                                         <td class="text-end">{{$course->CourseName}}</td>
@@ -44,16 +57,18 @@
                                 </tbody>
                             </table>
                         </div>
-                        <button type="submit" class="btn btn-primary registerButtonRepeat">Register</button>
+                        <button type="submit" class="btn btn-primary registerButtonNMCZ">Register</button>
                     </div>
                 </div>
             </div>
         </div>
         
         <script>
-            var registrationFeesRepeatArray = {!! json_encode($registrationFeesRepeat) !!};
-            var totalFeeArrayRepeat = {!! json_encode($totalFeesRepeat) !!};
+            var registrationFeesNMCZ = {{ $registrationFeesRepeat }};
+            var totalFeeNMCZ = {{ $totalFeesRepeat }};
         </script>
     </div>
 </div> 
+
+
 <!-- </div> -->

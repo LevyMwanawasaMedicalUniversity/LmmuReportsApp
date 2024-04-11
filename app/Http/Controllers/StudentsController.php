@@ -239,7 +239,7 @@ class StudentsController extends Controller
         return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
     }
 
-    private function createUserAccount($studentId){
+    public function createUserAccount($studentId){
         // Get the student's email from BasicInformation
         $basicInfo = BasicInformation::find($studentId);
         $email = trim($basicInfo->PrivateEmail);
@@ -388,8 +388,11 @@ class StudentsController extends Controller
         $studentId = $request->input('studentId');
         $year = $request->input('year');
         $courseId = $request->input('courseId');
+        $studentStatus = $request->input('studentStatus');
         $courseArray = [$courseId];
-        $this->deletCoursesFromMoodleEnrollment($studentId,$courseArray);
+        if($studentStatus != 5){
+            $this->deletCoursesFromMoodleEnrollment($studentId,$courseArray);
+        }        
         CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
             ->where('CourseID', $courseId)
@@ -418,16 +421,24 @@ class StudentsController extends Controller
             ->where('Year', 2024)
             ->where('Semester', 1)
             ->exists();
-    
+        $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
+        $studentStatus = $getStudentStaus->status;
         if ($checkRegistration) {
-            $checkRegistration = collect($this->getStudentRegistration($studentId));
-            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
-            
-            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            if($studentStatus != 5){
+                $checkRegistration = collect($this->getStudentRegistration($studentId));
+                $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+                
+                $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            }else{
+
+                $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+                        ->where('Year', 2024)
+                        ->get();
+            }            
             
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
-            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
         }
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
@@ -447,11 +458,37 @@ class StudentsController extends Controller
         })->toArray();
     
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
-    
-        return view('allStudents.studentSelfNMCZRegistration', compact('studentDetails','courses', 'studentsPayments', 'failed', 'studentId'));
+        if(strpos($studentDetails->StudentID, '190') === 0){
+            $year = 2019;
+        }else{
+            $year = 2023;
+        }
+        $studentsInvoice = SisReportsSageInvoices::where('InvoiceProgrammeCode','=',$studentDetails->ShortName)
+                ->where('InvoiceModeOfStudy','=', $studentDetails->StudyType)
+                ->where('InvoiceYearOfStudy','=', 'Y3')
+                ->where('InvoiceYearOfInvoice','=',$year)
+                ->first();
+        if($studentDetails->StudyType == 'Fulltime'){
+            $modeOfStudy = 'FT';
+        }else{
+            $modeOfStudy = 'DE';
+        }
+
+        $programmeStudyCode = $studentDetails->ShortName . '-' . $modeOfStudy . '-'. $year . '-Y3';
+        // return $programmeStudyCode;
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programmeStudyCode)->count();
+        // return $theNumberOfCourses;
+        $amount = $studentsInvoice ? $studentsInvoice->InvoiceAmount : 0;
+        return view('allStudents.studentSelfNMCZRegistration', compact('studentDetails','courses', 'studentsPayments', 'failed', 'studentId','amount','theNumberOfCourses','programmeStudyCode'));
     }
 
     public function studentRegisterForCourses($studentId) {
+        $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
+        $studentStatus = $getStudentStaus->status;
+
+        if ($studentStatus == 5) {
+            return redirect()->route('nmcz.registration', $studentId);
+        }
         $todaysDate = date('Y-m-d');
         $deadLine = '2024-05-31';       
         
@@ -535,6 +572,12 @@ class StudentsController extends Controller
     }
 
     public function registerStudent($studentId) {
+        $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
+        $studentStatus = $getStudentStaus->status;
+
+        if ($studentStatus == 5) {
+            return redirect()->route('nmcz.registration', $studentId);
+        }
         $todaysDate = date('Y-m-d');
         $deadLine = '2024-05-31'; 
         
@@ -637,6 +680,8 @@ class StudentsController extends Controller
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
         $courses = explode(',', $request->input('courses'));
+
+        // return $courses;
         $academicYear = 2024;
 
         $moodleController = new MoodleController();       

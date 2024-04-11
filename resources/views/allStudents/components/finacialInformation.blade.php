@@ -9,6 +9,7 @@
     </div>
     <script>
         var payments2024 = {{ isset($studentsPayments->TotalPayment2024) ? $studentsPayments->TotalPayment2024 : '0' }};
+        var balance = {{ $studentDetails->Amount }};
     </script>
     <div class="card-body">
         <div class="table-responsive">

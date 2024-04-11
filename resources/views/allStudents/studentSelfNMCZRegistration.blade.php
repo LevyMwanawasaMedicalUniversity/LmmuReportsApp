@@ -15,7 +15,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title no-print">Course Registration</h4>
+                    <h4 class="card-title no-print">NMCZ Course Registration</h4>
 
                     <div class="col-md-12">
                         @if (session('success'))
@@ -39,6 +39,49 @@
         </div>
     </div>
 </div>
-@include('allStudents.components.registrationModals')
+
+<script>
+$(document).ready(function() {
+    $('.registerButtonNMCZ').click(function(e) {
+        e.preventDefault();
+
+        
+        var registrationFee = registrationFeesNMCZ;
+        var totalFee = totalFeeNMCZ;
+        // var payments2024 = parseFloat($('#payments2024').text().replace('K', ''));
+        // Store the courses in a variable
+        var courses = [];
+        $('input[id^="coursesnmcz"]:checked').each(function() {
+            courses.push($(this).val());
+        });
+        var studentBalance = balance * -1;
+        console.log(courses);
+        console.log(registrationFee);
+        console.log(payments2024);
+        console.log(totalFee);
+
+        // Show the modal
+        if (registrationFee <= studentBalance) {
+            $('#eligibleModal').modal('show');
+
+            // Populate the modal with the courses
+            var courseList = '';
+            for (var i = 0; i < courses.length; i++) {
+                courseList += '<p>' + courses[i] + '</p>';
+            }
+            var courseListText = '<p>You are submitting the following course for registration. Click "Yes" to proceed and "No" to cancel</p><br>' + courseList + '<br><p>Your Total Invoice is: K ' + totalFee + '</p>';
+            $('#eligibleModal .modal-body').html(courseListText);
+
+            // Update the hidden input field with the selected courses
+            $('#coursesInput').val(courses.join(','));
+        } else {
+            var shortfall = registrationFee - payments2024;
+            $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
+            $('#ineligibleModal').modal('show');
+        }
+    });
+});
+</script>
+@include('allStudents.components.registrationModalsNMCZ')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 @endsection

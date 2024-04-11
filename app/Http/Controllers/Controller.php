@@ -402,6 +402,7 @@ class Controller extends BaseController
             'basic-information.PrivateEmail',
             'basic-information.MobilePhone',
             'programmes.ProgramName AS "Programme Code"',
+            'study.ShortName',
             'study.Name',
             'schools.Description',
             'basic-information.StudyType',
