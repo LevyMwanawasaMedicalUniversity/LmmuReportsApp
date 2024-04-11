@@ -75,7 +75,7 @@ $(document).ready(function() {
             // Update the hidden input field with the selected courses
             $('#coursesInput').val(courses.join(','));
         } else {
-            var shortfall = registrationFee - payments2024;
+            var shortfall = registrationFee - studentBalance;
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
             $('#ineligibleModal').modal('show');
         }
