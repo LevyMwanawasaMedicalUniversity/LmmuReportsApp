@@ -479,7 +479,9 @@ class StudentsController extends Controller
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programmeStudyCode)->count();
         // return $theNumberOfCourses;
         $amount = $studentsInvoice ? $studentsInvoice->InvoiceAmount : 0;
-        return view('allStudents.studentSelfNMCZRegistration', compact('studentDetails','courses', 'studentsPayments', 'failed', 'studentId','amount','theNumberOfCourses','programmeStudyCode'));
+        $amountAfterInvoicing = $amount + $studentDetails->Amount;
+        // return $amountAfterInvoicing;
+        return view('allStudents.studentSelfNMCZRegistration', compact('studentStatus','amountAfterInvoicing','studentDetails','courses', 'studentsPayments', 'failed', 'studentId','amount','theNumberOfCourses','programmeStudyCode'));
     }
 
     public function studentRegisterForCourses($studentId) {
@@ -568,7 +570,7 @@ class StudentsController extends Controller
         $currentStudentsCourses = $studentsProgramme;
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
     
-        return view('allStudents.studentSelfRegistration', compact('studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.studentSelfRegistration', compact('studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
     public function registerStudent($studentId) {
@@ -674,7 +676,7 @@ class StudentsController extends Controller
         }
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
     
-        return view('allStudents.adminRegisterStudent', compact('studentDetails','courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.adminRegisterStudent', compact('studentStatus','studentDetails','courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }  
 
     public function adminSubmitCourses(Request $request){
