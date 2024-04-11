@@ -52,6 +52,19 @@
                                         </td>
                                         <td>{{$course->course_code}}</td>
                                         <td class="text-end">{{$course->CourseName}}</td>
+                                        <td class="text-right">
+                                        @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
+                                        <form method="POST" action="{{ route('deleteCourseFromNMCZCourses.student') }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <input type="hidden" name="courseId" value="{{$course->course_code}}">
+                                            <input type="hidden" name="studentStatus" value="{{ $studentStatus }}">
+                                            <input type="hidden" name="studentId" value="{{ $studentId }}">
+                                            <input type="hidden" name="year" value="2024">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                        @endif
+                                </td>
                                     </tr>
                                     @endforeach
                                 </tbody>

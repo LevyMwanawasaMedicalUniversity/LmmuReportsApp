@@ -400,6 +400,17 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Registration deleted successfully');
     }
 
+    public function deleteCourseFromNMCZCourses(Request $request){
+        $studentId = $request->input('studentId');
+        $year = $request->input('year');
+        $courseId = $request->input('courseId');       
+        NMCZRepeatCourses::where('studnent_number', $studentId)
+            ->where('academic_year', $year)
+            ->where('course_code', $courseId)
+            ->delete();
+        return redirect()->back()->with('success', 'Registration deleted successfully');
+    }
+
     private function deletCoursesFromMoodleEnrollment($studentId,$coursesArray){        
         foreach ($coursesArray as $course) {
             $existingUser = MoodleUsers::where('username', $studentId)->first();
