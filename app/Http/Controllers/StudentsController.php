@@ -515,7 +515,7 @@ class StudentsController extends Controller
             
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
-            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
         }
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
@@ -605,7 +605,7 @@ class StudentsController extends Controller
             
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
-            return view('allStudents.registrationPage', compact('studentId','checkRegistration','studentInformation'));
+            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
         }
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration Deadline has passed.');
