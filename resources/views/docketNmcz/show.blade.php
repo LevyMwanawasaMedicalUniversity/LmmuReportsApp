@@ -111,7 +111,7 @@
                         </div>
                         <div style="width: 100%; margin-left: 20px; margin-top: 20px;">
                             <table style="border: 1px solid #ccc; padding: 5px; width: 800px;">
-                             <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                            <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
                                 <form id="myForm" action="" method="POST">
                                     @csrf
                                     <table id="myTable">
