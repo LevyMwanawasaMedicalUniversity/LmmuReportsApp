@@ -893,6 +893,7 @@ class DocketController extends Controller
         $this->setAndUpdateCourses($studentId);
         // Retrieve all unique Student values from the Course model
         $courses = Courses::where('Student', $studentId)->get();
+        $courses = CourseRegistration::where('StudentID',  $studentId)->get();
         // return $courses;
 
         // Pass the $students variable to the view

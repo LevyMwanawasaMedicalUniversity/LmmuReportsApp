@@ -110,7 +110,41 @@
                         <div style="float: left; width: 400px;">
                         </div>
                         <div style="width: 100%; margin-left: 20px; margin-top: 20px;">
-                            
+                            <table style="border: 1px solid #ccc; padding: 5px; width: 800px;">
+                             <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                                <form id="myForm" action="" method="POST">
+                                    @csrf
+                                    <table id="myTable">
+                                        <thead>
+                                            <tr>
+                                                <th style="border: 1px solid #ccc; padding: 5px;">Course</th>
+                                                <th style="border: 1px solid #ccc; padding: 5px;"><b>DATE / TIME</b></th>
+                                                <th style="border: 1px solid #ccc; padding: 5px;"><b>VENUE</b></th>
+                                                <th style="border: 1px solid #ccc; padding: 5px;"><b>SIGNATURE INVIGILATOR</b></th>
+                                                <th style="border: 1px solid #ccc; padding: 5px;" class="no-print">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($courses as $course)
+                                            <tr>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                    <div class="course-pair">
+                                                        {{$course->CourseID}} 
+                                                    </div>
+                                                </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px; width: 180px; height: 35px;">&nbsp; </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp; </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px; width: 200px; height: 35px;">&nbsp;</td>
+                                                <td>
+                                                    <button class="block no-print" style="background-color: #dc3545; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="button" onclick="removeRow(this)">Remove</button>
+                                                </td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="submit">Update</button>
+                                </form>
+                            </table>
                             
                             <div style="font-size: 10px; padding-top: 20px; float: left;"> 
                                 Kindly cross-check your courses on this slip against the separate examination timetable for the EXACT date and time of the examination.<br>

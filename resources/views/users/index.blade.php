@@ -81,7 +81,7 @@
                     </form>
                       </td>
                       <td class="text-right">
-                                             <a type="button" href="{{ route('users.edit', $user->id) }}" rel="tooltip" class="btn btn-success btn-icon btn-sm " data-original-title="" title="">
+                          <a type="button" href="{{ route('users.edit', $user->id) }}" rel="tooltip" class="btn btn-success btn-icon btn-sm " data-original-title="" title="">
                         <i class="now-ui-icons ui-2_settings-90"></i>
                         </a>
                       </td>

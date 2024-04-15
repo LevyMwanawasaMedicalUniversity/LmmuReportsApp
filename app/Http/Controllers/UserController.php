@@ -60,6 +60,17 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
+    public function searchForUser(Request $request)
+    {
+        $searchTerm = $request->get('term');
+
+        $users = User::where('name', 'LIKE', '%' . $searchTerm . '%')
+                    ->orWhere('email', 'LIKE', '%' . $searchTerm . '%')
+                    ->get();
+
+        return response()->json($users);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
