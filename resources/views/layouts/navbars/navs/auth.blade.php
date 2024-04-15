@@ -17,6 +17,7 @@
       <span class="navbar-toggler-bar navbar-kebab"></span>
     </button>
     <div class="collapse navbar-collapse justify-content-end" id="navigation">
+    @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
       <form>
         <div class="input-group no-border">
           <input type="text" id="search" value="" class="form-control" placeholder="Search...">
@@ -27,6 +28,7 @@
           </div>
         </div>
       </form>
+      @endif
       <ul class="navbar-nav">
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

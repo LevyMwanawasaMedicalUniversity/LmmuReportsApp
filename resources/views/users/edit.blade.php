@@ -9,13 +9,32 @@
 <div class="panel-header panel-header-sm">
 </div>
 <div class="content">
+    @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
+                @if (session('warning'))
+                    <div class="alert alert-warning">
+                        {{ session('warning') }}
+                    </div>
+                @endif
     <div class="row">
+                
         <div class="col-md-4">
             <div class="card card-user">
                 <div class="image">
                     <img src="{{ asset('assets/img/bg5.jpg') }}" alt="...">
                 </div>
                 <div class="card-body">
+                
                 @if($user->hasRole("Student"))
                     <div class="author">
                     @php
@@ -77,17 +96,7 @@
             <div class="card">
                 <div class="card-header">
                     <h4 class="card-title">Update User </h4>
-                    @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                    @endif
-
-                    @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                    @endif
+                    
                 </div>
                 <div class="card-body">
                     <div class="toolbar">

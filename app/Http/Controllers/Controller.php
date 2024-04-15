@@ -948,15 +948,37 @@ class Controller extends BaseController
         // Perform the query to get grades
         $gradesCheck = Grades::query()
             ->where('grades-published.StudentNo', $studentId)
-            ->whereNotIn('AcademicYear', ['2024'])
+            ->whereIn('AcademicYear', ['2023'])
             ->get();
 
         // Extract course numbers from the results
         $courseNumbers = $gradesCheck->pluck('CourseNo')->toArray();
 
         // Calculate the current year of study
-        $currentYearOfStudy = $this->getYearOfStudy($courseNumbers);        
+        $currentYearOfStudy = $this->getYearOfStudy($courseNumbers);
+        
+        $programmeForStudents = EduroleCourses::select('p.ProgramName')
+            ->join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+            ->join('study as s', 'spl.StudyID', '=', 's.ID')
+            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+            ->join('grades-published as gp', 'gp.StudentNo', '=', 'ssl2.StudentID')
+            ->where('ssl2.StudentID', $studentId)
+            ->whereIn('courses.Name', $courseNumbers)            
+            ->first();
 
+        $programmeName = $programmeForStudents->ProgramName;
+
+        // Find the last occurrence of "Y" and get the number after it
+        $yearNumber = substr($programmeName, strrpos($programmeName, 'Y') + 1);
+
+        // Increment the year number
+        $incrementedYearNumber = $yearNumber + 1;
+
+        // Replace the old year number with the incremented one
+        $updatedProgrammeName = str_replace("Y".$yearNumber, "Y".$incrementedYearNumber, $programmeName);
+            
         
         $level = '%' . $currentYearOfStudy;
 
@@ -965,7 +987,8 @@ class Controller extends BaseController
             ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
             ->join('study as s', 'spl.StudyID', '=', 's.ID')
             ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-            ->where('p.ProgramName', 'like', $level)
+            ->where('p.ProgramName', '=', $updatedProgrammeName)
+            // ->where('p.ProgramName', 'like', '%' .$level)
             ->where('ssl2.StudentID', $studentId)
             ->select('courses.Name','courses.CourseDescription')
             ->get();
