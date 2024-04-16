@@ -35,6 +35,6 @@ class NMCZRepeatCourseEmail extends Mailable
         return $this
             ->from('registration@lmmu.ac.zm')
             ->subject('NMCZ Repeat Course Email')
-            ->view('emailsNMCZ.nmczRepeat', compact('studentDetails','studentId','studentLocalDetails'));
+            ->view('emails.nmczRepeat2', compact('studentDetails','studentId','studentLocalDetails'));
     }
 }
