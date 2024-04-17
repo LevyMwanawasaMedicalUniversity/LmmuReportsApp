@@ -7,6 +7,7 @@ use App\Mail\NewStudentMail;
 use App\Mail\NMCZRepeatCourseEmail;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\NMCZRepeatCourses;
@@ -272,8 +273,7 @@ class DocketController extends Controller
         return redirect()->back()->with('error', 'Failed to upload students and their repeat courses.');
     }
 
-    public function uploadStudents(Request $request)
-    {
+    public function uploadStudents(Request $request){
         set_time_limit(1200000);
         // Validate the form data
         $request->validate([
@@ -447,11 +447,9 @@ class DocketController extends Controller
 
         // Handle errors or validation failures
         return redirect()->back()->with('error', 'Failed to upload students.');
-    }
-    
+    }    
 
-    private function processStudentChunk($chunk, $academicYear, $term, $status)
-    {
+    private function processStudentChunk($chunk, $academicYear, $term, $status){
         // Check for duplicate students in a single database query
         $existingStudents = Student::whereIn('student_number', $chunk)
             ->where('academic_year', $academicYear)
@@ -593,7 +591,6 @@ class DocketController extends Controller
         }
         return view('docketSupsAndDef.index', compact('results','courseName','courseId'));
     }
-
     
     public function assignStudentsRoles(){
         set_time_limit(1200000);
@@ -668,9 +665,7 @@ class DocketController extends Controller
             }
         }
         return back()->with('success', 'Emails sent successfully.');
-    }
-
-    
+    }   
 
     public function exportAppealStudents(){
         $studentNumbers = Student::where('status', 1)
@@ -839,7 +834,7 @@ class DocketController extends Controller
         // }catch(Exception $e){
             
         // }
-        $academicYear= 2023;
+        $academicYear= 2024;
         $student = Student::query()
                         ->where('student_number','=', $studentId)
                         ->first();
@@ -861,9 +856,15 @@ class DocketController extends Controller
             $this->setAndUpdateCourses($studentId);
         }
         // Retrieve all unique Student values from the Course model
-        $courses = Courses::where('Student', $studentId)->get();
+        // $courses = Courses::where('Student', $studentId)->get();     THIS IS THE OLD LOGIC
         // return $courses;
-
+        $courses = CourseRegistration::where('StudentID',  $studentId)->get();
+        if($courses->isEmpty()){
+            $courses = CourseElectives::select('courses.Name as CourseID', 'courses.CourseDescription as CourseName')
+            ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')
+            ->where('course-electives.Year', 2024)
+            ->where('course-electives.StudentID',  $studentId)->get();
+        }
         // Pass the $students variable to the view
         // return view('your.view.name', compact('students'));
         
@@ -876,7 +877,7 @@ class DocketController extends Controller
         // }catch(Exception $e){
             
         // }
-        $academicYear= 2023;
+        $academicYear= 2024;
         $student = Student::query()
                         ->where('student_number','=', $studentId)
                         ->first();
@@ -890,10 +891,16 @@ class DocketController extends Controller
         
                     
         
-        $this->setAndUpdateCourses($studentId);
+        // $this->setAndUpdateCourses($studentId);
         // Retrieve all unique Student values from the Course model
-        $courses = Courses::where('Student', $studentId)->get();
+        // $courses = Courses::where('Student', $studentId)->get();
         $courses = CourseRegistration::where('StudentID',  $studentId)->get();
+        if($courses->isEmpty()){
+            $courses = CourseElectives::select('courses.Name as CourseID', 'courses.CourseDescription as CourseName')
+            ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')
+            ->where('course-electives.Year', 2024)
+            ->where('course-electives.StudentID',  $studentId)->get();
+        }
         // return $courses;
 
         // Pass the $students variable to the view
@@ -1016,14 +1023,12 @@ class DocketController extends Controller
         return view('docketNmcz.importRepeat');
     }
 
-    public function allStudentsImport(){
-        
-    }
-    public function importNmcz(){
-        return view('docketNmcz.import');
+    public function allStudentsImport(){        
     }
 
-                                                                                                                        
+    public function importNmcz(){
+        return view('docketNmcz.import');
+    }                                                                                                                        
     
     public function importCourseFromSis(Request $request) {
         $getCoursesFromSis = $this->getSisCourses();

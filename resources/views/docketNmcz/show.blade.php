@@ -125,6 +125,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                        @if($courses->count() > 0)
                                             @foreach($courses as $course)
                                             <tr>
                                                 <td style="border: 1px solid #ccc; padding: 5px;">
@@ -140,6 +141,22 @@
                                                 </td>
                                             </tr>
                                             @endforeach
+                                        @else
+                                            <tr>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                STUDENT
+                                                </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                HAS NO 
+                                                </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                REGISTERED
+                                                </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                COURSES
+                                                </td>
+                                            </tr>
+                                        @endif
                                         </tbody>
                                     </table>
                                     <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="submit">Update</button>

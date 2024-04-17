@@ -145,9 +145,7 @@
                 </div>
                 <!-- end card-body -->
             </div>
-            <!-- end card -->
-        
-        
+            <!-- end card -->       
             </div>
             <div class="row">
                 <div class="card">
