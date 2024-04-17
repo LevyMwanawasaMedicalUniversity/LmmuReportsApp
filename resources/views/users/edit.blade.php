@@ -28,7 +28,7 @@
                 @endif
     <div class="row">
                 
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="card card-user">
                 <div class="image">
                     <img src="{{ asset('assets/img/bg5.jpg') }}" alt="...">
@@ -41,16 +41,55 @@
 
                     $getStudentStatus = \App\Models\Student::where('student_number','=',$user->name)->first();
                     $studentStatus = $getStudentStatus->status;
+                    $studentNumbers = $user->name;
+                    $academicYear = 2024;
 
-                    $studentInformation = \App\Models\BasicInformation::where('ID','=',$user->name)->first();
+                    $studentInformation = \App\Models\Schools::select(
+                            'basic-information.FirstName',
+                            'basic-information.MiddleName',
+                            'basic-information.Surname',
+                            'basic-information.Sex',
+                            'student-study-link.StudentID',
+                            'basic-information.GovernmentID',
+                            'basic-information.PrivateEmail',
+                            'basic-information.MobilePhone',
+                            'study.ShortName',
+                            'study.Name',
+                            'schools.Description',
+                            'basic-information.StudyType',
+                        )
+                        ->join('study', 'schools.ID', '=', 'study.ParentID')
+                        ->join('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')
+                        ->leftJoin('basic-information', 'student-study-link.StudentID', '=', 'basic-information.ID')  
+                        ->where('basic-information.StudyType', '!=', 'Staff')
+                        ->where('student-study-link.StudentID', $studentNumbers)
+                        ->groupBy('student-study-link.StudentID')
+                        ->first();
+
+                    //$studentInformation = \App\Models\BasicInformation::where('ID','=',$user->name)->first(); 
                     @endphp
-                        <a href="#">
+                        <a href="https://edurole.lmmu.ac.zm/information/show/{{ $studentInformation->StudentID }}" target="_blank">
                             <img class="avatar border-gray" src="{{ asset('assets/img/default-avatar.png') }}" alt="...">
-                            <h5 class="title">{{ $studentInformation->FirstName }} {{ $studentInformation->Surname }}</h5>
+                            <h5 class="title">{{ $studentInformation->FirstName }} {{ $studentInformation->Surname }} </h5>
                         </a>
-                        <h6 class="description">
+                        <p>
+                            {{ $studentInformation->StudentID }}
+                        </p>
+                        <p>
+                            {{ $studentInformation->GovernmentID }}
+                        </p>
+                        <p>
                             {{ $studentInformation->PrivateEmail }}
-                        </h6>
+                        </p> 
+                        <p>
+                            {{ $studentInformation->Name }}
+                        </p>
+                        <p>
+                            {{ $studentInformation->Description }}
+                        </p>
+                        <p>
+                            {{ $studentInformation->StudyType }}
+                        </p>                        
                         @if($studentStatus ==  5)
                             <a href="{{route('nmcz.registration',$user->name)}}">
                                 <p>
@@ -91,7 +130,7 @@
                 </div>           
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="row">
             <div class="card">
                 <div class="card-header">
