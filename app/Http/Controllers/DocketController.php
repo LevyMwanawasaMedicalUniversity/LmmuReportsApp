@@ -887,10 +887,7 @@ class DocketController extends Controller
             $studentResults = $this->getAppealStudentDetails($academicYear, $studentNumbers)->first();
         }else{
             return back()->with('error', 'NOT FOUND.');               
-        }
-        
-                    
-        
+        }       
         // $this->setAndUpdateCourses($studentId);
         // Retrieve all unique Student values from the Course model
         // $courses = Courses::where('Student', $studentId)->get();

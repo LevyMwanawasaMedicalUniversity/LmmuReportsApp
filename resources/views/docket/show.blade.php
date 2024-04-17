@@ -72,9 +72,9 @@
                                 <span style="font-size: 22pt;">Levy Mwanawasa Medical University</span>
                                 @if($status == 3)
                                 <div style="font-size: 15pt; font-weight: bold;">DEFFERED AND SUPPLEMENTARY </div>
-                                <div style="font-size: 15pt; font-weight: bold;">EXAMINATION DOCKET 2023 </div>
+                                <div style="font-size: 15pt; font-weight: bold;">EXAMINATION DOCKET 2024 </div>
                                 @else
-                                <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2023 </div>
+                                <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2024 </div>
                                 <div style="font-size: 15pt; font-weight: bold;">UNREGISTERED STUDENT </div>
                                 @endif
                                 <div style="font-size: 10pt; font-weight: bold;">PRINTED OUT</h2>

@@ -70,7 +70,7 @@
 
                             <div style="float: left; font-size: 18pt; color: #000; margin-top: 15px; width: 500px; ">
                                 <span style="font-size: 22pt;">Levy Mwanawasa Medical University</span>
-                                <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2023 </div>
+                                <div style="font-size: 15pt; font-weight: bold;">FINAL EXAMINATION DOCKET 2024 </div>
                                 <div style="font-size: 15pt; font-weight: bold;">PART-TIME STUDENT </div>
                                 <div style="font-size: 10pt; font-weight: bold;">PRINTED OUT</h2>
                                 <BR>
@@ -147,7 +147,10 @@
                                                 STUDENT
                                                 </td>
                                                 <td style="border: 1px solid #ccc; padding: 5px;">
-                                                HAS NO 
+                                                HAS
+                                                </td>
+                                                <td style="border: 1px solid #ccc; padding: 5px;">
+                                                NO 
                                                 </td>
                                                 <td style="border: 1px solid #ccc; padding: 5px;">
                                                 REGISTERED
