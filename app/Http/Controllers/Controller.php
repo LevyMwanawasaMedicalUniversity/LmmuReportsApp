@@ -991,9 +991,10 @@ class Controller extends BaseController
 
         // Replace the old year number with the incremented one
         if($programmeForStudents == null){
-            $updatedProgrammeName = str_replace("Y".$yearNumber, "Y".$incrementedYearNumber, $programmeName);
-        }else{
+            
             $updatedProgrammeName = $programmeName;
+        }else{
+            $updatedProgrammeName = str_replace("Y".$yearNumber, "Y".$incrementedYearNumber, $programmeName);
         }
             
         
