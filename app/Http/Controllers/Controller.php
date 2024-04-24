@@ -967,9 +967,22 @@ class Controller extends BaseController
             ->where('ssl2.StudentID', $studentId)
             ->whereIn('courses.Name', $courseNumbers)            
             ->first();
+        if($programmeForStudents == null){
+            $firstYear = 'Y1';
 
-        $programmeName = $programmeForStudents->ProgramName;
-
+            $studentsNewProgramme = BasicInformation::select('p.ProgramName')
+                ->join('student-study-link as ssl', 'ssl.StudentID', '=', 'basic-information.ID')
+                ->join('study as s', 'ssl.StudyID', '=', 's.ID')
+                ->join('study-program-link as spl', 'spl.StudyID', '=', 's.ID')
+                ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+                ->where('basic-information.ID', $studentId)
+                ->where('p.ProgramName', 'like', '%' .$firstYear)
+                ->first();
+            $programmeName = $studentsNewProgramme->ProgramName;
+        }else{
+            $programmeName = $programmeForStudents->ProgramName;
+        }       
+        
         // Find the last occurrence of "Y" and get the number after it
         $yearNumber = substr($programmeName, strrpos($programmeName, 'Y') + 1);
 
