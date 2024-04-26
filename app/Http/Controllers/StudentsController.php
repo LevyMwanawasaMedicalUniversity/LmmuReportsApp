@@ -101,7 +101,7 @@ class StudentsController extends Controller
                 );
     
                 // Send email to new student
-                $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+                // $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
             }
         }
     
@@ -222,7 +222,7 @@ class StudentsController extends Controller
         $student = Student::where('student_number', $studentId)->first();
         if ($student) {
             $student->update(['status' => 4]);
-            $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($student));
+            // $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($student));
         } else {
             Student::create([
                 'student_number' => $studentId,
@@ -233,7 +233,7 @@ class StudentsController extends Controller
             $existingUsers = User::where('name', $studentId)->get()->keyBy('name');
             if (!isset($existingUsers[$studentId])) {
                 $this->createUserAccount($studentId);
-                $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
+                // $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
             }            
         }           
         return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
@@ -776,5 +776,47 @@ class StudentsController extends Controller
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->paginate(30);
         }
         return view('allStudents.index', compact('results','courseName','courseId'));
+    }
+
+    public function getGraduatedStudents(){
+        set_time_limit(12000000);
+        $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
+        $studentIdsChunks = array_chunk($studentIds, 1000);
+        $graduatedStudents = []; // Array to store student IDs
+    
+        foreach ($studentIdsChunks as $studentIdsChunk) {
+            foreach ($studentIdsChunk as $studentId) {
+                $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+                $courses = $registrationResults['dataArray'];
+                $failed = $registrationResults['failed'];
+    
+                $coursesArray = $courses->pluck('Course')->toArray();
+                $coursesNamesArray = $courses->pluck('Program')->toArray();
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+                if($studentsProgramme->isEmpty()){
+                    $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+                }
+    
+                if (str_starts_with($studentId, '190')) {
+                    $studentsProgramme->transform(function ($studentProgramme) {
+                        $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                        return $studentProgramme;
+                    });
+                }
+    
+                if ($studentsProgramme->isEmpty()) {
+                    $graduatedStudents[] = $studentId; // Add student ID to the array
+                }
+            }
+        }
+    
+        // Export the array to a CSV file
+        $file = fopen('graduated_students.csv', 'w');
+        foreach ($graduatedStudents as $studentId) {
+            fputcsv($file, [$studentId]);
+        }
+        fclose($file);
+    
+        return redirect()->back()->with('success', 'Graduated students exported to CSV');
     }
 }

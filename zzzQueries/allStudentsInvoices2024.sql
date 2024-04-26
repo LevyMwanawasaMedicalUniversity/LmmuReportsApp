@@ -35,7 +35,7 @@ SELECT
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -149,7 +149,7 @@ SELECT
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -222,12 +222,11 @@ SELECT
                     'No Year Found'
 			END
         ELSE 'NO Year Reported'
-    END AS "Year Reported"
-    
+    END AS "Year Reported"    
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID
@@ -324,7 +323,7 @@ SELECT
 FROM
     edurole.`basic-information` bi
 left join balances b on b.StudentID = bi.ID 
-inner JOIN `grades` AS g ON g.StudentNo = bi.ID
+LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
 INNER JOIN study s ON s.ID = ssl2.StudyID

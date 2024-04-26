@@ -956,60 +956,75 @@ class Controller extends BaseController
 
         // Calculate the current year of study
         $currentYearOfStudy = $this->getYearOfStudy($courseNumbers);
+        try{
         
-        $programmeForStudents = EduroleCourses::select('p.ProgramName')
-            ->join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
-            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
-            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
-            ->join('study as s', 'spl.StudyID', '=', 's.ID')
-            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-            ->join('grades-published as gp', 'gp.StudentNo', '=', 'ssl2.StudentID')
-            ->where('ssl2.StudentID', $studentId)
-            ->whereIn('courses.Name', $courseNumbers)            
-            ->first();
-        if($programmeForStudents == null){
-            $firstYear = 'Y1';
-
-            $studentsNewProgramme = BasicInformation::select('p.ProgramName')
-                ->join('student-study-link as ssl', 'ssl.StudentID', '=', 'basic-information.ID')
-                ->join('study as s', 'ssl.StudyID', '=', 's.ID')
-                ->join('study-program-link as spl', 'spl.StudyID', '=', 's.ID')
-                ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
-                ->where('basic-information.ID', $studentId)
-                ->where('p.ProgramName', 'like', '%' .$firstYear)
+            $programmeForStudents = EduroleCourses::select('p.ProgramName')
+                ->join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+                ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+                ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+                ->join('study as s', 'spl.StudyID', '=', 's.ID')
+                ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+                ->join('grades-published as gp', 'gp.StudentNo', '=', 'ssl2.StudentID')
+                ->where('ssl2.StudentID', $studentId)
+                ->whereIn('courses.Name', $courseNumbers)            
                 ->first();
-            $programmeName = $studentsNewProgramme->ProgramName;
-        }else{
-            $programmeName = $programmeForStudents->ProgramName;
-        }       
-        
-        // Find the last occurrence of "Y" and get the number after it
-        $yearNumber = substr($programmeName, strrpos($programmeName, 'Y') + 1);
-
-        // Increment the year number
-        $incrementedYearNumber = $yearNumber + 1;
-
-        // Replace the old year number with the incremented one
-        if($programmeForStudents == null){
+            if($programmeForStudents == null){
+                $firstYear = 'Y1';
+                $studentsNewProgramme = BasicInformation::select('p.ProgramName')
+                    ->join('student-study-link as ssl', 'ssl.StudentID', '=', 'basic-information.ID')
+                    ->join('study as s', 'ssl.StudyID', '=', 's.ID')
+                    ->join('study-program-link as spl', 'spl.StudyID', '=', 's.ID')
+                    ->join('programmes as p', 'spl.ProgramID', '=', 'p.ID')
+                    ->where('basic-information.ID', $studentId)
+                    ->where('p.ProgramName', 'like', '%' .$firstYear)
+                    ->first();
             
-            $updatedProgrammeName = $programmeName;
-        }else{
-            $updatedProgrammeName = str_replace("Y".$yearNumber, "Y".$incrementedYearNumber, $programmeName);
+                $programmeName = $studentsNewProgramme->ProgramName;
+            } else {
+                $programmeName = $programmeForStudents->ProgramName;
+            }  
+            if($programmeName == null){
+                throw new Exception("Programme name is null");
+            }   
+        
+            // Find the last occurrence of "Y" and get the number after it
+            $yearNumber = substr($programmeName, strrpos($programmeName, 'Y') + 1);
+
+            // Increment the year number
+            $incrementedYearNumber = $yearNumber + 1;
+
+            // Replace the old year number with the incremented one
+            if($programmeForStudents == null){
+                
+                $updatedProgrammeName = $programmeName;
+            }else{
+                $updatedProgrammeName = str_replace("Y".$yearNumber, "Y".$incrementedYearNumber, $programmeName);
+            }
+            $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+                ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+                ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+                ->join('study as s', 'spl.StudyID', '=', 's.ID')
+                ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+                ->where('p.ProgramName', '=', $updatedProgrammeName)
+                // ->where('p.ProgramName', 'like', '%' .$level)
+                ->where('ssl2.StudentID', $studentId)
+                ->select('courses.Name','courses.CourseDescription')
+                ->get();
+        }catch(Exception $e){    
+        
+            $level = '%' . $currentYearOfStudy;
+
+            $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
+                ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
+                ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
+                ->join('study as s', 'spl.StudyID', '=', 's.ID')
+                ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
+                // ->where('p.ProgramName', '=', $updatedProgrammeName)
+                ->where('p.ProgramName', 'like', '%' .$level)
+                ->where('ssl2.StudentID', $studentId)
+                ->select('courses.Name','courses.CourseDescription')
+                ->get();
         }
-            
-        
-        $level = '%' . $currentYearOfStudy;
-
-        $courses = EduroleCourses::join('program-course-link as pcl', 'courses.ID', '=', 'pcl.CourseID')
-            ->join('programmes as p', 'pcl.ProgramID', '=', 'p.ID')
-            ->join('study-program-link as spl', 'spl.ProgramID', '=', 'p.ID')
-            ->join('study as s', 'spl.StudyID', '=', 's.ID')
-            ->join('student-study-link as ssl2', 'ssl2.StudyID', '=', 's.ID')
-            ->where('p.ProgramName', '=', $updatedProgrammeName)
-            // ->where('p.ProgramName', 'like', '%' .$level)
-            ->where('ssl2.StudentID', $studentId)
-            ->select('courses.Name','courses.CourseDescription')
-            ->get();
         
         if(count($courses) >0){
             foreach ($courses as $course) {

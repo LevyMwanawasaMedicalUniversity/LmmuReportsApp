@@ -36,6 +36,7 @@ Route::get('/verifyNmcz/{studentNumber}', 'App\Http\Controllers\DocketController
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 // Route::get('/exportAllStudents', [App\Http\Controllers\StudentsController::class, 'exportAllStudents'])->name('students.exportAllStudents');
 
+Route::get('/exportGraduants', 'App\Http\Controllers\StudentsController@getGraduatedStudents');
 Route::get('/send-test-email/{id}', 'App\Http\Controllers\EmailController@sendTestEmail');
 // Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
 //     Route::get('/homePageStatistics', 'HomeController@landingPage')->name('landing.page');
