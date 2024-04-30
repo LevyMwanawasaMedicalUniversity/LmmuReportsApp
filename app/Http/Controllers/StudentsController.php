@@ -529,7 +529,7 @@ class StudentsController extends Controller
             return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
         }
         if($todaysDate > $deadLine){
-            return redirect()->back()->with('error', 'Registration Deadline has passed.');
+            return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
         }
     
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
@@ -619,7 +619,7 @@ class StudentsController extends Controller
             return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
         }
         if($todaysDate > $deadLine){
-            return redirect()->back()->with('error', 'Registration Deadline has passed.');
+            return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
         }
     
         $studentsPayments = $this->getStudentsPayments($studentId)->first();
