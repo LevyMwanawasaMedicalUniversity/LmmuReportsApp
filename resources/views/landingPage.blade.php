@@ -85,6 +85,17 @@
       <div class="col-lg-3 col-md-6">
         <div class="card card-chart">
           <div class="card-header">
+              @if (session('success'))
+                  <div class="alert alert-success">
+                      {{ session('success') }}
+                  </div>
+              @endif
+
+              @if (session('error'))
+                  <div class="alert alert-danger">
+                      {{ session('error') }}
+                  </div>
+              @endif
             <h3 class="card-category"></h3>
             <h4 class="card-title">New Vs Returning</h4>
             {{-- <div class="dropdown">

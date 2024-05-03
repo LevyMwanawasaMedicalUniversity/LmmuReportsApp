@@ -281,6 +281,17 @@
               <div class="card">
                 <div class="card-header">
                   <centre><h4 class="card-title">Welcome To The Reports Dashboard</h4></centre>
+                  @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                    @endif
                 </div>
                 <div class="card-body">
                   <img src="{{ asset('assets') }}/img/DJI_0097.JPG" alt="LMMU">
