@@ -475,10 +475,13 @@ class StudentsController extends Controller
             $year = 2023;
         }
         $studentsInvoice = SisReportsSageInvoices::where('InvoiceProgrammeCode','=',$studentDetails->ShortName)
-                ->where('InvoiceModeOfStudy','=', $studentDetails->StudyType)
-                ->where('InvoiceYearOfStudy','=', 'Y3')
+                ->where('InvoiceModeOfStudy','=', $studentDetails->StudyType)                
                 ->where('InvoiceYearOfInvoice','=',$year)
-                ->first();
+                ->get();
+        // return $studentsInvoice;
+        $invoiceFirstYear = $studentsInvoice->where('InvoiceYearOfStudy', 'Y1')->first();
+        $invoiceSecondYear = $studentsInvoice->where('InvoiceYearOfStudy', 'Y2')->first();
+        $invoiceThirdYear = $studentsInvoice->where('InvoiceYearOfStudy', 'Y3')->first();
         if($studentDetails->StudyType == 'Fulltime'){
             $modeOfStudy = 'FT';
         }else{
@@ -489,8 +492,11 @@ class StudentsController extends Controller
         // return $programmeStudyCode;
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programmeStudyCode)->count();
         // return $theNumberOfCourses;
-        $amount = $studentsInvoice ? $studentsInvoice->InvoiceAmount : 0;
-        $amountAfterInvoicing = $amount + $studentDetails->Amount;
+        $totalInvoiceAccumulated = ($invoiceFirstYear->InvoiceAmount ? $invoiceFirstYear->InvoiceAmount : 0) + ($invoiceSecondYear->InvoiceAmount ? $invoiceSecondYear->InvoiceAmount : 0) + ($invoiceThirdYear->InvoiceAmount ? $invoiceThirdYear->InvoiceAmount : 0);
+        $amount = $invoiceThirdYear ?  $invoiceThirdYear->InvoiceAmount : 0;
+        $totalPaymentsByStudent = $studentsPayments->TotalPayments;
+
+        $amountAfterInvoicing = $totalInvoiceAccumulated - $totalPaymentsByStudent;
         // return $amountAfterInvoicing;
         return view('allStudents.studentSelfNMCZRegistration', compact('studentStatus','amountAfterInvoicing','studentDetails','courses', 'studentsPayments', 'failed', 'studentId','amount','theNumberOfCourses','programmeStudyCode'));
     }
