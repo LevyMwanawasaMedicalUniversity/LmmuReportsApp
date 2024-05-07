@@ -1492,31 +1492,35 @@ class Controller extends BaseController
             'Account',
             'Name',
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
-                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
                 WHEN pa.TxDate > \'2023-01-01\' THEN 0
                 ELSE pa.Credit 
                 END) AS TotalPaymentBefore2023'),
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
-                WHEN pa.Description LIKE \'%-%\' THEN 0   
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),            
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
-                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
                 WHEN pa.TxDate < \'2023-01-01\' THEN 0
                 WHEN pa.TxDate > \'2023-12-31\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2023'),
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0    
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
-                WHEN pa.Description LIKE \'%-%\' THEN 0            
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0             
                 ELSE pa.Credit 
                 END) AS TotalPayments'),
             DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
@@ -1593,31 +1597,35 @@ class Controller extends BaseController
             'Account',
             'Name',
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
-                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
                 WHEN pa.TxDate > \'2023-01-01\' THEN 0
                 ELSE pa.Credit 
                 END) AS TotalPaymentBefore2023'),
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0 
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
-                WHEN pa.Description LIKE \'%-%\' THEN 0   
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),            
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
-                WHEN pa.Description LIKE \'%-%\' THEN 0  
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 
                 WHEN pa.TxDate < \'2023-01-01\' THEN 0
                 WHEN pa.TxDate > \'2023-12-31\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2023'),
             DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0    
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
-                WHEN pa.Description LIKE \'%-%\' THEN 0            
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
                 ELSE pa.Credit 
                 END) AS TotalPayments'),
             DB::raw('SUM(pa.Credit) as TotalCredit'),
