@@ -65,6 +65,7 @@
                 </form>
                 <div class="col-md-6">
                             @if(!empty($results))
+                            <h4>Total Number Of Results {{ $results->total() }}</h4>
                                 <form method="POST" action="{{ route('exportStudentsUnderNaturalScienceSchool') }}">
                                     @csrf
                                     <input type="hidden" name="academicYear" value="{{ $academicYear }}">

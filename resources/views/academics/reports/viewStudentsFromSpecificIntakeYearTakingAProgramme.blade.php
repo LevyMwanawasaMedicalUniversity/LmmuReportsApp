@@ -64,6 +64,7 @@
                         </div>
                         <div class="col-md-6">
                             @if(!empty($results))
+                            <h4>Total Number Of Results {{ $results->total() }}</h4>
                             <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('exportStudentsFromSpecificIntakeYearTakingAProgramme',['intakeName' => $intakeName, 'programmeName' => $programmeName]) }}">Export Data</a>
                             @endif
                         </div>

@@ -1844,7 +1844,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear,$eduroleArray) {
+    private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear) {
         $results = BasicInformationSR::select(
             'basic_information_s_r_s.FirstName',
             'basic_information_s_r_s.MiddleName',
@@ -1889,7 +1889,7 @@ class Controller extends BaseController
         ->join('program_course_links_s_r_s', 'courses_s_r_s.course_id', '=', 'program_course_links_s_r_s.course_id')
         ->join('program_s_r_s', 'program_course_links_s_r_s.program_id', '=', 'program_s_r_s.programme_id')
         ->whereRaw('LENGTH(`basic_information_s_r_s`.StudentID) > 7')
-        ->whereNotIn('basic_information_s_r_s.StudentID', $eduroleArray)
+        // ->whereNotIn('basic_information_s_r_s.StudentID', $eduroleArray)
         ->distinct('basic_information_s_r_s.StudentID');
         
         return $results;
