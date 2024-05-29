@@ -12,29 +12,23 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
-        WHEN bi.ID LIKE "240%" then program.YEAR1
+        WHEN bi.ID LIKE '240%' THEN program.YEAR1
         ELSE program.YEAR2
     END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "240%" then program.YEAR1
-        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
+        WHEN bi.ID LIKE '240%' THEN program.YEAR1
+        WHEN bi.ID LIKE '230%' THEN program.YEAR1 + program.YEAR2
+        WHEN bi.ID LIKE '220%' THEN program.YEAR1 + (program.YEAR2 * 2)
+        WHEN bi.ID LIKE '210%' THEN program.YEAR1 + (program.YEAR2 * 3)
+        WHEN bi.ID LIKE '190%' THEN program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
-    CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
-            CASE 
-                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-                ELSE
-                    'No Year Found'
-			END
-        ELSE 'NO Year Reported'
-    END AS "Year Reported"    
+    COALESCE(
+        CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2)),
+        'No Year Found'
+    ) AS "Year Reported"
 FROM
     edurole.`basic-information` bi
-left join balances b on b.StudentID = bi.ID 
+LEFT JOIN balances b ON b.StudentID = bi.ID 
 LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
 INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
@@ -108,7 +102,9 @@ WHERE
     OR bi.ID LIKE '240%')
     AND LENGTH(bi.ID) >= 4
 GROUP BY
-    bi.ID;
+    bi.ID
+;
+
 
 
 SELECT
@@ -123,8 +119,7 @@ SELECT
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
-    END AS "Registration Status",
-    
+    END AS "Registration Status",    
     CASE 
         WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
@@ -297,8 +292,7 @@ SELECT
     CASE
         WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
         ELSE 'NO REGISTRATION'
-    END AS "Registration Status",
-    
+    END AS "Registration Status",    
     CASE 
         WHEN bi.ID LIKE "240%" then program.YEAR1
         ELSE program.YEAR2
