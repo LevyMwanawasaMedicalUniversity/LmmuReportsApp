@@ -36,19 +36,19 @@ class HomeController extends Controller
     public function landingPage(){
         // return "here";
         $academicYear = 2024;
-        $students = Student::query()
-            ->join('course_registration', 'students.student_number', '=', 'course_registration.StudentID')
-            ->where('course_registration.Year', $academicYear)
-            ->get();
+        // $students = Student::query()
+        //     ->join('course_registration', 'students.student_number', '=', 'course_registration.StudentID')
+        //     ->where('course_registration.Year', $academicYear)
+        //     ->get();
             // return $students;
-        $studentsArray = $students->pluck('student_number')->toArray();
-        $registeredCoursesArray = $students->pluck('CourseID')->toArray();
+        // $studentsArray = $students->pluck('student_number')->toArray();
+        // $registeredCoursesArray = $students->pluck('CourseID')->toArray();
         // return
         // return $studentsArray;
         $eduroleRegisteredStudents = $this->getRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
-        $eduroleArray = $eduroleRegisteredStudents->pluck('ID')->toArray();
+        // $eduroleArray = $eduroleRegisteredStudents->pluck('ID')->toArray();
         // return $eduroleArray;
-        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear,$eduroleArray)->get();
+        $sisReportsRegisteredStudents = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear)->get();
         // return $sisReportsRegisteredStudents;
         return view('landingPage', compact('eduroleRegisteredStudents', 'sisReportsRegisteredStudents'));
         

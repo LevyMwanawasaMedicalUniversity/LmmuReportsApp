@@ -1839,7 +1839,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear,$eduroleArray){
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear){
         $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear);
         return $results;
     }
