@@ -13,7 +13,7 @@ WITH program_data AS (
     UNION ALL SELECT 'Fulltime', 'MMEDOB', 22625, 22625
     UNION ALL SELECT 'Fulltime', 'MMEDPCH', 22625, 22625
     UNION ALL SELECT 'Fulltime', 'MSCFE', 32950, 32950
-    UNION ALL SELECT 'Fulltime', 'MSCHPE', 16625, 16625
+    UNION ALL SELECT 'Fulltime', 'MSCHPE', 16625, 16625 
     UNION ALL SELECT 'Fulltime', 'MSCOPTH', 19625, 19625
     UNION ALL SELECT 'Fulltime', 'MSCOPTO', 19625, 19625
     UNION ALL SELECT 'Fulltime', 'PDDIPEMC', 16625, 16625
@@ -36,6 +36,7 @@ WITH program_data AS (
     UNION ALL SELECT 'Fulltime', 'BScSLT', 19567, 19317
     UNION ALL SELECT 'Fulltime', 'BScEH', 16700, 16450
     UNION ALL SELECT 'Fulltime', 'BScMHN', 19673, 19317
+    UNION ALL SELECT 'Fulltime', 'BSc.MHN', 19673, 19317
     UNION ALL SELECT 'Fulltime', 'CertCHAHM', 8040, 8040
     UNION ALL SELECT 'Fulltime', 'CertHCHW', 8040, 8040
     UNION ALL SELECT 'Fulltime', 'CertDA', 8040, 8040
@@ -68,6 +69,7 @@ WITH program_data AS (
     UNION ALL SELECT 'Distance', 'BScPHNUR', 12506, 12150
     UNION ALL SELECT 'Distance', 'BScMID', 12506, 12150
     UNION ALL SELECT 'Distance', 'BScMHN', 12506, 12150
+    UNION ALL SELECT 'Distance', 'BSc.MHN', 12506, 12150
     UNION ALL SELECT 'Distance', 'DipCMSG', 10570 , 10350
     UNION ALL SELECT 'Distance', 'DipCMSP', 10570 , 10350
     UNION ALL SELECT 'Distance', 'DipCMSP', 14706 , 14706
@@ -98,6 +100,7 @@ program_data_190 AS (
     UNION ALL SELECT 'Fulltime', 'DipMID', 11806, 11125
     UNION ALL SELECT 'Fulltime', 'BScPHNUR', 15906, 15225
     UNION ALL SELECT 'Fulltime', 'BScMHN', 18773, 18092
+    UNION ALL SELECT 'Fulltime', 'BSc.MHN', 18773, 18092
     UNION ALL SELECT 'Fulltime', 'BScNUR', 18773, 18092
     UNION ALL SELECT 'Fulltime', 'BScON', 18773, 18092
     UNION ALL SELECT 'Fulltime', 'BScMID', 18773, 18092
@@ -138,8 +141,8 @@ SELECT
     s.ShortName AS ProgrammeCode,
     schools.Description AS School,
     bi.StudyType,
-    p.ProgramName AS "2023 Programme",
     c.Year as "2023 Year Of Study",
+    year_of_reporting.YearReported,
     CASE 
         WHEN gp2.Grade IN ('NE','F','D+','D','DEF') THEN c.`Year`
         ELSE
@@ -151,7 +154,7 @@ SELECT
     END AS EstimatedCurrentYearOfStudy,
     CASE 
         WHEN bi.ID LIKE '240%' THEN 'NEWLY ADMITTED'
-        ELSE 'RETURNING STUDENT'
+        ELSE 'RETURNING STUDENT' 
     END AS StudentType,
     CASE 
         WHEN gp2.Grade IN ('NE','F','D+','D','DEF') THEN 'REPEAT COURSE'
@@ -164,6 +167,7 @@ SELECT
     END AS "Registration Status",
     CASE 
         WHEN bi.ID LIKE '240%' THEN pd.YEAR1
+        WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
         ELSE pd.YEAR2
     END as "2024 Invoice",
     CASE 
@@ -172,49 +176,52 @@ SELECT
         WHEN bi.ID LIKE '220%' THEN pd.YEAR1 + (pd.YEAR2 * 2)
         WHEN bi.ID LIKE '210%' THEN pd.YEAR1 + (pd.YEAR2 * 3)
         WHEN bi.ID LIKE '190%' THEN pd190.YEAR1 + (pd190.YEAR2 * 4)
-    END as "Total Invoice",
-    CASE 
-        WHEN g.StudentNo IS NOT NULL THEN
-            CASE 
-                WHEN MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) >= 1 THEN
-                    CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2))
-                ELSE 'No Year Found'
-            END
-        ELSE 'NO Year Reported'
-    END AS "Year Reported"
+    END as "Total Invoice"
 FROM 
     `basic-information` bi
-JOIN `student-study-link` ssl ON ssl.StudentID = bi.ID
-JOIN study s ON ssl.StudyID = s.ID
+JOIN `student-study-link` ssl3 ON ssl3.StudentID = bi.ID
+JOIN study s ON ssl3.StudyID = s.ID
 JOIN schools ON s.ParentID = schools.ID
 LEFT JOIN `grades-published` gp ON gp.StudentNo = bi.ID AND gp.AcademicYear = 2023
 LEFT JOIN `grades-published` gp2 ON gp2.StudentNo = bi.ID
-INNER JOIN courses c ON c.Name = gp.CourseNo
-INNER JOIN `program-course-link` pcl ON pcl.CourseID = c.ID 
-INNER JOIN programmes p ON p.ID = pcl.ProgramID
-INNER JOIN `study-program-link` spl ON spl.ProgramID = p.ID
-INNER JOIN study s2 ON s2.ID = spl.StudyID
-INNER JOIN (
+LEFT JOIN courses c ON c.Name = gp.CourseNo
+LEFT JOIN `program-course-link` pcl ON pcl.CourseID = c.ID 
+LEFT JOIN programmes p ON p.ID = pcl.ProgramID
+LEFT JOIN `study-program-link` spl ON spl.ProgramID = p.ID
+LEFT JOIN study s2 ON s2.ID = spl.StudyID
+LEFT JOIN (
     SELECT 
         spl.StudyID,
         ss.ID AS StudentID,
         MAX(p.Year) AS MaxYear
     FROM `basic-information` ss
-    INNER JOIN `student-study-link` ssl2 ON ssl2.StudentID = ss.ID
-    INNER JOIN `study-program-link` spl ON spl.StudyID = ssl2.StudyID
-    INNER JOIN programmes p ON p.ID = spl.ProgramID
+    JOIN `student-study-link` ssl2 ON ssl2.StudentID = ss.ID
+    JOIN `study-program-link` spl ON spl.StudyID = ssl2.StudyID
+    JOIN programmes p ON p.ID = spl.ProgramID
     GROUP BY spl.StudyID, ss.ID
-) max_year_table ON max_year_table.StudentID = bi.ID AND max_year_table.StudyID = s2.ID
-LEFT JOIN balances b ON b.StudentID = bi.ID 
-LEFT JOIN `grades` AS g ON g.StudentNo = bi.ID
-LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2023
+) max_year_table ON max_year_table.StudentID = bi.ID
+LEFT JOIN (
+	SELECT
+		bi3.ID as StudentId,
+		MIN(c3.Year) as YearReported
+	FROM `basic-information` bi3
+	LEFT JOIN `grades-published` gp4 ON gp4.StudentNo = bi3.ID 
+	LEFT JOIN courses c3 ON gp4.CourseNo = c3.Name 
+	GROUP BY bi3.ID
+) year_of_reporting ON year_of_reporting.StudentId = bi.ID 
+LEFT JOIN balances b ON b.StudentID = bi.ID
+LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2024
 LEFT JOIN program_data pd ON s.ShortName = pd.ProgrammeCode AND bi.StudyType = pd.StudyType AND bi.ID NOT LIKE '190%'
 LEFT JOIN program_data_190 pd190 ON s.ShortName = pd190.ProgrammeCode AND bi.StudyType = pd190.StudyType AND bi.ID LIKE '190%'
+LEFT JOIN `applicants` a ON bi.ID = a.StudentID AND bi.ID LIKE '240%' AND a.Progress = 'Accepted'
 WHERE 
     LENGTH(bi.ID) > 7
-    AND (bi.ID LIKE '210%' OR bi.ID LIKE '220%' OR bi.ID LIKE '230%' OR bi.ID LIKE '240%' OR bi.ID LIKE '190%')
+    AND (
+        ((bi.ID LIKE '210%' and gp.StudentNo IS NOT NULL)
+        OR (bi.ID LIKE '220%' and gp.StudentNo IS NOT NULL)
+        OR (bi.ID LIKE '230%' and gp.StudentNo IS NOT NULL)
+        OR (bi.ID LIKE '190%' and gp.StudentNo IS NOT NULL))
+        OR (bi.ID LIKE '240%' AND a.StudentID IS NOT NULL)
+    )
 GROUP BY 
-    bi.ID, bi.FirstName, bi.MiddleName, bi.Surname, 
-    bi.Sex, bi.GovernmentID, bi.PrivateEmail, bi.MobilePhone, 
-    s.Name, s.ShortName, schools.Description, bi.StudyType, 
-    p.ProgramName, c.`Year`, max_year_table.MaxYear;
+    bi.ID;
