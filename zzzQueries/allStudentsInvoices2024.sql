@@ -20,7 +20,6 @@ SELECT
         WHEN bi.ID LIKE '230%' THEN program.YEAR1 + program.YEAR2
         WHEN bi.ID LIKE '220%' THEN program.YEAR1 + (program.YEAR2 * 2)
         WHEN bi.ID LIKE '210%' THEN program.YEAR1 + (program.YEAR2 * 3)
-        WHEN bi.ID LIKE '190%' THEN program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     COALESCE(
         CONCAT('Year', LEFT(CAST(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED)) AS CHAR), LENGTH(MIN(CAST(REGEXP_SUBSTR(g.CourseNo, '[0-9]+') AS UNSIGNED))) - 2)),
@@ -129,7 +128,6 @@ SELECT
         WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
         WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
     	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
@@ -202,11 +200,7 @@ SELECT
         ELSE program.YEAR2
     END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "240%" then program.YEAR1
-        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
+        WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN
@@ -298,11 +292,7 @@ SELECT
         ELSE program.YEAR2
     END as "2024 Invoice",
     CASE 
-        WHEN bi.ID LIKE "240%" then program.YEAR1
-        WHEN bi.ID LIKE "230%" then program.YEAR1 + program.YEAR2
-        WHEN bi.ID LIKE "220%" then program.YEAR1 + (program.YEAR2 * 2)
-    	WHEN bi.ID LIKE "210%" then program.YEAR1 + (program.YEAR2 * 3)
-    	WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
+        WHEN bi.ID LIKE "190%" then program.YEAR1 + (program.YEAR2 * 4)
     END as "Total Invoice",
     CASE 
         WHEN g.StudentNo IS NOT NULL THEN

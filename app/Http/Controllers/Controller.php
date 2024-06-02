@@ -1558,20 +1558,11 @@ class Controller extends BaseController
             'study.ShortName AS ShortName',
             'schools.Description AS School',
             'basic-information.StudyType',
+            'programmes.Year AS YearOfStudy',
             DB::raw("CASE
                 WHEN `course-electives`.StudentID IS NOT NULL THEN 'REGISTERED'
                 ELSE 'NO REGISTRATION'
-            END AS RegistrationStatus"),
-            DB::raw("CASE 
-                WHEN programmes.ProgramName LIKE '%1' THEN 'YEAR 1'
-                WHEN programmes.ProgramName LIKE '%2' THEN 'YEAR 2'
-                WHEN programmes.ProgramName LIKE '%3' THEN 'YEAR 3'
-                WHEN programmes.ProgramName LIKE '%4' THEN 'YEAR 4'
-                WHEN programmes.ProgramName LIKE '%5' THEN 'YEAR 5'
-                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'
-                WHEN programmes.ProgramName IS NULL THEN 'NO REGISTRATION'
-                ELSE 'NO REGISTRATION'
-            END AS YearOfStudy")
+            END AS RegistrationStatus")
         )
         ->leftJoin('study', 'schools.ID', '=', 'study.ParentID')
         ->leftJoin('student-study-link', 'study.ID', '=', 'student-study-link.StudyID')

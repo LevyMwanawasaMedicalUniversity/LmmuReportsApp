@@ -56,5 +56,5 @@ INNER JOIN (
 ) max_year_table ON max_year_table.StudentID = `basic-information`.ID AND max_year_table.StudyID = s.ID
 WHERE LENGTH(`basic-information`.ID) > 7
 GROUP BY `basic-information`.ID, `basic-information`.FirstName, `basic-information`.MiddleName, `basic-information`.Surname, 
-         `basic-information`.Sex, `basic-information`.GovernmentID, `basic-information`.PrivateEmail, `basic-information`.MobilePhone, 
-         study.Name, study.ShortName, schools.Description, `basic-information`.StudyType, p.ProgramName, c.`Year`, max_year_table.MaxYear;
+        `basic-information`.Sex, `basic-information`.GovernmentID, `basic-information`.PrivateEmail, `basic-information`.MobilePhone, 
+        study.Name, study.ShortName, schools.Description, `basic-information`.StudyType, p.ProgramName, c.`Year`, max_year_table.MaxYear;
