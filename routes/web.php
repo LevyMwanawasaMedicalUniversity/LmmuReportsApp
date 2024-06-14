@@ -49,6 +49,7 @@ Route::group(['middleware' => 'auth'], function () {
     // Route::get('/moodle', 'App\Http\Controllers\MoodleController@index')->name('home');
     Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
         Route::get('/landing', [App\Http\Controllers\HomeController::class, 'landingPage'])->name('landing.page');
+        Route::get('/fetchData/{academicYear}', [App\Http\Controllers\HomeController::class, 'fetchData']);
     });
 	Route::resource('user', 'App\Http\Controllers\UserController');
     Route::resource('roles', 'App\Http\Controllers\RolesController');

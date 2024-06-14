@@ -89,6 +89,7 @@ program_data_190 AS (
     UNION ALL SELECT 'Fulltime', 'BScEH', 15770, 15225
     UNION ALL SELECT 'Fulltime', 'DipEH', 11670, 11125
     UNION ALL SELECT 'Fulltime', 'BScND', 18637, 18092
+    UNION ALL SELECT 'Fulltime', 'Bpharm', 18637, 18092
     UNION ALL SELECT 'Fulltime', 'BScCA', 18637, 18092
     UNION ALL SELECT 'Fulltime', 'BScOPT', 18637, 18092
     UNION ALL SELECT 'Fulltime', 'BScCO', 18637, 18092
@@ -143,6 +144,24 @@ SELECT
     bi.StudyType,
     c.Year as "2023 Year Of Study",
     year_of_reporting.YearReported,
+    max_year_table.MaxYear,
+    p2.Year as 'RegisteredCurrentYearOfStudy',
+    CASE
+        WHEN p2.Year = max_year_table.MaxYear THEN 'FinalistByRegistration'
+        ELSE 'Not In Final Year'
+    END AS RegistrationFinalistStatus,
+    CASE
+        WHEN bi.ID LIKE '190%' THEN '2019'
+        WHEN bi.ID LIKE '210%' THEN '2021'
+        WHEN bi.ID LIKE '220%' THEN '2022'
+        WHEN bi.ID LIKE '230%' THEN '2023'
+        WHEN bi.ID LIKE '240%' THEN '2024'
+        ELSE '2018'
+    END as AcademicYearReported,    
+    CASE
+        WHEN c.Year + 1 = max_year_table.MaxYear THEN 'FinalistByEstimation'
+        ELSE 'Not In Final Year'
+    END AS EstimationFinalistStatus,    
     CASE 
         WHEN gp2.Grade IN ('NE','F','D+','D','DEF') THEN c.`Year`
         ELSE
@@ -152,6 +171,7 @@ SELECT
                 ELSE c.`Year` + 1
             END
     END AS EstimatedCurrentYearOfStudy,
+    
     CASE 
         WHEN bi.ID LIKE '240%' THEN 'NEWLY ADMITTED'
         ELSE 'RETURNING STUDENT' 
@@ -211,6 +231,8 @@ LEFT JOIN (
 ) year_of_reporting ON year_of_reporting.StudentId = bi.ID 
 LEFT JOIN balances b ON b.StudentID = bi.ID
 LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2024
+LEFT JOIN `program-course-link` pcl2 ON pcl2.CourseID = ce.CourseID 
+LEFT JOIN programmes p2 ON p2.ID = pcl2.ProgramID
 LEFT JOIN program_data pd ON s.ShortName = pd.ProgrammeCode AND bi.StudyType = pd.StudyType AND bi.ID NOT LIKE '190%'
 LEFT JOIN program_data_190 pd190 ON s.ShortName = pd190.ProgrammeCode AND bi.StudyType = pd190.StudyType AND bi.ID LIKE '190%'
 LEFT JOIN `applicants` a ON bi.ID = a.StudentID AND bi.ID LIKE '240%' AND a.Progress = 'Accepted'
