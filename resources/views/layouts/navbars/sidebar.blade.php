@@ -226,6 +226,37 @@
         </div>
       </li>
       <li>
+        <a data-toggle="collapse" href="#midAndNurse">
+          <i class="now-ui-icons ui-2_favourite-28"></i>
+          <p>
+            {{ __("NURSING AND MIDWIFERY") }}
+            <b class="caret"></b>
+          </p>
+        </a>
+        <div class="collapse" id="midAndNurse">
+          <ul class="nav">            
+            <li class="@if ($activePage == 'nurAndMid.viewStudents') active @endif">
+              <a href="{{ route('nurAndMid.viewStudents') }}">
+                <i class="now-ui-icons text_align-left"></i>
+                <p> {{ __("View Students") }} </p>
+              </a>
+            </li> 
+            <!-- <li class="@if ($activePage == 'students.import') active @endif">
+              <a href="{{ route('students.import') }}">
+                <i class="now-ui-icons arrows-1_cloud-upload-94"></i>
+                <p> {{ __("Bulk Import Students") }} </p>
+              </a>
+            </li>  -->
+            <li class="@if ($activePage == 'nurAndMid.import') active @endif">
+              <a href="{{ route('nurAndMid.import') }}">
+                <i class="now-ui-icons arrows-1_share-66"></i>
+                <p> {{ __("Import Students") }} </p>
+              </a>
+            </li>       
+          </ul>
+        </div>
+      </li>
+      <li>
         <a data-toggle="collapse" href="#parentDocket">
             <i class="now-ui-icons education_paper"></i>
             <p>

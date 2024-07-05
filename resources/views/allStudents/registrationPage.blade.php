@@ -51,9 +51,15 @@
                 </div>   
                 <div class="col-md-6 text-right">
                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
-                    <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
-                        <button class="btn btn-info">PRINT ID CARD</button>
-                    </a> 
+                        @if($studentStatus != 7)
+                            <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
+                                <button class="btn btn-info">PRINT ID CARD</button>
+                            </a>
+                        @else
+                            <a href="{{ route('printIDCard.studentNurandMid', ['studentId' => $studentId]) }}" class="mr-3">
+                                <button class="btn btn-info">PRINT ID CARD</button>
+                            </a> 
+                        @endif
                     @endif            
                 </div>              
             </div>       

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\ExistingStudentMail;
 use App\Mail\NewStudentMail;
 use App\Models\BasicInformation;
+use App\Models\BasicInformationSR;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
@@ -275,6 +276,32 @@ class StudentsController extends Controller
 
         $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
         // return $studentInformation;
+
+        return view('allStudents.printIdCard',compact('studentInformation'));
+    }
+
+    public function printIDCardStudentNurandMid( $studentId){
+
+        
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+        ->where('Year', 2024)
+        ->where('Semester', 1)
+        ->exists();
+
+        // return $checkRegistration;
+
+        if (!$checkRegistration) {            
+            return redirect()->back()->with('error', 'UNREGISTERED STUDENT');
+        }
+
+        $studentInformation = BasicInformationSR::join('student_study_link_s_r_s', 'basic_information_s_r_s.StudentID', '=', 'student_study_link_s_r_s.student_id')
+            ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
+            ->join('school_s_r_s', 'study_s_r_s.parent_id', '=', 'school_s_r_s.school_id')
+            ->where('basic_information_s_r_s.StudentID', $studentId)
+            // ->select('basic_information_s_r_s.*', 'study_s_r_s.*', 'school_s_r_s.*')
+            ->first();
+
+        return $studentInformation;
 
         return view('allStudents.printIdCard',compact('studentInformation'));
     }
@@ -662,24 +689,7 @@ class StudentsController extends Controller
     
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
-        })->toArray();
-        // return $allInvoicesArray;
-        // $processCourse = function ($course) use ($allInvoicesArray) {
-        //     $courseArray = $course->toArray();
-        //     $key = trim($course->CodeRegisteredUnder);
-        //     $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
-            
-        //     if ($matchedKey) {
-        //         $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-        //     } else {
-        //         Log::info('No match found for course: ' . $key);
-        //     }
-    
-        //     $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
-            
-        //     return (object) $courseArray;
-        // };
-        
+        })->toArray();        
     
         // $currentStudentsCourses = $studentsProgramme->map($processCourse);
         $currentStudentsCourses = $studentsProgramme;
@@ -699,6 +709,8 @@ class StudentsController extends Controller
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
         $courses = explode(',', $request->input('courses'));
+
+        // return $courses;
 
         // return $courses;
         $academicYear = 2024;

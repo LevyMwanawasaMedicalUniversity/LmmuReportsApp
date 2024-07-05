@@ -13,27 +13,27 @@ return new class extends Migration
     {
         Schema::create('basic_information_s_r_s', function (Blueprint $table) {
             $table->id();
-            $table->string('FirstName')->default('');
-            $table->string('MiddleName')->default('');
-            $table->string('Surname')->default('');
-            $table->string('Sex')->default('');
-            $table->unsignedBigInteger('StudentID');
-            $table->string('GovernmentID')->default('');
-            $table->string('DateOfBirth')->default('');
-            $table->string('PlaceOfBirth')->default('');
-            $table->string('Nationality')->default('');
-            $table->string('StreetName')->default('');
-            $table->string('PostalCode')->default('');
-            $table->string('Town')->default('');
-            $table->string('Country')->default('');
-            $table->string('HomePhone')->default('');
-            $table->string('MobilePhone')->default('');
-            $table->string('Disability')->default('');
-            $table->string('DisabilityType')->default('');
-            $table->string('PrivateEmail')->default('');
-            $table->string('MaritalStatus')->default('');
-            $table->string('StudyType')->default('');
-            $table->string('Status')->default('');        
+            $table->string('FirstName')->nullable();
+            $table->string('MiddleName')->nullable();
+            $table->string('Surname')->nullable();
+            $table->string('Sex')->nullable();
+            $table->unsignedBigInteger('StudentID')->nullable(); // Assuming you want this nullable as well
+            $table->string('GovernmentID')->nullable();
+            $table->string('DateOfBirth')->nullable(); // Already nullable
+            $table->string('PlaceOfBirth')->nullable();
+            $table->string('Nationality')->nullable();
+            $table->string('StreetName')->nullable();
+            $table->string('PostalCode')->nullable();
+            $table->string('Town')->nullable();
+            $table->string('Country')->nullable();
+            $table->string('HomePhone')->nullable();
+            $table->string('MobilePhone')->nullable();
+            $table->string('Disability')->nullable();
+            $table->string('DisabilityType')->nullable();
+            $table->string('PrivateEmail')->nullable();
+            $table->string('MaritalStatus')->nullable();
+            $table->string('StudyType')->nullable();
+            $table->string('Status')->nullable();
             $table->timestamps();
         });
     }

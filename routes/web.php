@@ -90,6 +90,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::DELETE('/viewStudents/deleteCourseFromNMCZCourses', 'StudentsController@deleteCourseFromNMCZCourses')->name('deleteCourseFromNMCZCourses.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
+            Route::GET('/viewStudents/studentNurandMid/{studentId}', 'StudentsController@printIDCardStudentNurandMid')->name('printIDCard.studentNurandMid');
             
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
@@ -120,6 +121,12 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::middleware('can:Examination')->group(function () {
+        Route::prefix('nurAndMid')->group(function () {
+            Route::get('/importNurAndMid', 'NursingAndMidwiferyController@import')->name('nurAndMid.import');
+            Route::post('/uploadNurAndMid', 'NursingAndMidwiferyController@uploadStudents')->name('nurAndMid.uploadStudents');
+            Route::get('/viewNurAndMid', 'NursingAndMidwiferyController@viewStudents')->name('nurAndMid.viewStudents');
+            Route::get('/showNurAndMid/{id}', 'NursingAndMidwiferyController@showStudents')->name('nurAndMid.showStudent');
+        });
         Route::prefix('docket')->group(function () {
             Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
             Route::get('/indexSupsAndDef/{id?}', 'DocketController@indexSupsAndDef')->name('docket.indexSupsAndDef');
@@ -130,6 +137,7 @@ Route::group(['middleware' => 'auth'], function () {
             
 
             Route::get('/import', 'DocketController@import')->name('docket.import');
+            
             Route::get('/importNMCZRepeat', 'DocketController@nmczRepeatImport')->name('docket.nmczRepeatImport');
             Route::get('/importSupsAndDef', 'DocketController@importSupsAndDef')->name('docket.importSupsAndDef');
             Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');

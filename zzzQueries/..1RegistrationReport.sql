@@ -170,8 +170,7 @@ SELECT
                 WHEN gp2.Grade IS NULL THEN 'NOT APPLICABLE'
                 ELSE c.`Year` + 1
             END
-    END AS EstimatedCurrentYearOfStudy,
-    
+    END AS EstimatedCurrentYearOfStudy,    
     CASE 
         WHEN bi.ID LIKE '240%' THEN 'NEWLY ADMITTED'
         ELSE 'RETURNING STUDENT' 

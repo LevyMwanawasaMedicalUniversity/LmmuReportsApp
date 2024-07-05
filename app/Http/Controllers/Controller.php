@@ -24,6 +24,7 @@ use App\Models\SageClient;
 use App\Models\SageInvoice;
 use App\Models\SagePostAR;
 use App\Models\Schools;
+use App\Models\SchoolsSR;
 use App\Models\SisCourses;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
@@ -171,6 +172,11 @@ class Controller extends BaseController
 
     public function getAppealStudentDetails($academicYear,$studentNumbers){
         $results= $this->queryAppealStudentDetails($academicYear,$studentNumbers);
+        return $results;
+    }
+
+    public function getAppealStudentDetailsNurAndMid($academicYear,$studentNumbers){
+        $results= $this->queryAppealStudentDetailsNurAndMid($academicYear,$studentNumbers);
         return $results;
     }
 
@@ -390,6 +396,30 @@ class Controller extends BaseController
     
         return $results;
     }
+
+    
+    private function queryAppealStudentDetailsNurAndMid($academicYear, $studentNumbers) {
+        $results = BasicInformationSR::select(
+            'basic_information_s_r_s.FirstName',
+            'basic_information_s_r_s.MiddleName',
+            'basic_information_s_r_s.Surname',
+            'basic_information_s_r_s.Sex',
+            'basic_information_s_r_s.StudentID',
+            // 'student_study_link_s_r_s.student_id AS StudentID',
+            'basic_information_s_r_s.GovernmentID',
+            'basic_information_s_r_s.PrivateEmail',
+            'basic_information_s_r_s.MobilePhone',
+            // 'program_s_r_s.program_name AS "Programme Code"',
+            // 'study.study_shortname AS ShortName',
+            // 'study.study_name as Name',
+            // 'schools_s_r_s.school_name AS Description',
+            'basic_information_s_r_s.StudyType'
+        )
+        ->whereIn('basic_information_s_r_s.StudentID', $studentNumbers);
+    
+        return $results;
+    }
+    
 
     private function queryAppealStudentDetails($academicYear, $studentNumbers) {
         $results = Schools::select(
