@@ -10,6 +10,7 @@ use App\Models\BasicInformation;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
+use App\Models\LMMAXStudentsContinousAssessment;
 use App\Models\NMCZRepeatCourses;
 use App\Models\SisCourses;
 use App\Models\Student;
@@ -29,6 +30,12 @@ use ZipArchive;
 
 class DocketController extends Controller
 {
+    public function testAssess(){
+
+        $assessmnets = LMMAXStudentsContinousAssessment::all();
+
+        return $assessmnets;
+    }
 
     public function sendEmailNotice(){
         $academicYear = 2023;

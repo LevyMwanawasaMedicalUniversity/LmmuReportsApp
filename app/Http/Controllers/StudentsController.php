@@ -766,9 +766,12 @@ class StudentsController extends Controller
 
     public function bulkEnrollFromEduroleOnMooodle(Request $request){
         set_time_limit(12000000);
-        $studentIds = CourseElectives::pluck('StudentID')
-                                ->unique()
-                                ->toArray();
+        $studentIds = CourseElectives::where('Year', 2024)
+                            ->pluck('StudentID')
+                            ->unique()
+                            ->toArray();
+
+        return $studentIds;
         $moodleController = new MoodleController();
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);
         return redirect()->back()->with('success', 'Students enrolled successfully.');

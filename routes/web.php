@@ -28,6 +28,7 @@ Route::get('/', function () {
     }
 });
 
+Route::get('/testsAssess','App\Http\Controllers\DocketController@testAssess');
 
 // Route::get('exportAllStudents', 'StudentsController@exportAllStudents')->name('students.exportAllStudents');
 Auth::routes(['register' => false]);
@@ -119,6 +120,7 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
     });
+    
 
     Route::middleware('can:Examination')->group(function () {
         Route::prefix('nurAndMid')->group(function () {

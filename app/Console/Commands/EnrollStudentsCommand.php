@@ -29,11 +29,12 @@ class EnrollStudentsCommand extends Command
         //                 ->unique()
         //                 ->toArray();
         $moodleController = new MoodleController();
-        $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
-        $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
+        // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
+        // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
-        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);      
+        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports); 
+        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');
         // Log::info('Students enrolled successfully.');
     }
