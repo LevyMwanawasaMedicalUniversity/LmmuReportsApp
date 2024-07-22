@@ -771,7 +771,7 @@ class StudentsController extends Controller
                             ->unique()
                             ->toArray();
 
-        return $studentIds;
+        // return $studentIds;
         $moodleController = new MoodleController();
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds);
         return redirect()->back()->with('success', 'Students enrolled successfully.');
