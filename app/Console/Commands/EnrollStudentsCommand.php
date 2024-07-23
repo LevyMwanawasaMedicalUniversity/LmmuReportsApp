@@ -8,6 +8,7 @@ use App\Http\Controllers\StudentsController;
 use App\Mail\CronJobEmail;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
+use App\Models\MoodleUserEnrolments;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -22,6 +23,8 @@ class EnrollStudentsCommand extends Command
     {
         
         set_time_limit(12000000);
+        MoodleUserEnrolments::where('timeend', '>', 0)        
+            ->update(['timeend' => strtotime('2024-12-31')]);
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $studentIds = CourseElectives::pluck('StudentID')
                         ->unique()
@@ -33,8 +36,11 @@ class EnrollStudentsCommand extends Command
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
-        // $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
-        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports); 
+        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
+        MoodleUserEnrolments::where('timeend', '>', 0)        
+            ->update(['timeend' => strtotime('2024-12-31')]);
+
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');
         // Log::info('Students enrolled successfully.');
