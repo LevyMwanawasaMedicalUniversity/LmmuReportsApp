@@ -112,7 +112,9 @@ class MoodleController extends Controller
     }
     
     private function enrollUserIntoCourses($courses, $userId){
-        set_time_limit(12000000);        
+        set_time_limit(12000000);  
+        $date = '2024-12-31';
+        $timeend = strtotime($date);      
     
         try {
             $enrolIds = [];
@@ -134,7 +136,7 @@ class MoodleController extends Controller
                     [
                         'status' => 0, // Assuming status 0 is 'active
                         'timestart' => time(),
-                        'timeend' => 1720959600,
+                        'timeend' => $timeend,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),
