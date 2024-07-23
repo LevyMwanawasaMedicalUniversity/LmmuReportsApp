@@ -20,8 +20,9 @@ class EnrollStudentsCommand extends Command
 
     public function handle()
     {
-        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
+        
         set_time_limit(12000000);
+        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $studentIds = CourseElectives::pluck('StudentID')
                         ->unique()
                         ->toArray();
