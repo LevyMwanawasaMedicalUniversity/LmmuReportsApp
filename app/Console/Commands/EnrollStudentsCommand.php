@@ -32,7 +32,7 @@ class EnrollStudentsCommand extends Command
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
-        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+        // $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports); 
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');
