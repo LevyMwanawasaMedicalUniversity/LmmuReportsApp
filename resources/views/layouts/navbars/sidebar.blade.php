@@ -9,7 +9,7 @@
       {{ asset('assets') }}/css/bootstrap.min.css
     </a>
     <a href="{{ route('home') }}" class="simple-text logo-normal">
-      {{ __('LMMU REPORTS') }}
+      {{ __('SIS REPORTS') }}
     </a>
   </div>
   <div class="sidebar-wrapper" id="sidebar-wrapper">
