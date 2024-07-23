@@ -136,7 +136,7 @@ class MoodleController extends Controller
                     [
                         'status' => 0, // Assuming status 0 is 'active
                         'timestart' => time(),
-                        'timeend' => $timeend,
+                        'timeend' => 1735689600,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),
