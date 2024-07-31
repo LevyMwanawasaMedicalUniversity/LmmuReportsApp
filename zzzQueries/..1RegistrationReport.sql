@@ -185,6 +185,11 @@ SELECT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status",
     CASE 
+        WHEN bi.ID LIKE '240%' THEN 0
+        WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
+        ELSE pd.YEAR2
+    END as "2023 Invoice",
+    CASE 
         WHEN bi.ID LIKE '240%' THEN pd.YEAR1
         WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
         ELSE pd.YEAR2
