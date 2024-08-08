@@ -195,6 +195,20 @@ SELECT
         ELSE pd.YEAR2
     END as "2024 Invoice",
     CASE 
+        WHEN bi.ID LIKE '240%' THEN 0
+        WHEN bi.ID LIKE '230%' THEN (pd.YEAR1 + pd.YEAR2) - (pd.YEAR1 + pd.YEAR2)        
+        WHEN bi.ID LIKE '220%' THEN (pd.YEAR1 + (pd.YEAR2 * 2)) - (pd.YEAR2 * 2)
+        WHEN bi.ID LIKE '210%' THEN (pd.YEAR1 + (pd.YEAR2 * 3)) - (pd.YEAR2 * 2)
+        WHEN bi.ID LIKE '190%' THEN (pd190.YEAR1 + (pd190.YEAR2 * 4)) - (pd190.YEAR2 * 2)
+    END as "Invoice Before 2023",
+    CASE 
+        WHEN bi.ID LIKE '240%' THEN pd.YEAR1 - pd.YEAR1
+        WHEN bi.ID LIKE '230%' THEN (pd.YEAR1 + pd.YEAR2) - pd.YEAR1
+        WHEN bi.ID LIKE '220%' THEN (pd.YEAR1 + (pd.YEAR2 * 2)) - pd.YEAR2
+        WHEN bi.ID LIKE '210%' THEN (pd.YEAR1 + (pd.YEAR2 * 3)) - pd.YEAR2
+        WHEN bi.ID LIKE '190%' THEN (pd190.YEAR1 + (pd190.YEAR2 * 4)) - pd190.YEAR2
+    END as "Invoice Before 2024",
+    CASE 
         WHEN bi.ID LIKE '240%' THEN pd.YEAR1
         WHEN bi.ID LIKE '230%' THEN pd.YEAR1 + pd.YEAR2
         WHEN bi.ID LIKE '220%' THEN pd.YEAR1 + (pd.YEAR2 * 2)

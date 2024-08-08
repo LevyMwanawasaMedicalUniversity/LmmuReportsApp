@@ -74,18 +74,18 @@ return [
             'strict' => false,
         ],
 
-        'assessments_database' => [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
-            'port' => '3307',      // Change this to the local port used in the SSH tunnel
-            'database' => 'assessments_db',
-            'username' => 'panda',
-            'password' => 'Crazy8@1000#',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
+        // 'assessments_database' => [
+        //     'driver' => 'mysql',
+        //     'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
+        //     'port' => '3307',      // Change this to the local port used in the SSH tunnel
+        //     'database' => 'assessments_db',
+        //     'username' => 'panda',
+        //     'password' => 'Crazy8@1000#',
+        //     'charset' => 'utf8mb4',
+        //     'collation' => 'utf8mb4_unicode_ci',
+        //     'prefix' => '',
+        //     'strict' => false,
+        // ],
 
 
         'sqlite' => [
