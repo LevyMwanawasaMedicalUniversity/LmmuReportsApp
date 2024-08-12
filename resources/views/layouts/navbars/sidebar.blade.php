@@ -40,6 +40,12 @@
             <p>{{ __('Exam Results') }}</p>
           </a>
         </li>
+        <li class = "@if ($activePage == 'studentExaminationResults') active @endif">
+          <a href="{{ url('students/caResult/results/') }}">
+            <i class="now-ui-icons education_hat"></i>
+            <p>{{ __('CA Results') }}</p>
+          </a>
+        </li>
       @endif
       @if ((auth()->user()->hasRole('Academics')) || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Dosa')) || (auth()->user()->hasRole('Developer')))
       <li class = "@if ($activePage == 'registrationCheck') active @endif">

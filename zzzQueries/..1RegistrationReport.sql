@@ -256,6 +256,7 @@ LEFT JOIN program_data_190 pd190 ON s.ShortName = pd190.ProgrammeCode AND bi.Stu
 LEFT JOIN `applicants` a ON bi.ID = a.StudentID AND bi.ID LIKE '240%' AND a.Progress = 'Accepted'
 WHERE 
     LENGTH(bi.ID) > 7
+    AND bi.Status = 'Approved'
     AND (
         ((bi.ID LIKE '210%' and gp.StudentNo IS NOT NULL)
         OR (bi.ID LIKE '220%' and gp.StudentNo IS NOT NULL)

@@ -207,9 +207,9 @@ class StudentsController extends Controller
         $maxAttempts = 10; // Define max attempts for email sending
         $studentId = $request->input('studentId');
         $results = $this->checkIfStudentIsRegistered($studentId)->exists();
-        if ($results) {
-            return redirect()->back()->with('error', 'Student already registered.');
-        }
+        // if ($results) {
+        //     return redirect()->back()->with('error', 'Student already registered.');
+        // }
         $results = BasicInformation::find($studentId);
         if (!$results) {
             return redirect()->back()->with('error', 'Student not found on Edurole.');

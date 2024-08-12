@@ -8,14 +8,12 @@ use Illuminate\Http\Request;
 
 class AcademicQueriesController extends Controller
 {
-    public function index(){
-        
+    public function index(){        
         return view('academics.index');
     } 
 
     //All students registered in a specific academic Year, regardless of programme
     public function viewAllStudentsRegisteredInASpecificAcademicYear(Request $request){
-
         $academicYear = $request->input('academicYear');
 
         if ($academicYear === null) {
@@ -42,8 +40,7 @@ class AcademicQueriesController extends Controller
             'Surname',
             'PrivateEmail',
             'ID',
-        ];
-        
+        ];        
         $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->get();        
         $filename = 'AllStudentsRegisteredInASpecificAcademicYear' . $academicYear;
         
@@ -88,7 +85,7 @@ class AcademicQueriesController extends Controller
             'excelFile' => 'required|mimes:xls,xlsx,csv',
             'academicYear' => 'required',
         ]);
-       
+        
         $academicYear = $request->input('academicYear');
 
         if ($request->hasFile('excelFile')){
