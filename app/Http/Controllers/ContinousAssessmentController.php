@@ -41,7 +41,7 @@ class ContinousAssessmentController extends Controller
         $academicYear= 2024;
 
         
-        $results = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
+        $results = LMMAXCourseAssessment::join('students_continous_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
             ->join('assessment_types', 'assessment_types.id', '=', 'students_continous_assessments.ca_type')
             //->join('c_a_type_marks_allocations','')
@@ -53,7 +53,7 @@ class ContinousAssessmentController extends Controller
             ->groupBy('students_continous_assessments.student_id','students_continous_assessments.course_id','students_continous_assessments.ca_type')
             ->get();
 
-        // return $results;
+        return $results;
         return view('allStudents.continousAssessment.viewCaComponents', compact('results','studentNumber'));
     }
 
