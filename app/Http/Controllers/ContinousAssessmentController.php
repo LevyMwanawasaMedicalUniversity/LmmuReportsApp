@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CourseElectives;
+use App\Models\CourseRegistration;
 use App\Models\LMMAXCourseAssessment;
 use App\Models\LMMAXCourseAssessmentScores;
 use App\Models\LMMAXStudentsContinousAssessment;
@@ -21,6 +23,17 @@ class ContinousAssessmentController extends Controller
         //     ->get();
         $academicYear= 2024;
         $studentNumber = Auth::user()->name;
+
+        $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
+            ->where('Year', 2024)
+            // ->where('Semester', 1)
+            ->exists();
+
+        // return $checkRegistration;
+        if (!$checkRegistration) {            
+            return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
+        }
+
         $results = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
             ->where('students_continous_assessments.student_id', $studentNumber)
@@ -40,6 +53,15 @@ class ContinousAssessmentController extends Controller
         $studentNumber = Auth::user()->name;
         $academicYear= 2024;
 
+        $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
+
+        // return $checkRegistration;
+        if (!$checkRegistration) {            
+            return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
+        }
         
         $results = LMMAXCourseAssessment::join('students_continous_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
@@ -47,13 +69,13 @@ class ContinousAssessmentController extends Controller
             //->join('c_a_type_marks_allocations','')
             //->join('c_a_type_marks_allocations', 'assessment_types.id', '=', 'c_a_type_marks_allocations.assessment_type_id')
             ->where('students_continous_assessments.student_id', $studentNumber)
-            ->where('course_assessments.academic_year', $academicYear)    
+            // ->where('course_assessments.academic_year', $academicYear)    
             ->where('students_continous_assessments.course_id', $courseId)
             ->select('students_continous_assessments.delivery_mode','students_continous_assessments.study_id','students_continous_assessments.students_continous_assessment_id','students_continous_assessments.student_id', DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'),'students_continous_assessments.course_id','students_continous_assessments.ca_type','assessment_types.assesment_type_name')
             ->groupBy('students_continous_assessments.student_id','students_continous_assessments.course_id','students_continous_assessments.ca_type')
             ->get();
 
-        return $results;
+        // return $results;
         return view('allStudents.continousAssessment.viewCaComponents', compact('results','studentNumber'));
     }
 
@@ -62,7 +84,15 @@ class ContinousAssessmentController extends Controller
         $studentNumber = Auth::user()->name;
         $academicYear= 2024;
         
+        $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
 
+        // return $checkRegistration;
+        if (!$checkRegistration) {            
+            return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
+        }
         
         $results = LMMAXCourseAssessment::join('course_assessment_scores', 'course_assessment_scores.course_assessment_id', '=', 'course_assessments.course_assessments_id')
             ->join('assessment_types', 'assessment_types.id', '=', 'course_assessments.ca_type')

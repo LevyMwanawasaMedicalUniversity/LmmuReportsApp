@@ -61,6 +61,8 @@ return [
             'strict' => false,
         ],
 
+        //This is the live database on the server
+
         'assessments_database' => [
             'driver' => 'mysql',
             'host' => '192.168.20.38',
@@ -74,13 +76,15 @@ return [
             'strict' => false,
         ],
 
+        //This is the test database on localhost
+
         // 'assessments_database' => [
         //     'driver' => 'mysql',
         //     'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
-        //     'port' => '3307',      // Change this to the local port used in the SSH tunnel
-        //     'database' => 'assessments_db',
-        //     'username' => 'panda',
-        //     'password' => 'Crazy8@1000#',
+        //     'port' => '3306',      // Change this to the local port used in the SSH tunnel
+        //     'database' => 'livedb7',
+        //     'username' => 'root',
+        //     'password' => '',
         //     'charset' => 'utf8mb4',
         //     'collation' => 'utf8mb4_unicode_ci',
         //     'prefix' => '',

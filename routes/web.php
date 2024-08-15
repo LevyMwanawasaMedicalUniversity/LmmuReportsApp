@@ -61,7 +61,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'App\Http\Controllers\ProfileController@password']);
     Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
     Route::get('/students/exam/results/{studentNumber}', 'App\Http\Controllers\DocketController@students2023ExamResults')->name('docket.students2023ExamResults');
-    Route::get('/students/caResult/results/', 'App\Http\Controllers\ContinousAssessmentController@studentsCAResults')->name('docket.studentsCAResults');
+    Route::get('/students/caResult/resultsViewCourses/', 'App\Http\Controllers\ContinousAssessmentController@studentsCAResults')->name('docket.studentsCAResults');
     Route::get('/students/caResult/viewCaComponents/{courseId}/', 'App\Http\Controllers\ContinousAssessmentController@viewCaComponents')->name('docket.viewCaComponents');
     Route::get('/students/caResult/viewInSpecificCaComponent/{courseId}/{caType}', 'App\Http\Controllers\ContinousAssessmentController@viewInSpecificCaComponent')->name('docket.viewInSpecificCaComponent');
 
@@ -85,6 +85,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
             Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
             Route::post('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
+            Route::post('/import/importStudentsFromLMMAX', 'StudentsController@importStudentsFromLMMAX')->name('students.importStudentsFromLMMAX');
             Route::get('/import/single/students', 'StudentsController@importSingleStudent')->name('students.importSingleStudent');
             Route::post('/upload/single/students', 'StudentsController@uploadSingleStudent')->name('students.uploadSingleStudent');
             Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');

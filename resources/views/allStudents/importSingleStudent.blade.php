@@ -63,12 +63,12 @@
                                     <h4 class="card-title">BULK UPLOAD STUDENTS</h4>
                                 </div> 
                                 <div class="card-body">
-                                    <form action="{{ route('students.import') }}" method="POST" onsubmit="return confirm('Are you sure you want to import students from Edurole?')">
+                                    <form action="{{ route('students.importStudentsFromLMMAX') }}" method="POST" onsubmit="return confirm('Are you sure you want to import students from Edurole?')">
                                         @csrf
                                         <div class="form-group">
                                             <label for="studentId">Bulk Import</label>
                                             <div class="col-md-12">
-                                                <p>CLICK THE BUTTON BELOW TO IMPORT STUDENTS FROM EDUROLE</p>
+                                                <p>CLICK THE BUTTON BELOW TO IMPORT STUDENTS FROM EDUROLE WITH CA ON LM-MAX</p>
                                             </div>                            
                                         </div>
                                         <button type="submit" class="btn btn-warning">SIS REPORTS IMPORT</button>

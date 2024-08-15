@@ -18,6 +18,7 @@ use App\Models\Grade;
 use App\Models\Grades;
 use App\Models\GradesModified;
 use App\Models\GradesPublished;
+use App\Models\LMMAXCourseAssessmentScores;
 use App\Models\Program;
 use App\Models\ProgramCourseLink;
 use App\Models\SageClient;
@@ -281,6 +282,16 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getStudentsFromLMMAX(){
+        $results = LMMAXCourseAssessmentScores::distinct('student_id')
+            ->get()
+            ->map(function ($item) {
+                $item->student_id = (string) $item->student_id;
+                return $item;
+            });
+        return $results;
+    }
+
     public function getStudentsToImportToExportToCsv(){
         $results = $this->queryStudentsToImportToExportToCsv();
         return $results;
@@ -434,6 +445,7 @@ class Controller extends BaseController
             'programmes.ProgramName AS "Programme Code"',
             'study.ShortName',
             'study.Name',
+            'programmes.Year',
             'schools.Description',
             'basic-information.StudyType',
             'balances.Amount',
@@ -447,7 +459,9 @@ class Controller extends BaseController
                 WHEN programmes.ProgramName LIKE '%3' THEN 'YEAR 3'
                 WHEN programmes.ProgramName LIKE '%4' THEN 'YEAR 4'
                 WHEN programmes.ProgramName LIKE '%5' THEN 'YEAR 5'
-                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'
+                WHEN programmes.ProgramName LIKE '%6' THEN 'YEAR 6'                
+                WHEN programmes.ProgramName LIKE '%8' THEN 'YEAR 1'
+                WHEN programmes.ProgramName LIKE '%9' THEN 'YEAR 2'
                 WHEN programmes.ProgramName IS NULL THEN 'NO REGISTRATION'
                 ELSE 'NO REGISTRATION'
             END AS `YearOfStudy`")

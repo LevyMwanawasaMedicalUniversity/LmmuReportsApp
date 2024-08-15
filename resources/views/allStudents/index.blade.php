@@ -62,6 +62,9 @@
                         <a class="btn btn-success mt-3 mr-2" href="{{ route('courses.exportListExamList',$courseId) }}">Export List</a>                      
                     </div>
                     @endif
+                    <div class="col-md-6"> 
+                        <button class="btn btn-success mt-3 mr-2" id="exportBtn">Export to Excel</button>
+                    </div>
                 </div>
                 <!-- <form action="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}" method="GET">
                     <div class="row">
@@ -103,14 +106,16 @@
                 @if(!empty($results))
                 <div class="card-body">
                     <div class="table-responsive">
-                    <table class="table">
+                    <table class="table" id="myTable">
                         <thead class="text-primary">
                             <tr>
+                                <th>#</th>
                                 <th>First Name</th>
                                 <th>Surname</th>
                                 <th>Student Number</th>
                                 <th>Email</th>
                                 <th>Programme</th>
+                                <th>School</th>
                                 <th>Study Mode</th>
                                 <th>Year Of Study</th>
                                 <th class="text-end">Action</th>
@@ -120,13 +125,15 @@
                         <tbody>
                             @foreach($results as $result)
                             <tr>
+                                <td>{{$loop->iteration}}</td>
                                 <td>{{$result->FirstName}}</td>
                                 <td>{{$result->Surname}}</td>
                                 <td>{{$result->StudentID}}</td>
                                 <td>{{$result->PrivateEmail}}</td>
                                 <td>{{$result->Name}}</td>
+                                <td>{{$result->Description}}</td>
                                 <td>{{$result->StudyType}}</td>
-                                <td>{{$result->YearOfStudy}}</td>
+                                <td>{{ $result->Year ? 'Year ' . $result->Year : 'NO REGISTRATION' }}</td>
                                 <td class="text-end">
                                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                                         <a href="{{route('docket.resetStudent',$result->StudentID)}}" class="btn btn-info">Reset</a>
@@ -140,7 +147,7 @@
                         </tbody>
                     </table>
                     </div>
-                    {{ $results->links('pagination::bootstrap-4') }}
+                    {{-- {{ $results->links('pagination::bootstrap-4') }} --}}
                 </div>
                 @else
                 <div class="card-body text-center">
@@ -151,5 +158,12 @@
         </div>
     </div>
 </div>
+<script>
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        var table = document.getElementById('myTable');
+        var wb = XLSX.utils.table_to_book(table, {sheet: "Sheet JS"});
+        XLSX.writeFile(wb, "ALL STUDENTS.xlsx");
+    });
+</script>
 
 @endsection
