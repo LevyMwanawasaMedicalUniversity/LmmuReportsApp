@@ -204,7 +204,7 @@
         <a data-toggle="collapse" href="#courseRegistration">
           <i class="now-ui-icons education_agenda-bookmark"></i>
           <p>
-            {{ __("Course Registration") }}
+            {{ __("All Students") }}
             <b class="caret"></b>
           </p>
         </a>

@@ -37,6 +37,9 @@ class EnrollStudentsCommand extends Command
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+
+        $studentsController = new StudentsController();
+        $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2024-12-31')]);

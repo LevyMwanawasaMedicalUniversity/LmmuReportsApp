@@ -871,7 +871,7 @@ class StudentsController extends Controller
         if($request->input('student-number')){
             $students = Student::query()
                         ->where('student_number', 'like', '%' . $request->input('student-number') . '%')
-                        ->where('status','=', 4)
+                        ->where('status','=', 5)
                         ->get();
             if($students){
                 $studentNumbers = $students->pluck('student_number')->toArray();
@@ -880,7 +880,7 @@ class StudentsController extends Controller
                 return back()->with('error', 'NOT FOUND.');               
             }
         }else{
-            $studentNumbers = Student::where('status', 4)->pluck('student_number')->toArray();
+            $studentNumbers = Student::where('status', 5)->pluck('student_number')->toArray();
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
         }
         return view('allStudents.index', compact('results','courseName','courseId'));
