@@ -8,7 +8,7 @@
 <body>
     <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }} ( {{ $studentId }} ),</p>
     <p>We are pleased to inform you that you can now view your Continuous Assessment (CA) results for the 2024 academic year on the <a href="http://sisreports.lmmu.ac.zm/">SIS Reports system</a>. To access your results, simply log in to your account using your <strong>{{ $studentLocalDetails->email }}</strong> email address as your username. If you have not updated your password, it remains "12345678". Navigate to the "CA Results" section in the menu after logging in to review your scores.</p>
-    <p><strong>Please note: The CA results are still in the process of being uploaded. If you notice any discrepancies or have concerns regarding your results, please contact your Programme Coordinator for assistance. Ensuring the accuracy of your academic records is our priority. <b>Only students that are Registered for the 2024 Academic Year will be able to view their Continuous Assessment.</b></strong></p>
+    <p><strong>Please note: The CA results are still in the process of being uploaded. If you notice any discrepancies or have concerns regarding your results, please contact your Programme Coordinator for assistance. Ensuring the accuracy of your academic records is our priority. <b>Only students that are Registered for the 2024 Academic Yearon Edurole, will be able to view their Continuous Assessment.</b></strong></p>
     <p>If you experience any issues while accessing your results, feel free to reach out to ICT Office for support. Your academic success is our top priority.</p>
 
     <p>You can access Sis Reports Using the link below:</p>
