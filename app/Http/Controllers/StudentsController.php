@@ -33,89 +33,58 @@ class StudentsController extends Controller
     public function importStudentsFromLMMAX(){
         set_time_limit(12000000);
         $maxAttempts = 10;
-
-        // Get student IDs to import from Edurole
-        // $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
-        // From LMMAX
-        $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
-        // return $studentIds;
-        // Start a database transaction
-        // DB::beginTransaction();
-        
+    
         try {
-            $studentIdsChunks = array_chunk($studentIds, 1000);
-
-            // Get existing users
+            // Get student IDs to import from LMMAX
+            $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
+            $studentIdsChunks = array_chunk($studentIds, 1000); // Chunk the student IDs for processing
+    
+            // Retrieve existing users and basic information for the student IDs
             $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
-
-            // Eager load BasicInformation for all students
             $basicInformations = BasicInformation::whereIn('ID', $studentIds)->get()->keyBy('ID');
-
+    
             foreach ($studentIdsChunks as $studentIdsChunk) {
                 foreach ($studentIdsChunk as $studentId) {
-                    // Check if student exists with required status
-                    $student = Student::where('student_number', $studentId)
-                        ->where('status', 6)
-                        ->first(); 
-                    if ($student) {
-                        continue;
-                    } 
-
-                    // $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-                    // $courses = $registrationResults['dataArray'];
-                    // $coursesArray = $courses->pluck('Course')->toArray();
-                    // $coursesNamesArray = $courses->pluck('Program')->toArray();
-                    // $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-                    // if($studentsProgramme->isEmpty()){
-                    //     $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+                    // Check if the student already exists with the required status
+                    // $student = Student::where('student_number', $studentId)
+                    //                 ->where('status', 6)
+                    //                 ->first();
+                    // if ($student) {
+                    //     continue; // Skip if the student already exists
                     // }
-                    // $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-                    // if ($studentsProgramme->isEmpty() || $isStudentRegistered) {
-                    //     Student::updateOrCreate(
-                    //         ['student_number' => $studentId],
-                    //         ['academic_year' => 2023, 'term' => 1, 'status' => 3]
-                    //     );
-                    //     continue;
-                    // }                                  
-
-                    // If a user account doesn't exist, create it
-                    
-
-                    // Get and prepare student's private email
-                    $privateEmail = BasicInformation::find($studentId);
-                    
-                    if($privateEmail){
-                        if (!isset($existingUsers[$studentId])) {
-                            $this->createUserAccount($studentId);
-                        }
-                        $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-                    }else{
-                        continue;
+    
+                    // Retrieve and validate the student's private email
+                    $privateEmail = $basicInformations->get($studentId);
+                    if (!$privateEmail) {
+                        continue; // Skip if no email found
                     }
-                    // $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-
-                    // Create or update student record
+    
+                    // Create a user account if it doesn't already exist
+                    if (!isset($existingUsers[$studentId])) {
+                        $this->createUserAccount($studentId);
+                    }
+    
+                    $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+    
+                    // Create or update the student record
                     Student::updateOrCreate(
                         ['student_number' => $studentId],
                         ['academic_year' => 2024, 'term' => 1, 'status' => 6]
                     );
-
-                    // Send email to new student
+    
+                    // Send an email to the new student
                     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 }
             }
-
-            // Commit the transaction
-            // DB::commit();
-
+    
             // Provide a success message
             return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
         } catch (\Exception $e) {
-            // Rollback the transaction if an error occurs
-            // DB::rollBack();
+            // Handle any errors that occur during the process
             return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
         }
     }
+    
 
     // public function importStudentsFromLMMAX() {
     //     set_time_limit(12000000);
