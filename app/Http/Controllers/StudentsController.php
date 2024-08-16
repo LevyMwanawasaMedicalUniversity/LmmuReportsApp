@@ -46,12 +46,12 @@ class StudentsController extends Controller
             foreach ($studentIdsChunks as $studentIdsChunk) {
                 foreach ($studentIdsChunk as $studentId) {
                     // Check if the student already exists with the required status
-                    // $student = Student::where('student_number', $studentId)
-                    //                 ->where('status', 6)
-                    //                 ->first();
-                    // if ($student) {
-                    //     continue; // Skip if the student already exists
-                    // }
+                    $student = Student::where('student_number', $studentId)
+                                    ->where('status', 6)
+                                    ->first();
+                    if ($student) {
+                        continue; // Skip if the student already exists
+                    }
     
                     // Retrieve and validate the student's private email
                     $privateEmail = $basicInformations->get($studentId);
