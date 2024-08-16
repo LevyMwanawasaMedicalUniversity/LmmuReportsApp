@@ -83,7 +83,10 @@ class StudentsController extends Controller
 
                     // Get and prepare student's private email
                     $privateEmail = BasicInformation::find($studentId);
-                    
+                    Student::updateOrCreate(
+                        ['student_number' => $studentId],
+                        ['academic_year' => 2024, 'term' => 1, 'status' => 6]
+                    );
                     if($privateEmail){
                         if (!isset($existingUsers[$studentId])) {
                             $this->createUserAccount($studentId);
@@ -95,10 +98,7 @@ class StudentsController extends Controller
                     // $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
 
                     // Create or update student record
-                    Student::updateOrCreate(
-                        ['student_number' => $studentId],
-                        ['academic_year' => 2024, 'term' => 1, 'status' => 6]
-                    );
+                    
 
                     // Send email to new student
                     $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
