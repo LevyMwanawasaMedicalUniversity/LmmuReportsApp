@@ -117,60 +117,91 @@ class StudentsController extends Controller
     //     }
     // }
 
-    public function importStudentsFromLMMAX(){
+    public function importStudentsFromLMMAX() {
         set_time_limit(12000000);
-        $maxAttempts = 10;
+        $maxAttempts = 3;
         $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
-        $studentIdsChunks = array_chunk($studentIds, 1000);
+        $studentIdsChunks = array_chunk($studentIds, 500); // Reduced chunk size for better performance
+    
+        $successfulImports = 0;
+        $failedImports = 0;
     
         foreach ($studentIdsChunks as $studentIdsChunk) {
             try {
-                // Get existing users and basic information for the current chunk
                 $existingUsers = User::whereIn('name', $studentIdsChunk)->get()->keyBy('name');
                 $basicInformations = BasicInformation::whereIn('ID', $studentIdsChunk)->get()->keyBy('ID');
     
                 foreach ($studentIdsChunk as $studentId) {
-                    DB::beginTransaction(); // Start a new transaction for each student
-                    try {
-                        $student = Student::where('student_number', $studentId)->where('status', 6)->first(); 
-                        if ($student) {
-                            DB::commit(); // Commit the transaction if student already exists
-                            continue;
-                        } 
+                    $attempts = 0;
+                    $success = false;
     
-                        $privateEmail = $basicInformations->get($studentId);
+                    while ($attempts < $maxAttempts && !$success) {
+                        $attempts++;
     
-                        if($privateEmail){
-                            if (!isset($existingUsers[$studentId])) {
-                                $this->createUserAccount($studentId);
+                        DB::beginTransaction();
+                        try {
+                            $student = Student::where('student_number', $studentId)
+                                            ->where('status', 6)
+                                            ->lockForUpdate() // Lock the row for update to avoid conflicts
+                                            ->first(); 
+    
+                            if ($student) {
+                                DB::commit();
+                                $success = true;
+                                $successfulImports++;
+                                break;
                             }
-                            $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
-                        } else {
-                            DB::commit(); // Commit the transaction if no email found
-                            continue;
+    
+                            $privateEmail = $basicInformations->get($studentId);
+    
+                            if ($privateEmail) {
+                                if (!isset($existingUsers[$studentId])) {
+                                    $this->createUserAccount($studentId);
+                                }
+                                $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+                            } else {
+                                DB::commit();
+                                $success = true;
+                                $successfulImports++;
+                                break;
+                            }
+    
+                            Student::updateOrCreate(
+                                ['student_number' => $studentId],
+                                ['academic_year' => 2024, 'term' => 1, 'status' => 6]
+                            );
+    
+                            $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    
+                            DB::commit();
+                            $success = true;
+                            $successfulImports++;
+                        } catch (\Exception $e) {
+                            DB::rollBack();
+    
+                            if ($e->getCode() == 1205 && $attempts < $maxAttempts) {
+                                // Retry on lock timeout
+                                continue;
+                            } else {
+                                // Log the error and move to the next student
+                                $failedImports++;
+                                error_log('Failed to import student ID ' . $studentId . ': ' . $e->getMessage());
+                                break;
+                            }
                         }
-    
-                        Student::updateOrCreate(
-                            ['student_number' => $studentId],
-                            ['academic_year' => 2024, 'term' => 1, 'status' => 6]
-                        );
-    
-                        // Queue email for sending
-                        $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
-    
-                        DB::commit(); // Commit the transaction for the current student
-                    } catch (\Exception $e) {
-                        DB::rollBack(); // Rollback the transaction if an error occurs
-                        return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
                     }
                 }
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
+                // Log general errors in chunk processing
+                error_log('Failed to process chunk: ' . $e->getMessage());
+                $failedImports += count($studentIdsChunk); // Assume all failed in this chunk
             }
         }
     
-        return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+        // Return a summary of the import process
+        return redirect()->back()->with('success', "Students imported successfully. Total: {$successfulImports}, Failed: {$failedImports}.");
     }
+    
     
     
     
