@@ -138,7 +138,7 @@ class StudentsController extends Controller
                     while ($attempts < $maxAttempts && !$success) {
                         $attempts++;
     
-                        // DB::beginTransaction();
+                        DB::beginTransaction();
                         try {
                             $student = Student::where('student_number', $studentId)
                                             ->where('status', 6)
@@ -146,7 +146,7 @@ class StudentsController extends Controller
                                             ->first(); 
     
                             if ($student) {
-                                // DB::commit();
+                                DB::commit();
                                 $success = true;
                                 $successfulImports++;
                                 break;
@@ -160,7 +160,7 @@ class StudentsController extends Controller
                                 }
                                 $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
                             } else {
-                                // DB::commit();
+                                DB::commit();
                                 $success = true;
                                 $successfulImports++;
                                 break;
@@ -173,11 +173,11 @@ class StudentsController extends Controller
     
                             $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
     
-                            // DB::commit();
+                            DB::commit();
                             $success = true;
                             $successfulImports++;
                         } catch (\Exception $e) {
-                            // DB::rollBack();
+                            DB::rollBack();
     
                             if ($e->getCode() == 1205 && $attempts < $maxAttempts) {
                                 // Retry on lock timeout
