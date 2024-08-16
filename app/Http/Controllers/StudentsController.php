@@ -30,92 +30,142 @@ use Spatie\Permission\Models\Role;
 
 class StudentsController extends Controller
 {
+    // public function importStudentsFromLMMAX(){
+    //     set_time_limit(12000000);
+    //     $maxAttempts = 10;
+
+    //     // Get student IDs to import from Edurole
+    //     // $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
+    //     // From LMMAX
+    //     $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
+    //     // return $studentIds;
+    //     // Start a database transaction
+    //     DB::beginTransaction();
+        
+    //     try {
+    //         $studentIdsChunks = array_chunk($studentIds, 1000);
+
+    //         // Get existing users
+    //         $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
+
+    //         // Eager load BasicInformation for all students
+    //         $basicInformations = BasicInformation::whereIn('ID', $studentIds)->get()->keyBy('ID');
+
+    //         foreach ($studentIdsChunks as $studentIdsChunk) {
+    //             foreach ($studentIdsChunk as $studentId) {
+    //                 // Check if student exists with required status
+    //                 $student = Student::where('student_number', $studentId)
+    //                     ->where('status', 6)
+    //                     ->first(); 
+    //                 if ($student) {
+    //                     continue;
+    //                 } 
+
+    //                 // $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+    //                 // $courses = $registrationResults['dataArray'];
+    //                 // $coursesArray = $courses->pluck('Course')->toArray();
+    //                 // $coursesNamesArray = $courses->pluck('Program')->toArray();
+    //                 // $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+    //                 // if($studentsProgramme->isEmpty()){
+    //                 //     $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+    //                 // }
+    //                 // $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+    //                 // if ($studentsProgramme->isEmpty() || $isStudentRegistered) {
+    //                 //     Student::updateOrCreate(
+    //                 //         ['student_number' => $studentId],
+    //                 //         ['academic_year' => 2023, 'term' => 1, 'status' => 3]
+    //                 //     );
+    //                 //     continue;
+    //                 // }                                  
+
+    //                 // If a user account doesn't exist, create it
+                    
+
+    //                 // Get and prepare student's private email
+    //                 $privateEmail = BasicInformation::find($studentId);
+                    
+    //                 if($privateEmail){
+    //                     if (!isset($existingUsers[$studentId])) {
+    //                         $this->createUserAccount($studentId);
+    //                     }
+    //                     $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
+    //                 }else{
+    //                     continue;
+    //                 }
+    //                 // $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
+
+    //                 // Create or update student record
+    //                 Student::updateOrCreate(
+    //                     ['student_number' => $studentId],
+    //                     ['academic_year' => 2024, 'term' => 1, 'status' => 6]
+    //                 );
+
+    //                 // Send email to new student
+    //                 $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    //             }
+    //         }
+
+    //         // Commit the transaction
+    //         DB::commit();
+
+    //         // Provide a success message
+    //         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
+    //     } catch (\Exception $e) {
+    //         // Rollback the transaction if an error occurs
+    //         DB::rollBack();
+    //         return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
+    //     }
+    // }
+
     public function importStudentsFromLMMAX(){
         set_time_limit(12000000);
         $maxAttempts = 10;
-
-        // Get student IDs to import from Edurole
-        // $studentIds = $this->getStudentsToImport()->pluck('StudentID')->toArray();
-        // From LMMAX
         $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
-        // return $studentIds;
-        // Start a database transaction
-        DB::beginTransaction();
-        
-        try {
-            $studentIdsChunks = array_chunk($studentIds, 1000);
-
-            // Get existing users
-            $existingUsers = User::whereIn('name', $studentIds)->get()->keyBy('name');
-
-            // Eager load BasicInformation for all students
-            $basicInformations = BasicInformation::whereIn('ID', $studentIds)->get()->keyBy('ID');
-
-            foreach ($studentIdsChunks as $studentIdsChunk) {
+        $studentIdsChunks = array_chunk($studentIds, 1000);
+    
+        foreach ($studentIdsChunks as $studentIdsChunk) {
+            DB::beginTransaction(); // Start a new transaction for each chunk
+            try {
+                // Get existing users for the current chunk
+                $existingUsers = User::whereIn('name', $studentIdsChunk)->get()->keyBy('name');
+                $basicInformations = BasicInformation::whereIn('ID', $studentIdsChunk)->get()->keyBy('ID');
+    
                 foreach ($studentIdsChunk as $studentId) {
-                    // Check if student exists with required status
-                    $student = Student::where('student_number', $studentId)
-                        ->where('status', 6)
-                        ->first(); 
+                    $student = Student::where('student_number', $studentId)->where('status', 6)->first(); 
                     if ($student) {
                         continue;
                     } 
-
-                    // $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-                    // $courses = $registrationResults['dataArray'];
-                    // $coursesArray = $courses->pluck('Course')->toArray();
-                    // $coursesNamesArray = $courses->pluck('Program')->toArray();
-                    // $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-                    // if($studentsProgramme->isEmpty()){
-                    //     $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
-                    // }
-                    // $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-                    // if ($studentsProgramme->isEmpty() || $isStudentRegistered) {
-                    //     Student::updateOrCreate(
-                    //         ['student_number' => $studentId],
-                    //         ['academic_year' => 2023, 'term' => 1, 'status' => 3]
-                    //     );
-                    //     continue;
-                    // }                                  
-
-                    // If a user account doesn't exist, create it
-                    
-
-                    // Get and prepare student's private email
-                    $privateEmail = BasicInformation::find($studentId);
+    
+                    $privateEmail = $basicInformations->get($studentId);
                     
                     if($privateEmail){
                         if (!isset($existingUsers[$studentId])) {
                             $this->createUserAccount($studentId);
                         }
-                        $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-                    }else{
+                        $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+                    } else {
                         continue;
                     }
-                    // $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail,$studentId);
-
-                    // Create or update student record
+    
                     Student::updateOrCreate(
                         ['student_number' => $studentId],
                         ['academic_year' => 2024, 'term' => 1, 'status' => 6]
                     );
-
-                    // Send email to new student
-                    $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    
+                    // Queue email for sending
+                    $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 }
+    
+                DB::commit(); // Commit the transaction for the current chunk
+            } catch (\Exception $e) {
+                DB::rollBack(); // Rollback the transaction for the current chunk if an error occurs
+                return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
             }
-
-            // Commit the transaction
-            DB::commit();
-
-            // Provide a success message
-            return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
-        } catch (\Exception $e) {
-            // Rollback the transaction if an error occurs
-            DB::rollBack();
-            return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
         }
+    
+        return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
+    
     
     public function importStudentsFromBasicInformation(){
         set_time_limit(12000000);
