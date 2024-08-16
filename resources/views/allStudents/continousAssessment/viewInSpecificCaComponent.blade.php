@@ -25,7 +25,7 @@
                             <th>#</th>
                             <th>Assessment Number</th>
                             <th>Description</th> 
-                            <th class="text-end">Total Marks</th>   
+                            <th class="text-end">Percentage Score</th>   
                         </tr>
                         </thead>
                         <tbody> 
@@ -39,7 +39,7 @@
                                     <td>{{$loop->iteration}}</td>
                                     <td>{{$result->assesment_type_name}} {{$loop->iteration}}</td>
                                     <td>{{$result->description}}</td>
-                                    <td class="text-end">{{$result->cas_score}}</td>                                    
+                                    <td class="text-end">{{$result->cas_score}} %</td>                                    
 
                                 </tr>
                             @endforeach                  

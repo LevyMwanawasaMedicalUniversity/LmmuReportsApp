@@ -55,7 +55,7 @@ class StudentsController extends Controller
                 foreach ($studentIdsChunk as $studentId) {
                     // Check if student exists with required status
                     $student = Student::where('student_number', $studentId)
-                        ->where('status', 5)
+                        ->where('status', 6)
                         ->first(); 
                     if ($student) {
                         continue;
@@ -97,7 +97,7 @@ class StudentsController extends Controller
                     // Create or update student record
                     Student::updateOrCreate(
                         ['student_number' => $studentId],
-                        ['academic_year' => 2024, 'term' => 1, 'status' => 5]
+                        ['academic_year' => 2024, 'term' => 1, 'status' => 6]
                     );
 
                     // Send email to new student
@@ -871,7 +871,7 @@ class StudentsController extends Controller
         if($request->input('student-number')){
             $students = Student::query()
                         ->where('student_number', 'like', '%' . $request->input('student-number') . '%')
-                        ->where('status','=', 5)
+                        ->where('status','=', 6)
                         ->get();
             if($students){
                 $studentNumbers = $students->pluck('student_number')->toArray();
@@ -880,7 +880,7 @@ class StudentsController extends Controller
                 return back()->with('error', 'NOT FOUND.');               
             }
         }else{
-            $studentNumbers = Student::where('status', 5)->pluck('student_number')->toArray();
+            $studentNumbers = Student::where('status', 6)->pluck('student_number')->toArray();
             $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
         }
         return view('allStudents.index', compact('results','courseName','courseId'));
