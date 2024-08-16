@@ -138,15 +138,13 @@ class StudentsController extends Controller
                     while ($attempts < $maxAttempts && !$success) {
                         $attempts++;
     
-                        DB::beginTransaction();
                         try {
                             $student = Student::where('student_number', $studentId)
-                                            ->where('status', 6)
-                                            ->lockForUpdate() // Lock the row for update to avoid conflicts
-                                            ->first(); 
+                                ->where('status', 6)
+                                ->lockForUpdate() // Lock the row for update to avoid conflicts
+                                ->first(); 
     
                             if ($student) {
-                                DB::commit();
                                 $success = true;
                                 $successfulImports++;
                                 break;
@@ -160,7 +158,6 @@ class StudentsController extends Controller
                                 }
                                 $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
                             } else {
-                                DB::commit();
                                 $success = true;
                                 $successfulImports++;
                                 break;
@@ -173,12 +170,9 @@ class StudentsController extends Controller
     
                             $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
     
-                            DB::commit();
                             $success = true;
                             $successfulImports++;
                         } catch (\Exception $e) {
-                            DB::rollBack();
-    
                             if ($e->getCode() == 1205 && $attempts < $maxAttempts) {
                                 // Retry on lock timeout
                                 continue;
@@ -201,7 +195,6 @@ class StudentsController extends Controller
         // Return a summary of the import process
         return redirect()->back()->with('success', "Students imported successfully. Total: {$successfulImports}, Failed: {$failedImports}.");
     }
-    
     
     
     
