@@ -124,47 +124,54 @@ class StudentsController extends Controller
         $studentIdsChunks = array_chunk($studentIds, 1000);
     
         foreach ($studentIdsChunks as $studentIdsChunk) {
-            DB::beginTransaction(); // Start a new transaction for each chunk
             try {
-                // Get existing users for the current chunk
+                // Get existing users and basic information for the current chunk
                 $existingUsers = User::whereIn('name', $studentIdsChunk)->get()->keyBy('name');
                 $basicInformations = BasicInformation::whereIn('ID', $studentIdsChunk)->get()->keyBy('ID');
     
                 foreach ($studentIdsChunk as $studentId) {
-                    $student = Student::where('student_number', $studentId)->where('status', 6)->first(); 
-                    if ($student) {
-                        continue;
-                    } 
+                    DB::beginTransaction(); // Start a new transaction for each student
+                    try {
+                        $student = Student::where('student_number', $studentId)->where('status', 6)->first(); 
+                        if ($student) {
+                            DB::commit(); // Commit the transaction if student already exists
+                            continue;
+                        } 
     
-                    $privateEmail = $basicInformations->get($studentId);
-                    
-                    if($privateEmail){
-                        if (!isset($existingUsers[$studentId])) {
-                            $this->createUserAccount($studentId);
+                        $privateEmail = $basicInformations->get($studentId);
+    
+                        if($privateEmail){
+                            if (!isset($existingUsers[$studentId])) {
+                                $this->createUserAccount($studentId);
+                            }
+                            $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
+                        } else {
+                            DB::commit(); // Commit the transaction if no email found
+                            continue;
                         }
-                        $sendingEmail = $this->validateAndPrepareEmail($privateEmail->PrivateEmail, $studentId);
-                    } else {
-                        continue;
+    
+                        Student::updateOrCreate(
+                            ['student_number' => $studentId],
+                            ['academic_year' => 2024, 'term' => 1, 'status' => 6]
+                        );
+    
+                        // Queue email for sending
+                        $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
+    
+                        DB::commit(); // Commit the transaction for the current student
+                    } catch (\Exception $e) {
+                        DB::rollBack(); // Rollback the transaction if an error occurs
+                        return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
                     }
-    
-                    Student::updateOrCreate(
-                        ['student_number' => $studentId],
-                        ['academic_year' => 2024, 'term' => 1, 'status' => 6]
-                    );
-    
-                    // Queue email for sending
-                    $this->queueEmailToStudent($sendingEmail, $studentId, $maxAttempts);
                 }
-    
-                DB::commit(); // Commit the transaction for the current chunk
             } catch (\Exception $e) {
-                DB::rollBack(); // Rollback the transaction for the current chunk if an error occurs
                 return redirect()->back()->with('error', 'An error occurred while importing students: ' . $e->getMessage());
             }
         }
     
         return redirect()->back()->with('success', 'Students imported successfully and accounts created.');
     }
+    
     
     
     public function importStudentsFromBasicInformation(){
