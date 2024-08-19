@@ -385,14 +385,14 @@ class StudentsController extends Controller
         }
         $student = Student::where('student_number', $studentId)->first();
         if ($student) {
-            $student->update(['status' => 4]);
+            $student->update(['status' => 6]);
             // $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new ExistingStudentMail($student));
         } else {
             Student::create([
                 'student_number' => $studentId,
                 'academic_year' => 2024,
                 'term' => 1,
-                'status' => 4
+                'status' => 6
             ]);
             $existingUsers = User::where('name', $studentId)->get()->keyBy('name');
             if (!isset($existingUsers[$studentId])) {
