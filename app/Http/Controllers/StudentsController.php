@@ -20,6 +20,7 @@ use App\Models\Student;
 use App\Models\User;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +165,31 @@ class StudentsController extends Controller
     //     // Return a summary of the import process
     //     return redirect()->back()->with('success', "Students imported successfully. Total: {$successfulImports}, Failed: {$failedImports}.");
     // }
+
+    public function updateYearAndSemesterForEnrolmentDate()
+    {
+        try {
+            CourseElectives::whereNull('Year')
+                ->where('EnrolmentDate', '>', '2024-01-01')
+                ->update([
+                    'Year' => 2024,
+                    'Semester' => 1
+                ]);
+
+            return response()->json(['message' => 'Update completed successfully.'], 200);
+        } catch (QueryException $e) {
+            // Check if it's a duplicate entry error
+            if ($e->getCode() == 23000) {
+                // Log the error if needed
+                Log::warning('Duplicate entry error ignored: ' . $e->getMessage());
+
+                return response()->json(['message' => 'Update completed with some duplicate entry errors ignored.'], 200);
+            } else {
+                // Re-throw the exception if it's not a duplicate entry error
+                throw $e;
+            }
+        }
+    }
     
     
     

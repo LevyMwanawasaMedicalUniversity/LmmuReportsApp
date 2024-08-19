@@ -812,9 +812,14 @@ class DocketController extends Controller
         if ($user && $user->hasRole('Student')) {
             $username = $user->name;
             try {
+                $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                $user->update([
+                    'email' => $privateEmail,
+                    'password' => Hash::make('12345678')
+                ]);
                 $this->sendTestEmail($username);
                 
-                $privateEmail = BasicInformation::find($username)->PrivateEmail;
+                
                 if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
                     $privateEmail = $username . '@lmmu.ac.zm';
                 }
@@ -824,10 +829,7 @@ class DocketController extends Controller
                 if ($student) {
                     Mail::to($privateEmail)->send(new ExistingStudentMail($studentId));
                 }
-                $user->update([
-                    'email' => $privateEmail,
-                    'password' => Hash::make('12345678')
-                ]);
+                
             } catch (\Exception $e) {
                 // Log the exception or handle it as needed
             }
