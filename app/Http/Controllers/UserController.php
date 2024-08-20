@@ -86,7 +86,7 @@ class UserController extends Controller
         if ($user && $user->hasRole('Student')) {
             $username = $user->name;
             try {
-                $this->sendTestEmail($username);
+                
                 $privateEmail = trim(BasicInformation::find($username)->PrivateEmail);
                 if (!filter_var($privateEmail, FILTER_VALIDATE_EMAIL)) {
                     $privateEmail = $username . '@lmmu.ac.zm';
@@ -95,6 +95,7 @@ class UserController extends Controller
                     'email' => $privateEmail,
                     'password' => Hash::make('12345678')
                 ]);
+                $this->sendTestEmail($username);
             } catch (\Exception $e) {
                 // Log the exception or handle it as needed
             }
