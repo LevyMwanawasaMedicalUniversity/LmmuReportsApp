@@ -1526,10 +1526,13 @@ class Controller extends BaseController
     }
 
     private function queryStudentsPayments($studentId){
-
+        $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
-            ->where('Description', 'like', '%-%-%')
-            ->where('Debit', '>=', 0)
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
         $results = SageClient::select    (
             'DCLink',
@@ -1582,11 +1585,15 @@ class Controller extends BaseController
 
     private function querySumOfAllTransactionsOfEachStudent(){
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
-            ->where('Description', 'like', '%-%-%')
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
             ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
 
         $academicYear = '2024';
+        $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
 
         $studentInformation = Schools::select(
             'basic-information.FirstName',
@@ -1624,6 +1631,7 @@ class Controller extends BaseController
                 ->orWhere('basic-information.StudyType', '=', 'Distance');
         })
         ->where('basic-information.StudyType', '!=', 'Staff')
+        ->whereIn('student-study-link.StudentID', $studentIds)
         ->groupBy('student-study-link.StudentID')
         ->get();
 

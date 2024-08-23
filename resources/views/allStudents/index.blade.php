@@ -17,7 +17,7 @@
                     @if($courseName)
                     <h4 class="card-title">{{ $courseName }} Students </h4>
                     @else
-                    <h4 class="card-title">ALL {{$results->count()}} STUDENTS</h4>
+                    <h4 class="card-title">STUDENTS WITH CA : <span style="color: blue;"><b>{{$count}}</b></span> STUDENTS</h4>
                     @endif
                     <div class="col-md-12">
                         @if (session('success'))
@@ -62,9 +62,9 @@
                         <a class="btn btn-success mt-3 mr-2" href="{{ route('courses.exportListExamList',$courseId) }}">Export List</a>                      
                     </div>
                     @endif
-                    <div class="col-md-6"> 
+                    {{-- <div class="col-md-6"> 
                         <button class="btn btn-success mt-3 mr-2" id="exportBtn">Export to Excel</button>
-                    </div>
+                    </div> --}}
                 </div>
                 <!-- <form action="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}" method="GET">
                     <div class="row">
@@ -149,7 +149,7 @@
                         </tbody>
                     </table>
                     </div>
-                    {{-- {{ $results->links('pagination::bootstrap-4') }} --}}
+                    {{ $results->links('pagination::bootstrap-4') }}
                 </div>
                 @else
                 <div class="card-body text-center">

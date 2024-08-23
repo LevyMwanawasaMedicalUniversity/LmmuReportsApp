@@ -951,15 +951,19 @@ class StudentsController extends Controller
                         ->get();
             if($students){
                 $studentNumbers = $students->pluck('student_number')->toArray();
-                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+                $results = $this->getAppealStudentDetails($academicYear, $studentNumbers);
+                $count = $results->get()->count();
+                $results = $results->paginate(30);
             }else{
                 return back()->with('error', 'NOT FOUND.');               
             }
         }else{
             $studentNumbers = Student::where('status', 6)->pluck('student_number')->toArray();
-            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
+            $results = $this->getAppealStudentDetails($academicYear, $studentNumbers);
+            $count = $results->get()->count();
+            $results = $results->paginate(30);
         }
-        return view('allStudents.index', compact('results','courseName','courseId'));
+        return view('allStudents.index', compact('results','courseName','courseId','count'));
     }
 
     public function getGraduatedStudents(){
