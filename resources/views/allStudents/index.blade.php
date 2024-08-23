@@ -17,7 +17,7 @@
                     @if($courseName)
                     <h4 class="card-title">{{ $courseName }} Students </h4>
                     @else
-                    <h4 class="card-title">ALL STUDENTS </h4>
+                    <h4 class="card-title">ALL {{$results->count()}} STUDENTS</h4>
                     @endif
                     <div class="col-md-12">
                         @if (session('success'))
@@ -118,6 +118,7 @@
                                 <th>School</th>
                                 <th>Study Mode</th>
                                 <th>Year Of Study</th>
+                                <th>Registration Status</th>
                                 <th class="text-end">Action</th>
                                 <!-- Add other table headers for additional properties -->
                             </tr>
@@ -133,7 +134,8 @@
                                 <td>{{$result->Name}}</td>
                                 <td>{{$result->Description}}</td>
                                 <td>{{$result->StudyType}}</td>
-                                <td>{{ $result->Year ? 'Year ' . $result->Year : 'NO REGISTRATION' }}</td>
+                                <td>{{ $result->Year ? 'Year ' . $result->Year : 'NOT FOUND' }}</td>
+                                <td>{{$result->RegistrationStatus}}</td>
                                 <td class="text-end">
                                     <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
                                         <a href="{{route('docket.resetStudent',$result->StudentID)}}" class="btn btn-info">Reset</a>

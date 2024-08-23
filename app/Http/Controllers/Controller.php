@@ -1529,7 +1529,7 @@ class Controller extends BaseController
 
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
             ->where('Description', 'like', '%-%-%')
-            ->where('Debit', '>', 0)
+            ->where('Debit', '>=', 0)
             ->groupBy('AccountLink');
         $results = SageClient::select    (
             'DCLink',
