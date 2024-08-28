@@ -6,6 +6,23 @@
 ])
 
 @section('content')
+<style>
+@keyframes pulsate {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulsate {
+    animation: pulsate 1s infinite;
+}
+</style>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 <div class="panel-header panel-header-sm">
@@ -22,9 +39,8 @@
                     <table class="table">
                         <thead class="text-primary">
                         <tr>
-                            <th>Course Name</th>
-                            <th>Course Code</th>
-                            <th>Total Marks (40)</th> 
+                            <th>Course </th>
+                            <th>CA OUT OF <span class="badge bg-secondary">40</span></th> 
                             <th class="text-end">Actions</th>   
                         </tr>
                         </thead>
@@ -38,11 +54,14 @@
                             @endphp
                                 <tr>
                                     
-                                    <td>{{$courseName}}</td>
-                                    <td>{{$courseCode}}</td>
-                                    <td>{{$result->total_marks}}</td>
+                                    <td>{{$courseName}}-{{$courseCode}}</td>
+                                    {{-- <td>{{$result->total_marks}}</td> --}}
+                                    <td>
+                                        <span class="badge bg-primary">{{$result->total_marks}}</span> <b>/</b>
+                                        <span class="badge bg-secondary">40</span>
+                                    </td>
                                     <td class="text-end">
-                                        <a href="{{route('docket.viewCaComponents',$result->course_id )}}" class="btn btn-success">View</a>
+                                        <a href="{{route('docket.viewCaComponents',$result->course_id )}}" class="btn btn-success pulsate">CLICK HERE</a>
                                     </td>
 
                                 </tr>

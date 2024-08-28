@@ -22,10 +22,10 @@
                     <table class="table">
                         <thead class="text-primary">
                         <tr>
-                            <th>#</th>
-                            <th>Assessment Number</th>
-                            <th>Description</th> 
-                            <th class="text-end">Percentage Score</th>   
+                            {{-- <th>#</th> --}}
+                            <th>{{$results->first()->assesment_type_name}}</th>                             
+                            <th>Mark</th>   
+                            <th class="text-end">Details</th>
                         </tr>
                         </thead>
                         <tbody> 
@@ -34,13 +34,18 @@
                                 
 
                             @endphp
-                                <tr>
-                                    
-                                    <td>{{$loop->iteration}}</td>
-                                    <td>{{$result->assesment_type_name}} {{$loop->iteration}}</td>
-                                    <td>{{$result->description}}</td>
-                                    <td class="text-end">{{$result->cas_score}} %</td>                                    
-
+                                <tr>                                    
+                                    {{-- <td>{{$loop->iteration}}</td> --}}
+                                    <td>{{$result->assesment_type_name}} {{$loop->iteration}}</td>                                    
+                                    {{-- <td >{{$result->cas_score}} %</td>  --}}
+                                    <td>
+                                        <span class="badge bg-primary">{{$result->cas_score}}%</span>
+                                    </td>
+                                    @if($result->description)
+                                    <td class="text-end">{{$result->description}}</td> 
+                                    @else                                  
+                                    <td class="text-end">None Provided</td>
+                                    @endif 
                                 </tr>
                             @endforeach                  
                         </tbody>
