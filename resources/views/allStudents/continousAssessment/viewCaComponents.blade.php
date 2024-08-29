@@ -39,7 +39,12 @@
 
             <div class="card-header">
                 <h4 class="card-title">Continous Assessment Components for {{$courseName}}-{{$courseCode}}</h4>
+                <div class="alert alert-info" role="alert">
+                    <p class="text-white">Please note that if the total marks for all CA components summed up are not <span class="badge bg-secondary">40</span>,
+                    then some CA components have yet to be uploaded.</p>
+                </div> 
             </div>
+            
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table">

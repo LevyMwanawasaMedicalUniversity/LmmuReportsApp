@@ -33,6 +33,9 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Continous Assessment</h4>
+                <div class="alert alert-info" role="alert">
+                    <p class="text-white">Click the button to view CA details.</p>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">

@@ -15,7 +15,10 @@
         <div class="col-md-12">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Continous Assessment Components</h4>
+                <h4 class="card-title">{{$results->first()->assesment_type_name}} results for {{$results->first()->course_code}}</h4>
+                <div class="alert alert-info" role="alert">
+                    <p class="text-white">Below are the marks recorded for each {{$results->first()->assesment_type_name}} in {{$results->first()->course_code}}</p>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
