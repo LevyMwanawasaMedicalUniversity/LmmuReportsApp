@@ -66,11 +66,11 @@ return [
 
     'moodle_database' => [
         'driver' => 'mysql',
-        'host' => env('MOODLE_DB_HOST', '192.168.20.29'),
-        'port' => env('MOODLE_DB_PORT', '3306'),
-        'database' => env('MOODLE_DB_DATABASE', 'moodle_lmmu'),
-        'username' => env('MOODLE_DB_USERNAME', 'azwel'),
-        'password' => env('MOODLE_DB_PASSWORD', 'Lm@2023Paxre1#'),
+        'host' => env('MOODLE_DB_HOST'),
+        'port' => env('MOODLE_DB_PORT'),
+        'database' => env('MOODLE_DB_DATABASE'),
+        'username' => env('MOODLE_DB_USERNAME'),
+        'password' => env('MOODLE_DB_PASSWORD'),
         'charset' => 'utf8mb4',
         'collation' => 'utf8mb4_unicode_ci',
         'prefix' => '',
