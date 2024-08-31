@@ -180,10 +180,10 @@ SELECT
         WHEN gp2.Grade IS NULL THEN 'NOT APPLICABLE'
         ELSE 'CLEARED'
     END AS YearOfStudy,
-    CASE
-        WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
-        ELSE 'NO REGISTRATION'
-    END AS "Registration Status",
+    -- CASE
+    --     WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
+    --     ELSE 'NO REGISTRATION'
+    -- END AS "Registration Status",
     CASE 
         WHEN bi.ID LIKE '240%' THEN 0
         WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
@@ -248,7 +248,7 @@ LEFT JOIN (
 	GROUP BY bi3.ID
 ) year_of_reporting ON year_of_reporting.StudentId = bi.ID 
 LEFT JOIN balances b ON b.StudentID = bi.ID
-LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2024
+LEFT JOIN `course-electives` ce ON bi.ID = ce.StudentID AND (ce.`Year` = 2024 OR ce.`EnrolmentDate` > '2024-01-01')
 LEFT JOIN `program-course-link` pcl2 ON pcl2.CourseID = ce.CourseID 
 LEFT JOIN programmes p2 ON p2.ID = pcl2.ProgramID
 LEFT JOIN program_data pd ON s.ShortName = pd.ProgrammeCode AND bi.StudyType = pd.StudyType AND bi.ID NOT LIKE '190%'

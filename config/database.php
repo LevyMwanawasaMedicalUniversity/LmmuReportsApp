@@ -33,48 +33,67 @@ return [
     |
     */
 
-    'connections' => [
+    'connections' => [       
 
-        'edurole_database' => [
-            'driver' => 'mysql',
-            'host' => '192.168.20.50',
-            'port' => '3306',
-            'database' => 'edurole',
-            'username' => 'azwel',
-            'password' => '4p3xKun16Rodrig0!J0hn#100%',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
 
-        'moodle_database' => [
-            'driver' => 'mysql',
-            'host' => '192.168.20.29',
-            'port' => '3306',
-            'database' => 'moodle_lmmu',
-            'username' => 'azwel',
-            'password' => 'Lm@2023Paxre1#',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
+        /////////////////////////////////////
 
-        //This is the live database on the server
+    'sage_database' => [
+        'driver' => 'sqlsrv',
+        'host' => env('SAGE_DB_HOST'),
+        'port' => env('SAGE_DB_PORT'),
+        'database' => env('SAGE_DB_DATABASE'),
+        'username' => env('SAGE_DB_USERNAME'),
+        'password' => env('SAGE_DB_PASSWORD'),
+        'charset' => 'utf8',
+        'collation' => 'utf8_unicode_ci',
+        'encrypt' => 'yes',
+        'trust_server_certificate' => true,
+    ],
 
-        'assessments_database' => [
-            'driver' => 'mysql',
-            'host' => '192.168.20.38',
-            'port' => '3306',
-            'database' => 'assessments_db',
-            'username' => 'panda',
-            'password' => 'Crazy8@1000#',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
+    'edurole_database' => [
+        'driver' => 'mysql',
+        'host' => env('EDUROLE_DB_HOST'),
+        'port' => env('EDUROLE_DB_PORT'),
+        'database' => env('EDUROLE_DB_DATABASE'),
+        'username' => env('EDUROLE_DB_USERNAME'),
+        'password' => env('EDUROLE_DB_PASSWORD'),
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix' => '',
+        'strict' => false,
+    ],
+
+    'moodle_database' => [
+        'driver' => 'mysql',
+        'host' => env('MOODLE_DB_HOST', '192.168.20.29'),
+        'port' => env('MOODLE_DB_PORT', '3306'),
+        'database' => env('MOODLE_DB_DATABASE', 'moodle_lmmu'),
+        'username' => env('MOODLE_DB_USERNAME', 'azwel'),
+        'password' => env('MOODLE_DB_PASSWORD', 'Lm@2023Paxre1#'),
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix' => '',
+        'strict' => false,
+    ],
+
+    'assessments_database' => [
+        'driver' => 'mysql',
+        'host' => env('ASSESSMENTS_DB_HOST'),
+        'port' => env('ASSESSMENTS_DB_PORT'),
+        'database' => env('ASSESSMENTS_DB_DATABASE'),
+        'username' => env('ASSESSMENTS_DB_USERNAME'),
+        'password' => env('ASSESSMENTS_DB_PASSWORD'),
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix' => '',
+        'strict' => false,
+    ],
+
+
+        /////////////////////////
+
+
 
         //This is the test database on localhost
 
@@ -91,6 +110,8 @@ return [
         //     'strict' => false,
         // ],
 
+        
+
 
         'sqlite' => [
             'driver' => 'sqlite',
@@ -100,18 +121,7 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
-        'sage_database' => [
-            'driver' => 'sqlsrv',
-            'host' =>  '192.168.20.145',
-            'port' => '1433',
-            'database' => 'LMMU_Live',
-            'username' => 'lmmureports',
-            'password' => '#R3p0rt5@DevBoi!/2580=F!naNc3!le',
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'encrypt' => 'yes',
-            'trust_server_certificate' => true,
-        ],
+        
 
         'mysql' => [
             'driver' => 'mysql',

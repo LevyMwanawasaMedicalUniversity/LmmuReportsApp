@@ -1631,7 +1631,7 @@ class Controller extends BaseController
                 ->orWhere('basic-information.StudyType', '=', 'Distance');
         })
         ->where('basic-information.StudyType', '!=', 'Staff')
-        ->whereIn('student-study-link.StudentID', $studentIds)
+        // ->whereIn('student-study-link.StudentID', $studentIds)
         ->groupBy('student-study-link.StudentID')
         ->get();
 

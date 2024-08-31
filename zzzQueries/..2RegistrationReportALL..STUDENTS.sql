@@ -180,10 +180,10 @@ SELECT
         WHEN gp2.Grade IS NULL THEN 'NOT APPLICABLE'
         ELSE 'CLEARED'
     END AS YearOfStudy,
-    CASE
-        WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
-        ELSE 'NO REGISTRATION'
-    END AS "Registration Status",
+    -- CASE
+    --     WHEN ce.StudentID IS NOT NULL THEN 'REGISTERED'
+    --     ELSE 'NO REGISTRATION'
+    -- END AS "Registration Status",
     CASE 
         WHEN bi.ID LIKE '240%' THEN 0
         WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
