@@ -44,6 +44,7 @@ WITH program_data AS (
     UNION ALL SELECT 'Fulltime', 'DipBMS', 14570, 14350
     UNION ALL SELECT 'Fulltime', 'DipCMSG', 12570, 12350
     UNION ALL SELECT 'Fulltime', 'DipCMSP', 12350, 12350
+    UNION ALL SELECT 'Fulltime', 'DipMHCP', 12350, 12350   
     UNION ALL SELECT 'Fulltime', 'DipDTech', 12570, 12350
     UNION ALL SELECT 'Fulltime', 'DipDTh', 12570, 12350
     UNION ALL SELECT 'Fulltime', 'DipEMC', 12570, 12350
@@ -72,7 +73,7 @@ WITH program_data AS (
     UNION ALL SELECT 'Distance', 'BSc.MHN', 12506, 12150
     UNION ALL SELECT 'Distance', 'DipCMSG', 10570 , 10350
     UNION ALL SELECT 'Distance', 'DipCMSP', 10570 , 10350
-    UNION ALL SELECT 'Distance', 'DipCMSP', 14706 , 14706
+    UNION ALL SELECT 'Distance', 'DipMHCP', 14706 , 14706
     UNION ALL SELECT 'Distance', 'DipHNP', 14706 , 14706
     UNION ALL SELECT 'Distance', 'MPH', 14625  , 14625
     UNION ALL SELECT 'Distance', 'MScID', 16575  , 16575    

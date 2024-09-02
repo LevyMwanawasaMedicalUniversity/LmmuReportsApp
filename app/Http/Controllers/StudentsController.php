@@ -399,8 +399,9 @@ class StudentsController extends Controller
                 $this->createUserAccount($studentId);
                 // $this->sendEmailToStudent($sendingEmail, $studentId, $maxAttempts, new NewStudentMail($studentId));
             }            
-        }           
-        return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
+        }     
+        return redirect()->back()->with('success', 'Student imported successfully.');      
+        // return redirect()->route('students.showStudent',$studentId)->with('success', 'Student created successfully.');
     }
 
     public function createUserAccount($studentId){

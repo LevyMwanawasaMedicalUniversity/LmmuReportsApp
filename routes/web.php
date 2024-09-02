@@ -63,6 +63,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/students/exam/results/{studentNumber}', 'App\Http\Controllers\DocketController@students2023ExamResults')->name('docket.students2023ExamResults');
     Route::get('/students/caResult/resultsViewCourses/', 'App\Http\Controllers\ContinousAssessmentController@studentsCAResults')->name('docket.studentsCAResults');
     Route::get('/students/caResult/viewCaComponents/{courseId}/', 'App\Http\Controllers\ContinousAssessmentController@viewCaComponents')->name('docket.viewCaComponents');
+    Route::get('/students/caResult/viewCaComponentsWithComponent/{courseId}/', 'App\Http\Controllers\ContinousAssessmentController@viewCaComponentsWithComponent')->name('docket.viewCaComponentsWithComponent');
     Route::get('/students/caResult/viewInSpecificCaComponent/{courseId}/{caType}', 'App\Http\Controllers\ContinousAssessmentController@viewInSpecificCaComponent')->name('docket.viewInSpecificCaComponent');
 
     

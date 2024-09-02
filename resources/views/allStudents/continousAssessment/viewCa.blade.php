@@ -43,7 +43,7 @@
                         <thead class="text-primary">
                         <tr>
                             <th>Course </th>
-                            <th>CA OUT OF <span class="badge bg-secondary">40</span></th> 
+                            <th>Overall CA <span class="badge bg-secondary">40</span></th> 
                             <th class="text-end">Actions</th>   
                         </tr>
                         </thead>
@@ -55,19 +55,54 @@
                                 $courseCode = $course->Name;                              
 
                             @endphp
-                                <tr>
-                                    
-                                    <td>{{$courseName}}-{{$courseCode}}</td>
-                                    {{-- <td>{{$result->total_marks}}</td> --}}
-                                    <td>
-                                        <span class="badge bg-primary">{{$result->total_marks}}</span> <b>/</b>
-                                        <span class="badge bg-secondary">40</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="{{route('docket.viewCaComponents',$result->course_id )}}" class="btn btn-success pulsate">CLICK HERE</a>
-                                    </td>
+                            
 
-                                </tr>
+                                @if(in_array($result->course_id, [1106, 1105]) || $result->study_id != 165)
+                                    <tr>
+                                        
+                                        <td>{{$courseName}}-{{$courseCode}}</td>
+                                        {{-- <td>{{$result->total_marks}}</td> --}}
+                                        <td>
+                                            <span class="badge bg-primary">{{$result->total_marks}}</span> <b>/</b>
+                                            <span class="badge bg-secondary">40 </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <form action="{{ route('docket.viewCaComponents', encrypt($result->course_id)) }}" method="GET">
+                                                <input type="hidden" name="study_id" value="{{encrypt($result->study_id)}}">
+                                                <input type="hidden" name="delivery_mode" value="{{encrypt($result->delivery_mode)}}">
+                                                <input type="hidden" name="course_id" value="{{encrypt($result->course_id)}}">
+                                                <button type="submit" class="btn btn-success pulsate">CLICK HERE</button>
+                                            </form>
+                                        </td>
+
+                                    </tr>
+                                @else
+                                    <tr>
+                                        <td>{{$courseName}}-{{$courseCode}}</td>
+                                        {{-- <td>{{$result->total_marks}}</td> --}}
+
+                                        @php
+                                            $numberOfUniqueInstances = App\Models\LMMAXStudentsContinousAssessment::where('students_continous_assessments.course_id', $result->course_id)
+                                                ->where('students_continous_assessments.delivery_mode', $result->delivery_mode)
+                                                ->where('students_continous_assessments.study_id', $result->study_id)
+                                                ->whereNotNull('students_continous_assessments.component_id')
+                                                ->distinct('students_continous_assessments.component_id')
+                                                ->count('students_continous_assessments.component_id');
+                                        @endphp
+                                        <td>
+                                            <span class="badge bg-primary">{{ number_format($result->total_marks / $numberOfUniqueInstances, 2) }}</span> <b>/</b>
+                                            <span class="badge bg-secondary">40</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <form action="{{ route('docket.viewCaComponentsWithComponent', encrypt($result->course_id)) }}" method="GET">
+                                                <input type="hidden" name="study_id" value="{{encrypt($result->study_id)}}">
+                                                <input type="hidden" name="delivery_mode" value="{{encrypt($result->delivery_mode)}}">
+                                                <input type="hidden" name="course_id" value="{{encrypt($result->course_id)}}">
+                                                <button type="submit" class="btn btn-success pulsate">CLICK HERE</button>
+                                            </form>
+                                    </tr>
+
+                                @endif
                             @endforeach                  
                         </tbody>
                     </table>

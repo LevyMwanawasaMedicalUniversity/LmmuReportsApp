@@ -38,7 +38,7 @@
             @endphp
 
             <div class="card-header">
-                <h4 class="card-title">Continous Assessment Components for {{$courseName}}-{{$courseCode}}</h4>
+                <h4 class="card-title">Continous Assessment Components for {{$courseName}}-{{$courseCode}} {{$componentName}}</h4>
                 <div class="alert alert-info" role="alert">
                     <p class="text-white">Please note that if the total marks for all CA components summed up are not <span class="badge bg-secondary">40</span>,
                     then some CA components have yet to be uploaded.</p>
@@ -104,9 +104,12 @@
                                         </div>
                                     </td> --}}
                                     <td class="text-end">
-                                        <a href="{{ route('docket.viewInSpecificCaComponent', ['courseId' => $result->course_id, 'caType' => $result->ca_type]) }}" class="btn btn-success pulsate">CLICK HERE</a> 
+                                        <form action="{{ route('docket.viewInSpecificCaComponent', ['courseId' => $result->course_id, 'caType' => $result->ca_type]) }}" method="GET">
+                                            <input type="hidden" name="component_name" value="{{encrypt($componentName)}}">
+                                            <input type="hidden" name="component_id" value="{{encrypt($result->component_id)}}">
+                                            <button type="submit" class="btn btn-success pulsate">COMPOCLICK HERE</button>
+                                        </form>
                                     </td>
-
                                 </tr>
                             @endforeach                  
                         </tbody>
