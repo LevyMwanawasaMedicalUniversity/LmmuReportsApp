@@ -36,7 +36,7 @@
                         @endif
                     </div>
                 <div class="col-md-12">
-                    <div class="alert alert-info">>
+                    <div class="alert alert-info">
                         <p class="text-white">Below are the marks recorded for each {{$results->first()->assesment_type_name}} in {{$results->first()->course_code}}</p>
                     </div>
                 </div>
