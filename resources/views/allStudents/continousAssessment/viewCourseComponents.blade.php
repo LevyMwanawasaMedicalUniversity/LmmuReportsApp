@@ -33,6 +33,25 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">Continous Assessment Components for {{$courseName}} - {{$courseCode}}</h4>
+                <div class="col-md-12">
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+    
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div class="alert alert-warning">
+                                {{ session('warning') }}
+                            </div>
+                        @endif
+                    </div>
                 <div class="alert alert-info" role="alert">
                     <p class="text-white">Click the button to view CA Component details.</p>
                 </div>

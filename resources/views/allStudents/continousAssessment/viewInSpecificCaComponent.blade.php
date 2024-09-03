@@ -16,6 +16,25 @@
         <div class="card">
             <div class="card-header">
                 <h4 class="card-title">{{$results->first()->assesment_type_name}} results for {{$results->first()->course_code}} {{$componentName}}</h4>
+                <div class="col-md-12">
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+    
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div class="alert alert-warning">
+                                {{ session('warning') }}
+                            </div>
+                        @endif
+                    </div>
                 <div class="alert alert-info" role="alert">
                     <p class="text-white">Below are the marks recorded for each {{$results->first()->assesment_type_name}} in {{$results->first()->course_code}}</p>
                 </div>

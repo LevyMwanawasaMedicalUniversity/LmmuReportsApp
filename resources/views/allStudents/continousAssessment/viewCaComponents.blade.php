@@ -39,6 +39,25 @@
 
             <div class="card-header">
                 <h4 class="card-title">Continous Assessment Components for {{$courseName}}-{{$courseCode}} {{$componentName}}</h4>
+                <div class="col-md-12">
+                        @if (session('success'))
+                            <div class="alert alert-success">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+    
+                        @if (session('error'))
+                            <div class="alert alert-danger">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
+                        @if (session('warning'))
+                            <div class="alert alert-warning">
+                                {{ session('warning') }}
+                            </div>
+                        @endif
+                    </div>
                 <div class="alert alert-info" role="alert">
                     <p class="text-white">Please note that if the total marks for all CA components summed up are not <span class="badge bg-secondary">40</span>,
                     then some CA components have yet to be uploaded.</p>
@@ -71,6 +90,7 @@
                                     ->where('c_a_type_marks_allocations.delivery_mode', $result->delivery_mode)
                                     ->where('c_a_type_marks_allocations.study_id', $result->study_id)
                                     ->where('c_a_type_marks_allocations.course_id', $result->course_id)
+                                    ->where('c_a_type_marks_allocations.component_id', $result->component_id)
                                     //->where('students_continous_assessments.students_continous_assessment_id', $result->students_continous_assessment_id)
                                     ->select('c_a_type_marks_allocations.total_marks')
                                     ->first();
@@ -107,7 +127,7 @@
                                         <form action="{{ route('docket.viewInSpecificCaComponent', ['courseId' => $result->course_id, 'caType' => $result->ca_type]) }}" method="GET">
                                             <input type="hidden" name="component_name" value="{{encrypt($componentName)}}">
                                             <input type="hidden" name="component_id" value="{{encrypt($result->component_id)}}">
-                                            <button type="submit" class="btn btn-success pulsate">COMPOCLICK HERE</button>
+                                            <button type="submit" class="btn btn-success pulsate">CLICK HERE</button>
                                         </form>
                                     </td>
                                 </tr>

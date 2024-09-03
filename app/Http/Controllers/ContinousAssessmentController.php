@@ -94,6 +94,9 @@ class ContinousAssessmentController extends Controller
             ->select('students_continous_assessments.component_id','students_continous_assessments.delivery_mode','students_continous_assessments.study_id','students_continous_assessments.students_continous_assessment_id','students_continous_assessments.student_id', DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'),'students_continous_assessments.course_id','students_continous_assessments.ca_type','assessment_types.assesment_type_name')
             ->groupBy('students_continous_assessments.student_id','students_continous_assessments.course_id','students_continous_assessments.ca_type')
             ->get();
+            if ($results->isEmpty()) {
+                return redirect()->back()->with('warning', 'No Results Uploaded Yet');
+            }
 
         // return $results;
         return view('allStudents.continousAssessment.viewCaComponents', compact('results','studentNumber','componentName'));
@@ -166,7 +169,10 @@ class ContinousAssessmentController extends Controller
             ->where('course_assessments.component_id', $componentId)
             ->orderBy('course_assessments.course_assessments_id', 'asc')
             ->get();
-        // return $results;
+        if ($results->isEmpty()) {
+            return redirect()->back()->with('warning', 'No Results Uploaded Yet');
+        }
+        
         return view('allStudents.continousAssessment.viewInSpecificCaComponent', compact('componentName','results','studentNumber'));
     }
 }
