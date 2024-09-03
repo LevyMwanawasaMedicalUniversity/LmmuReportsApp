@@ -77,18 +77,18 @@ return [
         'strict' => false,
     ],
 
-    // 'assessments_database' => [
-    //     'driver' => 'mysql',
-    //     'host' => env('ASSESSMENTS_DB_HOST'),
-    //     'port' => env('ASSESSMENTS_DB_PORT'),
-    //     'database' => env('ASSESSMENTS_DB_DATABASE'),
-    //     'username' => env('ASSESSMENTS_DB_USERNAME'),
-    //     'password' => env('ASSESSMENTS_DB_PASSWORD'),
-    //     'charset' => 'utf8mb4',
-    //     'collation' => 'utf8mb4_unicode_ci',
-    //     'prefix' => '',
-    //     'strict' => false,
-    // ],
+    'assessments_database' => [
+        'driver' => 'mysql',
+        'host' => env('ASSESSMENTS_DB_HOST'),
+        'port' => env('ASSESSMENTS_DB_PORT'),
+        'database' => env('ASSESSMENTS_DB_DATABASE'),
+        'username' => env('ASSESSMENTS_DB_USERNAME'),
+        'password' => env('ASSESSMENTS_DB_PASSWORD'),
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_unicode_ci',
+        'prefix' => '',
+        'strict' => false,
+    ],
 
 
         /////////////////////////
@@ -97,18 +97,18 @@ return [
 
         //This is the test database on localhost
 
-        'assessments_database' => [
-            'driver' => 'mysql',
-            'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
-            'port' => '3306',      // Change this to the local port used in the SSH tunnel
-            'database' => 'livedb12',
-            'username' => 'root',
-            'password' => '',
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ],
+        // 'assessments_database' => [
+        //     'driver' => 'mysql',
+        //     'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
+        //     'port' => '3306',      // Change this to the local port used in the SSH tunnel
+        //     'database' => 'livedb12',
+        //     'username' => 'root',
+        //     'password' => '',
+        //     'charset' => 'utf8mb4',
+        //     'collation' => 'utf8mb4_unicode_ci',
+        //     'prefix' => '',
+        //     'strict' => false,
+        // ],
 
         
 
