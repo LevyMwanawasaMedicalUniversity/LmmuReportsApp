@@ -52,8 +52,10 @@
                             </div>
                         @endif
                     </div>
-                <div class="alert alert-info" role="alert">
-                    <p class="text-white">Click the button to view CA Component details.</p>
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <p class="text-white">Click the button to view CA Component details.</p>
+                    </div>
                 </div>
             </div>
             <div class="card-body">

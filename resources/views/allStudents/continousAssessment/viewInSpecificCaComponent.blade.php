@@ -35,8 +35,10 @@
                             </div>
                         @endif
                     </div>
-                <div class="alert alert-info" role="alert">
-                    <p class="text-white">Below are the marks recorded for each {{$results->first()->assesment_type_name}} in {{$results->first()->course_code}}</p>
+                <div class="col-md-12">
+                    <div class="alert alert-info">>
+                        <p class="text-white">Below are the marks recorded for each {{$results->first()->assesment_type_name}} in {{$results->first()->course_code}}</p>
+                    </div>
                 </div>
             </div>
             <div class="card-body">

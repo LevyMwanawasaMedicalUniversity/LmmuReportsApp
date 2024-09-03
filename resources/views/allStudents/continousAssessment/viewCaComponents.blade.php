@@ -58,9 +58,11 @@
                             </div>
                         @endif
                     </div>
-                <div class="alert alert-info" role="alert">
-                    <p class="text-white">Please note that if the total marks for all CA components summed up are not <span class="badge bg-secondary">40</span>,
-                    then some CA components have yet to be uploaded.</p>
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <p class="text-white">Please note that if the total marks for all CA components summed up are not <span class="badge bg-secondary">40</span>,
+                        then some CA components have yet to be uploaded.</p>
+                    </div>
                 </div> 
             </div>
             
