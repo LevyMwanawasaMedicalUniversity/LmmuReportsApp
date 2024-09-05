@@ -152,6 +152,14 @@ SELECT
         ELSE 'Not In Final Year'
     END AS RegistrationFinalistStatus,
     CASE
+        WHEN (bi.ID LIKE '210%' and gp.StudentNo IS NOT NULL) THEN 'ACTIVE STUDENT'
+        WHEN (bi.ID LIKE '220%' and gp.StudentNo IS NOT NULL) THEN 'ACTIVE STUDENT'
+        WHEN (bi.ID LIKE '230%' and gp.StudentNo IS NOT NULL) THEN 'ACTIVE STUDENT'
+        WHEN (bi.ID LIKE '190%' and gp.StudentNo IS NOT NULL) THEN 'ACTIVE STUDENT'
+        WHEN (bi.ID LIKE '240%' AND a.StudentID IS NOT NULL) THEN 'ACTIVE STUDENT'
+        ELSE 'INACTIVE ACCOUNT'
+    END AS StudentStatusEstimation,
+    CASE
         WHEN bi.ID LIKE '190%' THEN '2019'
         WHEN bi.ID LIKE '210%' THEN '2021'
         WHEN bi.ID LIKE '220%' THEN '2022'
@@ -258,12 +266,12 @@ LEFT JOIN `applicants` a ON bi.ID = a.StudentID AND bi.ID LIKE '240%' AND a.Prog
 WHERE 
     LENGTH(bi.ID) > 7
     AND bi.Status = 'Approved'
-    AND (
-        ((bi.ID LIKE '210%' and gp.StudentNo IS NOT NULL)
-        OR (bi.ID LIKE '220%' and gp.StudentNo IS NOT NULL)
-        OR (bi.ID LIKE '230%' and gp.StudentNo IS NOT NULL)
-        OR (bi.ID LIKE '190%' and gp.StudentNo IS NOT NULL))
-        OR (bi.ID LIKE '240%' AND a.StudentID IS NOT NULL)
-    )
+    -- AND (
+    --     ((bi.ID LIKE '210%' and gp.StudentNo IS NOT NULL)
+    --     OR (bi.ID LIKE '220%' and gp.StudentNo IS NOT NULL)
+    --     OR (bi.ID LIKE '230%' and gp.StudentNo IS NOT NULL)
+    --     OR (bi.ID LIKE '190%' and gp.StudentNo IS NOT NULL))
+    --     OR (bi.ID LIKE '240%' AND a.StudentID IS NOT NULL)
+    -- )
 GROUP BY 
     bi.ID;
