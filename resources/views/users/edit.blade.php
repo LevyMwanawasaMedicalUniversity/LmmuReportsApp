@@ -69,7 +69,8 @@
                     //$studentInformation = \App\Models\BasicInformation::where('ID','=',$user->name)->first(); 
                     @endphp
                         <a href="https://edurole.lmmu.ac.zm/information/show/{{ $studentInformation->StudentID }}" target="_blank">
-                            <img class="avatar border-gray" src="{{ asset('assets/img/default-avatar.png') }}" alt="...">
+                            <img class="avatar border-gray" src="//edurole.lmmu.ac.zm/datastore/identities/pictures/{{ $studentInformation->StudentID }}.png" 
+                                onerror="this.onerror=null;this.src='{{ asset('assets/img/default-avatar.png') }}';" alt="...">
                             <h5 class="title">{{ $studentInformation->FirstName }} {{ $studentInformation->Surname }} </h5>
                         </a>
                         <p>
@@ -119,6 +120,7 @@
                     <div class="author">
                         <a href="#">
                             <img class="avatar border-gray" src="{{ asset('assets/img/default-avatar.png') }}" alt="...">
+                            
                             <h5 class="title">{{ $user->name }}</h5>
                         </a>
                         <h6 class="description">
