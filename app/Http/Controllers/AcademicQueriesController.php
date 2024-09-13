@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BasicInformation;
 use App\Models\GradesPublished;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Http\Request;
@@ -11,6 +12,19 @@ class AcademicQueriesController extends Controller
     public function index(){        
         return view('academics.index');
     } 
+
+    public function manageAdmissions(){
+        $results = BasicInformation::join('student-study-link', 'basic-information.ID', '=', 'student-study-link.StudentID')
+            ->join('study', 'student-study-link.StudyID', '=', 'study.ID')
+            ->join('schools', 'study.ParentID', '=', 'schools.ID')
+            ->join('applicants', 'basic-information.ID', '=', 'applicants.StudentID')
+            ->where('applicants.DateTime', '>=', '2024-08-16')
+            // ->groupBy('study.Name')
+            ->select('study.Name as Programme', 'schools.Name as School', 'study.ID as studyID' )
+            ->get();
+    
+        return view('academics.manageAdmissions', compact('results'));
+    }
 
     //All students registered in a specific academic Year, regardless of programme
     public function viewAllStudentsRegisteredInASpecificAcademicYear(Request $request){

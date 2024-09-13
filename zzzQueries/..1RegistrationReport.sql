@@ -159,14 +159,7 @@ SELECT
         WHEN (bi.ID LIKE '240%' AND a.StudentID IS NOT NULL) THEN 'ACTIVE STUDENT'
         ELSE 'INACTIVE ACCOUNT'
     END AS StudentStatusEstimation,
-    CASE
-        WHEN bi.ID LIKE '190%' THEN '2019'
-        WHEN bi.ID LIKE '210%' THEN '2021'
-        WHEN bi.ID LIKE '220%' THEN '2022'
-        WHEN bi.ID LIKE '230%' THEN '2023'
-        WHEN bi.ID LIKE '240%' THEN '2024'
-        ELSE '2018'
-    END as AcademicYearReported,    
+       
     CASE
         WHEN c.Year + 1 = max_year_table.MaxYear THEN 'FinalistByEstimation'
         ELSE 'Not In Final Year'

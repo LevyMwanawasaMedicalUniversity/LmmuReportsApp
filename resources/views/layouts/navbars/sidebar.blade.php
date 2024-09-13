@@ -155,6 +155,12 @@
                   <i class="now-ui-icons arrows-1_share-66"></i>
                   <p>{{ __('Import to Grades Archive') }}</p>
                 </a>
+              </li>
+              <li class="@if ($activePage == 'academics.ManageAdmissions') active @endif">
+                <a href="{{ route('academics.ManageAdmissions') }}">
+                  <i class="now-ui-icons arrows-1_share-66"></i>
+                  <p>{{ __('Manage Admissions') }}</p>
+                </a>
               </li>               
               <li class="@if ($activePage == 'importGradesArchive') active @endif">
                 <a href="{{ route('academics.EmailAnnouncement') }}">
