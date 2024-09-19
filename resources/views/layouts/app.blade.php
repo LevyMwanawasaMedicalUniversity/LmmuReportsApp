@@ -28,7 +28,6 @@
   <!-- CSS Just for demo purpose, don't include it in your project -->
   <link href="{{ asset('assets') }}/demo/demo.css" rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="html2pdf.bundle.min.js"></script>
   
 </head>
 
