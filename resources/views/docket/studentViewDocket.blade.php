@@ -62,7 +62,7 @@
                             <p class="m-0"><strong>{{$studentResults->FirstName}} {{$studentResults->Surname}}</strong></p>
                             <p class="m-0">StudentID: <strong>{{$studentResults->StudentID}}</strong></p>
                             <p class="m-0">NRC: <strong>{{$studentResults->GovernmentID}}</strong></p>
-                            <p class="m-0">Balance: <strong>K {{$studentResults->Amount}}</strong></p>
+                            <p class="m-0">School: <strong>{{$studentResults->Description}}</strong></p>                            
                             <p class="m-0">Delivery Mode: <strong>{{$studentResults->StudyType}}</strong></p>
                         </div>
 
