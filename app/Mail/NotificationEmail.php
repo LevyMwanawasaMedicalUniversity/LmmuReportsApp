@@ -30,7 +30,7 @@ class NotificationEmail extends Mailable
         $studentDetails = BasicInformation::find($this->studentId);
         
         return $this
-            ->from('registrar@lmmu.ac.zm')
+            ->from('registration@lmmu.ac.zm')
             ->subject('2024 EXAMINATION DOCKETS')
             ->view('emails.notification', compact('studentDetails'));
     }
