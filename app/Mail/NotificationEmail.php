@@ -31,7 +31,7 @@ class NotificationEmail extends Mailable
         
         return $this
             ->from('registrar@lmmu.ac.zm')
-            ->subject('2023 Examination Results')
+            ->subject('2024 EXAMINATION DOCKETS')
             ->view('emails.notification', compact('studentDetails'));
     }
 }

@@ -638,7 +638,7 @@ class Controller extends BaseController
             // $email is not a valid email address
             $sendingEmail = 'azwel.simwinga@lmmu.ac.zm';
         }
-        // Mail::to($sendingEmail)->send(new NotificationEmail($studentID));        
+        Mail::to($sendingEmail)->send(new NotificationEmail($studentID));        
     
         return "Test email sent successfully!";
     }

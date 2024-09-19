@@ -50,6 +50,13 @@
                             
                             <button type="submit" class="btn btn-primary">Search</button>
                         </form>
+
+                        <form action="{{ route('docket.sendEmailNotice') }}" method="GET">
+                            @csrf                           
+                            
+                            
+                            <button type="submit" class="btn btn-info">Send Dockets Notification</button>
+                        </form>
                         
                         {{-- <div class="">
                             <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('docket.exportAppealStudents') }}">Export Appeal List</a>

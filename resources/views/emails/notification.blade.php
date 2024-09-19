@@ -2,30 +2,30 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title><b>Exam Results Notification</b></title>
+    <title><b>2024 EXAMINATION DOCKETS</b></title>
 </head>
 <body>
     <div style="font-family: Arial, sans-serif; font-size: 16px; margin: 20px;">
-        {{-- <b>
-            <b> --}}
-                <h2>Exam Results Notification</h2>
-                <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }},</p>            
+        <h2>2024 EXAMINATION DOCKETS</h2>
+        <p>Dear {{ $studentDetails->FirstName }} {{ $studentDetails->Surname }},</p>
 
-                {{-- <P>Kindly accept our apologies and disregard the previously sent emails.</P> --}}
-                <p>We are pleased to inform you that you can also access your results at <a href="http://sisreports.lmmu.ac.zm/">http://sisreports.lmmu.ac.zm</a>.</p>
-                <p><strong>Please note that from now on, you will use your personal email '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password.</strong></p>
-                <p>Login using '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your password.</p>
-                <p><strong>If you encounter any challenges logging in, please utilize the "Forgot Password" option located just below the login section to reset your password. Enter '{{ $studentDetails->PrivateEmail }}' as the email address to which the reset password link will be sent, and then follow the provided instructions.</strong></p>
-                <p>Note that '{{ $studentDetails->PrivateEmail }}' is the email address registered on the system, and therefore, it is the only one you can use to log in and access your results or reset your password.</p>
-                <p>Note that your password has been reset to '12345678'. Be advised to update your passwords as this is not a secure password</p>
-                <p>Note that only the students eligible to view their results will be able to view them through the system.</p>
-                <p><strong> If you are not the intended recipient of this email, please ignore it and accept our apologies.</strong></p>
-                <p>Best Regards,</p>
-                <p>Registrar</p>
-                <p>Levy Mwanawasa Medical University, LUSAKA.</p>
-
-            {{-- </b>
-        </b> --}}
+        <p>We are pleased to inform you that you can access your examination docket at <a href="http://sisreports.lmmu.ac.zm/">http://sisreports.lmmu.ac.zm</a>.</p>
+        <p>Please log in using your personal email address '{{ $studentDetails->PrivateEmail }}' as your username and '12345678' as your default password, if you have not yet changed it.</p>
+        <p><strong>Important:</strong> To view your docket, you must meet the following requirements:</p>
+        <ul>
+            <li>You must have paid at least 75% of your 2024 invoice.</li>
+            <li>You must have completed your course registration.</li>
+            <li>Your courses must be approved, and an invoice for 2024 should have been posted to your account.</li>
+        </ul>
+        <p>If your courses are not approved, please contact your Programme Coordinator for approval. If you have not been invoiced for 2024, kindly visit the Accounts Department.</p>
+        <p>If you encounter any difficulties logging in, please use the "Forgot Password" option on the login page. Enter '{{ $studentDetails->PrivateEmail }}' as your registered email address, and follow the instructions to reset your password.</p>
+        <p>Remember, '{{ $studentDetails->PrivateEmail }}' is the only email address registered in the system, and it must be used to log in or reset your password.</p>
+        <p>Note that your default password is '12345678'. We recommend updating it as soon as possible for security reasons.</p>
+        <p>If you are not the intended recipient of this email, please disregard it, and we apologize for any inconvenience.</p>
+        
+        <p>Best Regards,</p>
+        <p>Registrar</p>
+        <p>Levy Mwanawasa Medical University, LUSAKA.</p>
     </div>
 </body>
 </html>

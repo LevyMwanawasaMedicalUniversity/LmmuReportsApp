@@ -40,17 +40,18 @@ class DocketController extends Controller
     }
 
     public function sendEmailNotice(){
-        $academicYear = 2023;
-        $studentNumbers = Student::where('status', 1)->pluck('student_number')->toArray();
+        $academicYear = 2024;
+        $studentNumbers = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear )->pluck('ID')->toArray();
+        // return $studentNumbers;
+        
+        
         
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
-                    ->get()
-                    ->filter(function ($student) {
-                        return $student->RegistrationStatus == 'NO REGISTRATION';
-                    });
+                    ->get();
+        return $studentsDetails;
         foreach ($studentsDetails as $student) {
             $studentNumber = $student->StudentID;
-            // $this->sendEmailNotification($studentNumber);            
+            $this->sendEmailNotification($studentNumber);            
         }
         return back()->with('success', 'Emails sent successfully.');
     }

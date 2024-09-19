@@ -138,7 +138,7 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
             Route::get('/indexSupsAndDef/{id?}', 'DocketController@indexSupsAndDef')->name('docket.indexSupsAndDef');
             Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
-            // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
+            Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
             Route::get('/docketIndexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
             Route::get('/docketIndexNmczRepeating/{id?}', 'DocketController@indexNmczRepeating')->name('docket.indexNmczRepeating');
             
