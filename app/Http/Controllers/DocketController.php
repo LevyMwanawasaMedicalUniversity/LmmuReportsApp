@@ -7,11 +7,13 @@ use App\Mail\NewStudentMail;
 use App\Mail\NMCZRepeatCourseEmail;
 use App\Models\AllCourses;
 use App\Models\BasicInformation;
+use App\Models\Billing;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
 use App\Models\LMMAXStudentsContinousAssessment;
 use App\Models\NMCZRepeatCourses;
+use App\Models\SageClient;
 use App\Models\SisCourses;
 use App\Models\Student;
 use App\Models\User;
@@ -843,7 +845,7 @@ class DocketController extends Controller
         // }catch(Exception $e){
             
         // }
-        $academicYear= 2024;
+        $academicYear= 2023;
         $student = Student::query()
                         ->where('student_number','=', $studentId)
                         ->first();
@@ -854,20 +856,76 @@ class DocketController extends Controller
         }else{
             return back()->with('error', 'NOT FOUND.');               
         }
+
+        try{
+            $subQuery = Billing::select(
+                'StudentID',
+                'Amount',
+                'Year',
+                DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
+            )
+            ->where('Description', 'NOT LIKE', '%NULL%')
+            ->where('PackageName', 'NOT LIKE', '%NULL%')
+            ->where ('Year', 2024)
+            ->where('StudentID', $studentId)
+            ->first();
+            $invoice2024 = $subQuery->Amount;
+        }catch(\Exception $e){
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        }
+
+        if(!$invoice2024){
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        }
+
+        $studentPaymentInformation = SageClient::select    (
+            'DCLink',
+            'Account',
+            'Name',            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+        $balance = $studentPaymentInformation->TotalBalance;
+
+        $percentageOfInvoice = ($balance / $invoice2024) * 100;   
+
+        
+        // return $percentageOfInvoice;
+
+        if($percentageOfInvoice > 25){
+            return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
+        }
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $status = $student->status;
         
-        if($status == 3){
-            $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
-            if (!$studentExistsInStudentsTable) {
-                $this->setAndUpdateCoursesForCurrentYear($studentId); 
-            }           
-        }else{            
+        // if($status == 3){
+        $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
+        if (!$studentExistsInStudentsTable) {
+            if($isStudentRegistered){
+                $this->setAndUpdateRegisteredCourses($studentId);
+            }else{
+            $this->setAndUpdateCoursesForCurrentYear($studentId); 
+        }}else {
             $this->setAndUpdateCourses($studentId);
-        }
-        // Retrieve all unique Student values from the Course model
+        }                      
+        // }        // Retrieve all unique Student values from the Course model
         // $courses = Courses::where('Student', $studentId)->get();     THIS IS THE OLD LOGIC
         // return $courses;
-        $courses = CourseRegistration::where('StudentID',  $studentId)->get();
+        $courses = Courses::where('Student', $studentId)->get();
         if($courses->isEmpty()){
             $courses = CourseElectives::select('courses.Name as CourseID', 'courses.CourseDescription as CourseName')
             ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')

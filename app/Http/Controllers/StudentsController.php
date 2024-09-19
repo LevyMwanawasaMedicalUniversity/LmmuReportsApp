@@ -6,6 +6,7 @@ use App\Mail\ExistingStudentMail;
 use App\Mail\NewStudentMail;
 use App\Models\BasicInformation;
 use App\Models\BasicInformationSR;
+use App\Models\Billing;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\Courses;
@@ -15,6 +16,7 @@ use App\Models\MoodleEnroll;
 use App\Models\MoodleUserEnrolments;
 use App\Models\MoodleUsers;
 use App\Models\NMCZRepeatCourses;
+use App\Models\SageClient;
 use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\User;
@@ -490,14 +492,70 @@ class StudentsController extends Controller
 
         $academicYear = 2023;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();        
 
         // Update courses based on the student's status
-        if ($student->status == 3 && !Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
-            $this->setAndUpdateCoursesForCurrentYear($user->name);
-        } else {
-            $this->setAndUpdateCourses($user->name);
+        if (!Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
+            if ($isStudentRegistered) {
+                $this->setAndUpdateRegisteredCourses($user->name);
+            } else {
+                $this->setAndUpdateCoursesForCurrentYear($user->name);
+            }            
+        }else {
+                $this->setAndUpdateCourses($user->name);
         }
-        // return $student->status;
+        try{
+            $subQuery = Billing::select(
+                'StudentID',
+                'Amount',
+                'Year',
+                DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
+            )
+            ->where('Description', 'NOT LIKE', '%NULL%')
+            ->where('PackageName', 'NOT LIKE', '%NULL%')
+            ->where ('Year', 2024)
+            ->where('StudentID', $user->name)
+            ->first();
+            $invoice2024 = $subQuery->Amount;
+        }catch(\Exception $e){
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        }
+
+        if(!$invoice2024){
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        }
+
+        $studentPaymentInformation = SageClient::select    (
+            'DCLink',
+            'Account',
+            'Name',            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            
+        )
+        ->where('Account', $user->name)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+        $balance = $studentPaymentInformation->TotalBalance;
+
+        $percentageOfInvoice = ($balance / $invoice2024) * 100;   
+
+        
+        // return $percentageOfInvoice;
+
+        if($percentageOfInvoice > 25){
+            return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
+        }
 
         $courses = Courses::where('Student', $user->name)->get();
 
@@ -507,7 +565,7 @@ class StudentsController extends Controller
         // Return the appropriate view based on the student's status
         $viewName = match ($status) {
             1 => 'docket.studentViewDocket',
-            4 => 'docket.studentViewDocket',
+            6 => 'docket.studentViewDocket',
             2 => 'docketNmcz.studentViewDocket',
             3 => 'docketSupsAndDef.studentViewDocket',
         };

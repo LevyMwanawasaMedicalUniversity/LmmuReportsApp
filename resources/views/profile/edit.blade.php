@@ -102,10 +102,10 @@
           </div>
           <div class="card-body">
             <div class="author">
-              <a href="#">
+              {{-- <a href="#"> --}}
                 <img class="avatar border-gray" src="{{asset('assets')}}/img/default-avatar.png" alt="...">
                 <h5 class="title">{{ auth()->user()->name }}</h5>
-              </a>
+              {{-- </a> --}}
               <p class="description">
                   {{ auth()->user()->email }}
               </p>

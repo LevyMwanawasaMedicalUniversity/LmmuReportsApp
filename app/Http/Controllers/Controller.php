@@ -1457,6 +1457,35 @@ class Controller extends BaseController
             Courses::insert($coursesToInsert);
         }
     }
+ 
+    public function setAndUpdateRegisteredCourses($studentId){
+        $registeredCourses = CourseElectives::where('course-electives.StudentID', $studentId)
+            ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+            ->select('courses.Name', 'courses.CourseDescription', 'course-electives.StudentID')
+            ->where('course-electives.Year', 2024)
+            ->get();
+
+        $coursesToInsert = [];
+
+        foreach ($registeredCourses as $item) {
+            $coursesToInsert[] = [
+                'Student' => $item->StudentID,
+                'Program' => $item->CourseDescription,
+                'Course' => $item->Name,
+                'Grade' => null,
+            ];
+        }
+
+        if (!empty($coursesToInsert)) {
+            // Delete rows with "No Value" entries
+            Courses::where('Student', $studentId)
+                ->delete();
+            
+            // Batch insert the new courses
+            Courses::insert($coursesToInsert);
+        }
+        
+    }
 
     public function getInvoicesPerProgramme(){
         $results = $this->queryInvoicesPerProgramme();
