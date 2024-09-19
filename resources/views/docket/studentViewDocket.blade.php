@@ -7,13 +7,14 @@
 
 @section('content')
 <div class="panel-header panel-header-sm"></div>
+
 <div class="content">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card shadow-sm">
+            <div class="card shadow-sm border-0" id="docketCard">
                 <!-- Header -->
-                <div class="card-header bg-primary text-white text-center py-2">
-                    <h5 class="card-title no-print m-0">Student Examination Docket</h5>
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h4 class="card-title no-print m-0">Student Examination Docket</h4>
 
                     @if (session('success'))
                         <div class="alert alert-success py-1 my-2">
@@ -29,39 +30,35 @@
                 </div>
 
                 <!-- Body -->
-                <div class="card-body p-3">
+                <div class="card-body p-4">
                     @php
-                        // Define the route or path you want to convert to a QR code
                         $route = $studentResults->StudentID;
-                        $url = ($route); // Generates the complete URL
+                        $url = ($route);
                     @endphp
 
                     <!-- Header Section with University Name, Logo, and QR Code -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
                         <!-- University Logo -->
-                        <div>
-                            <a href="//edurole.lmmu.ac.zm">
-                                <img src="//edurole.lmmu.ac.zm/templates/mobile/images/header.png" height="50px" class="img-fluid" alt="LMMU Logo">
-                            </a>
-                        </div>
+                        <a href="//edurole.lmmu.ac.zm">
+                            <img src="//edurole.lmmu.ac.zm/templates/mobile/images/header.png" id="universityLogo" style="width: 140px; height: 140px;" class="img-fluid" alt="LMMU Logo">
+                        </a>
 
                         <!-- University Name and Exam Details -->
-                        <div class="text-center">
-                            <h6 class="font-weight-bold m-0">Levy Mwanawasa Medical University</h6>
-                            <small>FINAL EXAMINATION DOCKET 2024</small><br>
-                            <small>PRINTED ON: <span id="currentDate"></span></small>
+                        <div class="text-center flex-grow-1">
+                            <h2 class="font-weight-bold m-0">Levy Mwanawasa Medical University</h2>
                         </div>
 
-                        <!-- QR Code -->
-                        <div class="bg-light p-1 rounded">
-                            {!! QrCode::size(70)->generate($url) !!}
+                        <!-- Student Image -->
+                        <div class="text-right">
+                            <div style="width: 140px; height: 140px;">
+                                <img src="//edurole.lmmu.ac.zm/datastore/identities/pictures/{{ $studentResults->StudentID }}.png" id="studentPhoto" class="border border-dark" style="width: 100%; height: 100%; object-fit: cover;" alt="Student Photo">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Student Details and Profile Image -->
-                    <div class="row mb-3">
-                        <!-- Student Details -->
-                        <div class="col-md-7">
+                    <!-- Student Details -->
+                    <div class="row">
+                        <div class="col-md-4">
                             <p class="m-0"><strong>{{$studentResults->FirstName}} {{$studentResults->Surname}}</strong></p>
                             <p class="m-0">StudentID: <strong>{{$studentResults->StudentID}}</strong></p>
                             <p class="m-0">NRC: <strong>{{$studentResults->GovernmentID}}</strong></p>
@@ -69,23 +66,29 @@
                             <p class="m-0">Delivery Mode: <strong>{{$studentResults->StudyType}}</strong></p>
                         </div>
 
-                        <!-- Profile Image -->
-                        <div class="col-md-5 text-center">
-                            <div class="border border-dark" style="width: 100px; height: 130px; margin: 0 auto;">
-                                <img src="//edurole.lmmu.ac.zm/datastore/identities/pictures/{{ $studentResults->StudentID }}.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Student Photo">
+                        <!-- Exam Details -->
+                        <div class="col-md-4 d-flex flex-column align-items-center">
+                            <small>FINAL EXAMINATION DOCKET 2024</small><br>
+                            <small>PRINTED ON: <span id="currentDate"></span></small>
+                        </div>
+
+                        <!-- QR Code -->
+                        <div class="col-md-4 d-flex justify-content-end align-items-start">
+                            <div style="width: 140px; height: 140px;">
+                                {!! QrCode::size(140)->generate($url) !!}
                             </div>
                         </div>
                     </div>
 
                     <!-- Course Information Section -->
-                    <div class="mb-3">
-                        <h6 class="m-0">Course Details</h6>
-                        <p class="m-0">The student is studying <strong>{{$studentResults->Name}}</strong> and is authorized to write the following courses:</p>
+                    <div class="mb-4">
+                        <h6 class="font-weight-bold">Course Details</h6>
+                        <p>The student is studying <strong>{{$studentResults->Name}}</strong> and is authorized to write the following courses:</p>
                     </div>
 
                     <!-- Course Table -->
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered">
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered" id="courseTable">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Course</th>
@@ -108,14 +111,14 @@
                     </div>
 
                     <!-- Important Information -->
-                    <div class="text-muted">
-                        <p class="mb-1">Please check your courses against the timetable for the exact date and time of the examination.</p>
-                        <p class="mb-0">Note: Admission into the hall requires a valid Student ID, NRC, or Passport, this slip, and fee clearance.</p>
+                    <div class="text-muted small">
+                        <p>Please check your courses against the timetable for the exact date and time of the examination.</p>
+                        <p>Note: Admission into the hall requires a valid Student ID, NRC, or Passport, this slip, and fee clearance.</p>
                     </div>
 
-                    <!-- Print Button -->
-                    <div class="text-center mt-3 no-print">
-                        <button class="btn btn-success btn-sm" onclick="printContent()">Print Docket</button>
+                    <!-- Download PDF Button (hidden in PDF) -->
+                    <div class="text-center mt-4 no-print">
+                        <button class="btn btn-success btn-sm" id="downloadPdf">Download PDF</button>
                     </div>
                 </div>
             </div>
@@ -123,47 +126,73 @@
     </div>
 </div>
 
+<!-- Include the html2pdf.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
+<!-- Your custom script to handle PDF download -->
 <script>
-function printContent() {
-    // Hide elements with the "no-print" class
-    var noPrintElements = document.querySelectorAll('.no-print');
-    noPrintElements.forEach(function (element) {
-        element.style.display = 'none';
+    document.getElementById('downloadPdf').addEventListener('click', function () {
+        var element = document.getElementById('docketCard'); // Select the card element
+
+        // Hide the "Download PDF" button
+        document.querySelector('.no-print').style.display = 'none';
+
+        // Convert images to base64 and replace the sources
+        convertImagesToBase64(function() {
+            // Customize options if needed
+            var opt = {
+                margin:       0.5,
+                filename:     'student_examination_docket.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 }, // Scale of 2 for better quality
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Generate PDF
+            html2pdf().from(element).set(opt).save().then(function() {
+                // Show the "Download PDF" button again after saving the PDF
+                document.querySelector('.no-print').style.display = 'block';
+            });
+        });
     });
 
-    var contentToPrint = document.querySelector('.content').innerHTML;
-    var printWindow = window.open('', '', 'width=600,height=600');
-    
-    printWindow.document.open();
-    printWindow.document.write('<html><head><title>Print</title></head><body>' + contentToPrint + '</body></html>');
-    printWindow.document.close();
+    // Set current date in the template
+    var currentDate = new Date();
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1;
+    var year = currentDate.getFullYear();
+    document.getElementById('currentDate').textContent = day + '-' + month + '-' + year;
 
-    var images = printWindow.document.getElementsByTagName('img');
-    var imagesLoaded = 0;
+    // Function to convert images to base64
+    function convertImagesToBase64(callback) {
+        var images = document.querySelectorAll('img');
+        var totalImages = images.length;
+        var processedImages = 0;
 
-    for (var i = 0; i < images.length; i++) {
-        images[i].onload = function() {
-            imagesLoaded++;
-            if (imagesLoaded === images.length) {
-                // All images are loaded, now we can initiate the print
-                printWindow.print();
-                printWindow.close();
-            }
-        };
+        images.forEach(function(img) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function() {
+                var reader = new FileReader();
+                reader.onloadend = function() {
+                    img.src = reader.result;
+                    processedImages++;
+                    if (processedImages === totalImages) {
+                        callback();
+                    }
+                }
+                reader.readAsDataURL(xhr.response);
+            };
+            xhr.open('GET', img.src);
+            xhr.responseType = 'blob';
+            xhr.send();
+        });
     }
-
-    // Restore the display of "no-print" elements after printing
-    noPrintElements.forEach(function (element) {
-        element.style.display = 'block';
-    });
-}
-
-// Get and format current date
-var currentDate = new Date();
-var day = currentDate.getDate();
-var month = currentDate.getMonth() + 1;
-var year = currentDate.getFullYear();
-var formattedDate = day + '-' + month + '-' + year;
-document.getElementById('currentDate').textContent = formattedDate;
 </script>
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 @endsection

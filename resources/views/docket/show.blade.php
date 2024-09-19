@@ -51,8 +51,8 @@
 
                             {{-- Define the route or path you want to convert to a QR code --}}
                             @php
-                                $route = '/verify/'.$studentResults->StudentID; // Replace with your desired route or path
-                                $url = url($route); // This generates the complete URL including the base URL
+                                $route = $studentResults->StudentID; // Replace with your desired route or path
+                                $url = ($route); // This generates the complete URL including the base URL
                             @endphp
 
                             {{-- Generate a QR code using simplesoftwareio/simple-qrcode --}}

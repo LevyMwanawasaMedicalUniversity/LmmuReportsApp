@@ -907,7 +907,7 @@ class DocketController extends Controller
         
         // return $percentageOfInvoice;
 
-        if($percentageOfInvoice > 25){
+        if($percentageOfInvoice > 55){
             return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
         }
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
