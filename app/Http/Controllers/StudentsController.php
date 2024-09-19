@@ -492,7 +492,10 @@ class StudentsController extends Controller
 
         $academicYear = 2023;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
-        $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();        
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();
+        if(!$isStudentRegistered){
+            return redirect()->back()->with('error', 'Student not registered.');
+        }
 
         // Update courses based on the student's status
         if (!Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
