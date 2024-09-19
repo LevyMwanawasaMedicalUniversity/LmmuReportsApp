@@ -40,6 +40,7 @@ class DocketController extends Controller
     }
 
     public function sendEmailNotice(){
+        set_time_limit(1200000);
         $academicYear = 2024;
         $studentNumbers = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear )->pluck('ID')->toArray();
         // return $studentNumbers;
@@ -48,7 +49,7 @@ class DocketController extends Controller
         
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)
                     ->get();
-        return $studentsDetails;
+        // return $studentsDetails;
         foreach ($studentsDetails as $student) {
             $studentNumber = $student->StudentID;
             $this->sendEmailNotification($studentNumber);            
