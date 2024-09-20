@@ -498,7 +498,10 @@ class StudentsController extends Controller
         }
 
         // Update courses based on the student's status
-        if (!Courses::where('Student', $user->name)->whereNotNull('updated_at')->exists()) {
+        if (!Courses::where('Student', $user->name)
+            ->whereNotNull('updated_at')
+            ->where('updated_at', '>', '2024-09-19')
+            ->exists()) {
             if ($isStudentRegistered) {
                 $this->setAndUpdateRegisteredCourses($user->name);
             } else {

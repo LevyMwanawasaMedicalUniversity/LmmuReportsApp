@@ -908,7 +908,7 @@ class DocketController extends Controller
         
         // return $percentageOfInvoice;
 
-        if($percentageOfInvoice > 55){
+        if($percentageOfInvoice > 25){
             return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
         }
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
@@ -916,7 +916,10 @@ class DocketController extends Controller
         
         // if($status == 3){
         $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
-        if (!$studentExistsInStudentsTable) {
+        if ((!Courses::where('Student', $studentId)
+        ->whereNotNull('updated_at')
+        ->where('updated_at', '>', '2024-09-19')
+        ->exists())) {
             if($isStudentRegistered){
                 $this->setAndUpdateRegisteredCourses($studentId);
             }else{
