@@ -11,7 +11,7 @@
 <div class="content">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card shadow-sm border-0" id="docketCard">
+            <div class="card shadow-sm border-0" id="docketCard" style="max-width: 1024px; margin: auto;">
                 <!-- Header -->
                 <div class="card-header bg-primary text-white text-center py-3">
                     <h4 class="card-title no-print m-0">Student Examination Docket</h4>
@@ -57,8 +57,8 @@
                     </div>
 
                     <!-- Student Details -->
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
                             <p class="m-0"><strong>{{$studentResults->FirstName}} {{$studentResults->Surname}}</strong></p>
                             <p class="m-0">StudentID: <strong>{{$studentResults->StudentID}}</strong></p>
                             <p class="m-0">NRC: <strong>{{$studentResults->GovernmentID}}</strong></p>
@@ -67,13 +67,13 @@
                         </div>
 
                         <!-- Exam Details -->
-                        <div class="col-md-4 d-flex flex-column align-items-center">
+                        <div>
                             <small>FINAL EXAMINATION DOCKET 2024</small><br>
                             <small>PRINTED ON: <span id="currentDate"></span></small>
                         </div>
 
                         <!-- QR Code -->
-                        <div class="col-md-4 d-flex justify-content-end align-items-start">
+                        <div>
                             <div style="width: 140px; height: 140px;">
                                 {!! QrCode::size(140)->generate($url) !!}
                             </div>
@@ -141,10 +141,10 @@
         convertImagesToBase64(function() {
             // Customize options if needed
             var opt = {
-                margin:       0.5,
+                margin:       [0.5, 0.5, 0.5, 0.5],
                 filename:     'student_examination_docket.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 }, // Scale of 2 for better quality
+                html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
@@ -192,6 +192,16 @@
 @media print {
     .no-print {
         display: none !important;
+    }
+    
+    #docketCard {
+        max-width: 1024px; /* Maintain maximum width for printing */
+        margin: auto; /* Center card on the page */
+    }
+    
+    img {
+        max-width: 100%; /* Ensure images scale down */
+        height: auto; /* Maintain aspect ratio */
     }
 }
 </style>
