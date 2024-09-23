@@ -26,6 +26,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
@@ -472,7 +473,9 @@ class StudentsController extends Controller
         return view('allStudents.printIdCard',compact('studentInformation'));
     }
 
-    public function viewDocket(){
+    
+    public function viewDocket()
+    {
         $user = Auth::user(); // Get the currently logged-in user
 
         // If the user doesn't have the "Student" role, return the home view
@@ -480,10 +483,7 @@ class StudentsController extends Controller
             return view('home');
         }
 
-        // return $user->getRoleNames();
-
         $student = Student::where('student_number', $user->name)->first();
-        // return $student;
 
         // If the student doesn't exist, return back with an error message
         if (is_null($student)) {
@@ -493,7 +493,8 @@ class StudentsController extends Controller
         $academicYear = 2023;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
         $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();
-        if(!$isStudentRegistered){
+
+        if (!$isStudentRegistered) {
             return redirect()->back()->with('error', 'Student not registered.');
         }
 
@@ -506,11 +507,12 @@ class StudentsController extends Controller
                 $this->setAndUpdateRegisteredCourses($user->name);
             } else {
                 $this->setAndUpdateCoursesForCurrentYear($user->name);
-            }            
-        }else {
-                $this->setAndUpdateCourses($user->name);
+            }
+        } else {
+            $this->setAndUpdateCourses($user->name);
         }
-        try{
+
+        try {
             $subQuery = Billing::select(
                 'StudentID',
                 'Amount',
@@ -519,22 +521,23 @@ class StudentsController extends Controller
             )
             ->where('Description', 'NOT LIKE', '%NULL%')
             ->where('PackageName', 'NOT LIKE', '%NULL%')
-            ->where ('Year', 2024)
+            ->where('Year', 2024)
             ->where('StudentID', $user->name)
             ->first();
+
             $invoice2024 = $subQuery->Amount;
-        }catch(\Exception $e){
-            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
         }
 
-        if(!$invoice2024){
-            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        if (!$invoice2024) {
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
         }
 
-        $studentPaymentInformation = SageClient::select    (
+        $studentPaymentInformation = SageClient::select(
             'DCLink',
             'Account',
-            'Name',            
+            'Name',
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -544,24 +547,25 @@ class StudentsController extends Controller
                 END) AS TotalPayments'),
             DB::raw('SUM(pa.Credit) as TotalCredit'),
             DB::raw('SUM(pa.Debit) as TotalDebit'),
-            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
-            
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
         )
         ->where('Account', $user->name)
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        
         ->groupBy('DCLink', 'Account', 'Name')
         ->first();
+
         $balance = $studentPaymentInformation->TotalBalance;
+        $percentageOfInvoice = ($balance / $invoice2024) * 100;
 
-        $percentageOfInvoice = ($balance / $invoice2024) * 100;   
-
-        
-        // return $percentageOfInvoice;
-
-        if($percentageOfInvoice > 25){
+        if ($percentageOfInvoice > 25) {
             return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
         }
+
+        $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$user->name}.png";
+        $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
+
+        $imageDataUri = $this->convertImageToDataUri($imageUrl);
+        $logoDataUri = $this->convertImageToDataUri($logoUrl);
 
         $courses = Courses::where('Student', $user->name)->get();
 
@@ -570,15 +574,36 @@ class StudentsController extends Controller
 
         // Return the appropriate view based on the student's status
         $viewName = match ($status) {
-            1 => 'docket.studentViewDocket',
-            6 => 'docket.studentViewDocket',
+            1, 6 => 'docket.studentViewDocket',
             2 => 'docketNmcz.studentViewDocket',
             3 => 'docketSupsAndDef.studentViewDocket',
+            default => 'home', // Fallback view if status doesn't match any case
         };
 
-        return view($viewName, compact('studentResults', 'courses'));
-    }   
+        return view($viewName, compact('studentResults', 'courses', 'imageDataUri', 'logoDataUri'));
+    }
 
+    private function convertImageToDataUri($url)
+    {
+        try {
+            $response = Http::withOptions(['verify' => false])->get($url);
+
+            if ($response->successful()) {
+                $imageContent = $response->body();
+                $imageBase64 = base64_encode($imageContent);
+                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
+
+                // Create the data URI
+                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
+            } else {
+                // Handle cases where the image is not found or request failed
+                return null;
+            }
+        } catch (\Exception $e) {
+            // Handle exceptions (e.g., network errors)
+            return null;
+        }
+    }
     public function setAndSaveCoursesForCurrentYearRegistration($studentId){
         // First, attempt to get courses for failed students
         $dataArray = $this->getCoursesForFailedStudents($studentId);

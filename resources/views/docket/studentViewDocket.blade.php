@@ -40,7 +40,7 @@
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <!-- University Logo -->
                         <a href="//edurole.lmmu.ac.zm">
-                            <img src="//edurole.lmmu.ac.zm/templates/mobile/images/header.png" id="universityLogo" style="width: 140px; height: 140px;" class="img-fluid" alt="LMMU Logo">
+                            <img src="{{$logoDataUri}}" id="universityLogo" style="width: 140px; height: 140px;" class="img-fluid" alt="LMMU Logo">
                         </a>
 
                         <!-- University Name and Exam Details -->
@@ -51,7 +51,7 @@
                         <!-- Student Image -->
                         <div class="text-right">
                             <div style="width: 140px; height: 140px;">
-                                <img src="//edurole.lmmu.ac.zm/datastore/identities/pictures/{{ $studentResults->StudentID }}.png" id="studentPhoto" class="border border-dark" style="width: 100%; height: 100%; object-fit: cover;" alt="Student Photo">
+                                <img src="{{ $imageDataUri }}" id="studentPhoto" class="border border-dark" style="width: 100%; height: 100%; object-fit: cover;" alt="Student Photo">
                             </div>
                         </div>
                     </div>
