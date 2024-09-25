@@ -650,34 +650,37 @@ class Controller extends BaseController
         $view = '';
         $pdfPath = null;
     
-        switch ($status) {
-            case 1:
-                $courses = $this->getStudentCourses($studentID);
-                $view = 'emails.pdf';
-                break;
-            case 2:
-                $courses = $this->getStudentCourses($studentID);
-                $view = 'emails.pdf';
-                break;
-            case 4:
-                $courses = $this->getStudentCourses($studentID);
-                $view = 'emails.pdf';
-                break;
-            case 3:
-                $courses = Courses::where('Student', $studentID)->get();
-                $view = 'emails.pdfSudAndDef';
-                $pdf = PDF::loadView($view, compact('studentResults', 'courses'));
-                $fileName = $studentID . '.pdf';
-                $pdfPath = storage_path('app/' . $fileName);
-                $pdf->save($pdfPath);
-                break;
-        }
+        // switch ($status) {
+        //     case 1:
+        //         $courses = $this->getStudentCourses($studentID);
+        //         $view = 'emails.pdf';
+        //         break;
+        //     case 2:
+        //         $courses = $this->getStudentCourses($studentID);
+        //         $view = 'emails.pdf';
+        //         break;
+        //     case 4:
+        //         $courses = $this->getStudentCourses($studentID);
+        //         $view = 'emails.pdf';
+        //         break;
+        //     case 3:
+        //         $courses = Courses::where('Student', $studentID)->get();
+        //         $view = 'emails.pdfSudAndDef';
+        //         $pdf = PDF::loadView($view, compact('studentResults', 'courses'));
+        //         $fileName = $studentID . '.pdf';
+        //         $pdfPath = storage_path('app/' . $fileName);
+        //         $pdf->save($pdfPath);
+        //         break;
+        // }
+
+        $courses = $this->getStudentCourses($studentID);
+        $view = 'emails.pdf';
     
         $privateEmail = BasicInformation::find($studentID);
         $email = trim($privateEmail->PrivateEmail);
         $sendingEmail = filter_var($email, FILTER_VALIDATE_EMAIL) ? $email : 'azwel.simwinga@lmmu.ac.zm';
     
-        $mailClass = $status == 3 ? new DefSupDocket($pdfPath,$studentID) : new SendAnEmail($studentID);
+        $mailClass =  new SendAnEmail($studentID);
     
         // Dispatch the email sending job to the queue
         dispatch(new SendEmailJob($sendingEmail, $mailClass));
