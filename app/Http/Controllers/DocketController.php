@@ -23,6 +23,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -876,9 +877,9 @@ class DocketController extends Controller
             return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
         }
 
-        if(!$invoice2024){
-            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
-        }
+        // if(!$invoice2024){
+        //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        // }
 
         $studentPaymentInformation = SageClient::select    (
             'DCLink',
@@ -903,14 +904,20 @@ class DocketController extends Controller
         ->first();
         $balance = $studentPaymentInformation->TotalBalance;
 
-        $percentageOfInvoice = ($balance / $invoice2024) * 100;   
+        $percentageOfInvoice = ($balance / $invoice2024) * 100;  
+        
+        $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png";
+        $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
+
+        $imageDataUri = $this->convertImageToDataUri($imageUrl);
+        $logoDataUri = $this->convertImageToDataUri($logoUrl);
 
         
         // return $percentageOfInvoice;
 
-        if($percentageOfInvoice > 25){
-            return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
-        }
+        // if($percentageOfInvoice > 25){
+        //     return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
+        // }
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $status = $student->status;
         
@@ -940,7 +947,29 @@ class DocketController extends Controller
         // Pass the $students variable to the view
         // return view('your.view.name', compact('students'));
         
-        return view('docket.show',compact('courses','studentResults','status'));
+        return view('docket.show',compact('courses','studentResults','status','imageDataUri','logoDataUri'));
+    }
+
+    private function convertImageToDataUri($url)
+    {
+        try {
+            $response = Http::withOptions(['verify' => false])->get($url);
+
+            if ($response->successful()) {
+                $imageContent = $response->body();
+                $imageBase64 = base64_encode($imageContent);
+                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
+
+                // Create the data URI
+                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
+            } else {
+                // Handle cases where the image is not found or request failed
+                return null;
+            }
+        } catch (\Exception $e) {
+            // Handle exceptions (e.g., network errors)
+            return null;
+        }
     }
 
     public function showStudentNmcz($studentId){
@@ -976,7 +1005,7 @@ class DocketController extends Controller
         // return view('your.view.name', compact('students'));
         
         return view('docketNmcz.show',compact('courses','studentResults'));
-    }
+    }    
 
     public function verifyStudent($studentId){
 

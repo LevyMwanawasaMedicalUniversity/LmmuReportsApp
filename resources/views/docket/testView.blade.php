@@ -108,14 +108,13 @@
                     <form id="myForm" action="" method="POST">
                     @csrf
                         <table class="table table-sm table-bordered" id="courseTable">
-                        <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
                             <thead class="thead-light">
                                 <tr>
                                     <th>Course</th>
                                     <th>Date / Time</th>
                                     <th>Venue</th>
                                     <th>Signature Invigilator</th>
-                                    {{-- <th class="no-print">Action</th> --}}
+                                    <th class="no-print">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -125,19 +124,19 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                    {{-- <td>
+                                    <td>
                                         <button class="block no-print" style="background-color: #dc3545; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="button" onclick="removeRow(this)">Remove</button>
-                                    </td> --}}
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
-                        {{-- <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="submit">Update</button> --}}
+                        <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="submit">Update</button>
                         </form>
                     </div>
-                    {{-- <a href="{{ route('courses.select', $studentResults->StudentID) }}">
+                    <a href="{{ route('courses.select', $studentResults->StudentID) }}">
                         <button class="block no-print" style="background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Add Course(s)</button>
-                    </a> --}}
+                    </a>
 
                     <!-- Important Information -->
                     <div class="text-muted small">
