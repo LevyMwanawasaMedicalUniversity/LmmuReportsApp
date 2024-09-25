@@ -572,6 +572,12 @@ class StudentsController extends Controller
         // Cast the status to an integer
         $status = (int) $student->status;
 
+        // Update the student's status to 6 if it's not already 6
+        if ($status !== 6) {
+            $student->status = 6;
+            $student->save();
+        }
+
         // Return the appropriate view based on the student's status
         $viewName = match ($status) {
             1, 6 => 'docket.studentViewDocket',
