@@ -521,6 +521,7 @@ class StudentsController extends Controller
             )
             ->where('Description', 'NOT LIKE', '%NULL%')
             ->where('PackageName', 'NOT LIKE', '%NULL%')
+            ->whereNotNull('Approval')
             ->where('Year', 2024)
             ->where('StudentID', $user->name)
             ->first();
@@ -529,6 +530,8 @@ class StudentsController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
         }
+
+        // return $subQuery;
 
         if (!$invoice2024) {
             return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
