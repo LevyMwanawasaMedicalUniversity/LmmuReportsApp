@@ -877,9 +877,9 @@ class DocketController extends Controller
             return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
         }
 
-        // if(!$invoice2024){
-        //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
-        // }
+        if(!$invoice2024){
+            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        }
 
         $studentPaymentInformation = SageClient::select    (
             'DCLink',

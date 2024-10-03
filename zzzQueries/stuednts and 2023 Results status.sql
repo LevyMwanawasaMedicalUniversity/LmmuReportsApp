@@ -24,6 +24,6 @@ FROM `basic-information`
 JOIN `student-study-link` ON `student-study-link`.StudentID = `basic-information`.ID
 JOIN study ON `student-study-link`.StudyID = study.ID
 JOIN schools ON study.ParentID = schools.ID
-LEFT JOIN `grades-published` gp on gp.StudentNo = `basic-information`.ID and gp.AcademicYear = 2023
+inner JOIN `grades-published` gp on gp.StudentNo = `basic-information`.ID and gp.AcademicYear = 2023
 WHERE LENGTH(`basic-information`.ID) > 7
 GROUP BY `basic-information`.ID;

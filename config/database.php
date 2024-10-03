@@ -101,7 +101,7 @@ return [
         //     'driver' => 'mysql',
         //     'host' => '127.0.0.1', // Change this to localhost or 127.0.0.1
         //     'port' => '3306',      // Change this to the local port used in the SSH tunnel
-        //     'database' => 'livedb12',
+        //     'database' => 'neworiginaldb',
         //     'username' => 'root',
         //     'password' => '',
         //     'charset' => 'utf8mb4',
