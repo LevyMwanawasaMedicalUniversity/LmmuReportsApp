@@ -521,7 +521,7 @@ class StudentsController extends Controller
             )
             ->where('Description', 'NOT LIKE', '%NULL%')
             ->where('PackageName', 'NOT LIKE', '%NULL%')
-            ->whereNotNull('Approval')
+            // ->whereNotNull('Approval')
             ->where('Year', 2024)
             ->where('StudentID', $user->name)
             ->first();
