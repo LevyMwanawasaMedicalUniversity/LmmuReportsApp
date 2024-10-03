@@ -59,7 +59,7 @@
                     <!-- Student Details -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div>
-                            <p class="m-0"><strong>{{$studentResults->FirstName}} {{$studentResults->Surname}}</strong></p>
+                            <p class="m-0"><strong>{{$studentResults->FirstName}} {{$studentResults->MiddleName}} {{$studentResults->Surname}}</strong></p>
                             <p class="m-0">StudentID: <strong>{{$studentResults->StudentID}}</strong></p>
                             <p class="m-0">NRC: <strong>{{$studentResults->GovernmentID}}</strong></p>
                             <p class="m-0">School: <strong>{{$studentResults->Description}}</strong></p>                            
