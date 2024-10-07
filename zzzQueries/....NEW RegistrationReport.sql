@@ -82,12 +82,12 @@ LEFT JOIN `grades-published` gp2 ON gp2.StudentNo = bi.ID
 LEFT JOIN courses c ON c.Name = gp.CourseNo
 LEFT JOIN `program-course-link` pcl ON pcl.CourseID = c.ID 
 LEFT JOIN programmes p ON p.ID = pcl.ProgramID
-LEFT JOIN `study-program-link` spl ON spl.ProgramID = p.I
+LEFT JOIN `study-program-link` spl ON spl.ProgramID = p.ID
 LEFT JOIN study s3 ON s3.ID = spl.StudyID
 LEFT JOIN MaxYearTable my ON my.StudentID = bi.ID
 LEFT JOIN YearOfReporting yor ON yor.StudentId = bi.ID
 INNER JOIN BillingData bd ON bd.StudentID = bi.ID
 INNER JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2024
 INNER JOIN schools s2 ON s2.ID = s.ParentID 
-WHERE bi.ID = 190102249
+-- WHERE bi.ID = 190102249
 GROUP BY bi.ID;
