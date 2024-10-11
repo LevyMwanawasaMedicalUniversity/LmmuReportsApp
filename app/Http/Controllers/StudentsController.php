@@ -574,7 +574,7 @@ class StudentsController extends Controller
                 } catch (\Exception $e) {
                     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
                 }
-                return $invoice2024;
+                // return $invoice2024;
                 if (!$invoice2024) {
                     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
                 }
