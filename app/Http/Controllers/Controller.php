@@ -444,6 +444,7 @@ class Controller extends BaseController
             'basic-information.MobilePhone',
             'programmes.ProgramName AS "Programme Code"',
             'study.ShortName',
+            'study.ID as StudyID',
             'study.Name',
             'programmes.Year',
             'schools.Description',
@@ -709,8 +710,10 @@ class Controller extends BaseController
                 'student-study-link.StudentID',
                 'basic-information.GovernmentID',
                 'study.Name as ProgrammeName',
+                'study.ID as StudyID',
                 'schools.Name as School',
                 'courses.Name as CourseName',
+                'course-electives.Approved',
                 'courses.CourseDescription as CourseDescription',
                 DB::raw("
                     CASE
