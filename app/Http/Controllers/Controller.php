@@ -176,6 +176,10 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function arrayOfValidProgrammes($studyId){
+        return [$studyId, 163, 165,166, 167,168,169,170,171,172,173,174];
+    }
+
     public function getAppealStudentDetailsNurAndMid($academicYear,$studentNumbers){
         $results= $this->queryAppealStudentDetailsNurAndMid($academicYear,$studentNumbers);
         return $results;

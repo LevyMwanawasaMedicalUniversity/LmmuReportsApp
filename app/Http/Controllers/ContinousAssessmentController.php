@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BasicInformation;
 use App\Models\CourseElectives;
 use App\Models\CourseRegistration;
 use App\Models\EduroleCourses;
@@ -16,6 +17,24 @@ use Illuminate\Support\Facades\DB;
 
 class ContinousAssessmentController extends Controller
 {
+
+    private function getStudentDetails($studentNumber){
+        $studentDetails = BasicInformation::where('basic-information.ID', $studentNumber)
+                ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+                ->join('study', 'study.ID', '=', 'student-study-link.StudyID')
+                ->join('schools', 'schools.ID', '=', 'study.ParentID')
+                ->select('basic-information.ID', 'basic-information.FirstName','basic-information.PrivateEmail', 'basic-information.Surname','basic-information.StudyType', 'study.Name','schools.Description','study.ID as studyId')
+                ->first();
+        return $studentDetails;
+    }
+
+    private function getRegistrationDetails($studentNumber){
+        $studentDetails = CourseElectives::where('Year', 2024)
+            ->where('StudentID', $studentNumber)
+            ->get();
+        return $studentDetails;
+    }
+
     public function studentsCAResults()
     {
         // $courseAssessments = LMMAXCourseAssessment::join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
@@ -37,9 +56,20 @@ class ContinousAssessmentController extends Controller
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
 
+        $studentDetails = $this->getStudentDetails($studentNumber);
+            if (!$studentDetails) {
+                return redirect()->back()->with('error', 'Student Not Found on Edurole');
+            }
+            
+        
+        $studyId = $studentDetails->studyId; 
+
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);        
+
         $results = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
             ->where('students_continous_assessments.student_id', $studentNumber)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes)
             ->where('course_assessments.academic_year', $academicYear)    
             ->select('students_continous_assessments.students_continous_assessment_id','students_continous_assessments.student_id', DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'),'students_continous_assessments.course_id','students_continous_assessments.study_id','students_continous_assessments.delivery_mode')
             ->groupBy('students_continous_assessments.student_id','students_continous_assessments.course_id')
@@ -80,6 +110,14 @@ class ContinousAssessmentController extends Controller
         if (!$checkRegistration) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
+
+        $studentDetails = $this->getStudentDetails($studentNumber);
+            if (!$studentDetails) {
+                return redirect()->back()->with('error', 'Student Not Found on Edurole');
+            }
+        
+        $studyId = $studentDetails->studyId; 
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId); 
         
         $results = LMMAXCourseAssessment::join('students_continous_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
@@ -87,6 +125,7 @@ class ContinousAssessmentController extends Controller
             //->join('c_a_type_marks_allocations','')
             //->join('c_a_type_marks_allocations', 'assessment_types.id', '=', 'c_a_type_marks_allocations.assessment_type_id')
             ->where('students_continous_assessments.student_id', $studentNumber)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes)
             // ->where('course_assessments.academic_year', $academicYear)    
             ->where('students_continous_assessments.course_id', $courseId)
             ->where('students_continous_assessments.delivery_mode', $delivery)  
@@ -106,7 +145,7 @@ class ContinousAssessmentController extends Controller
         $studentNumber = Auth::user()->name;
         $academicYear= 2024;
         $delivery = Crypt::decrypt($request->delivery_mode);
-        $studyId = Crypt::decrypt($request->study_id);
+        // $studyId = Crypt::decrypt($request->study_id);
         $courseId = Crypt::decrypt($request->course_id);
 
         $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
@@ -118,11 +157,18 @@ class ContinousAssessmentController extends Controller
         if (!$checkRegistration) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
+        $studentDetails = $this->getStudentDetails($studentNumber);
+            if (!$studentDetails) {
+                return redirect()->back()->with('error', 'Student Not Found on Edurole');
+            }
+        
+        $studyId = $studentDetails->studyId;
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
 
         $results = LMMAXCourseComponentAllocation::join('course_components', 'course_components.course_components_id', '=', 'course_component_allocations.course_component_id')
             ->where('course_id', $courseId)
             ->where('delivery_mode', $delivery)
-            ->where('study_id', $studyId)
+            ->whereIn('study_id', $arrayOfProgrammes)
             ->where('academic_year', $academicYear)
             ->get();
 
@@ -159,10 +205,19 @@ class ContinousAssessmentController extends Controller
         if (!$checkRegistration) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
+
+        $studentDetails = $this->getStudentDetails($studentNumber);
+            if (!$studentDetails) {
+                return redirect()->back()->with('error', 'Student Not Found on Edurole');
+            }
+        
+        $studyId = $studentDetails->studyId;
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
         
         $results = LMMAXCourseAssessment::join('course_assessment_scores', 'course_assessment_scores.course_assessment_id', '=', 'course_assessments.course_assessments_id')
             ->join('assessment_types', 'assessment_types.id', '=', 'course_assessments.ca_type')
             ->where('course_assessments.course_id', $courseId)
+            ->whereIn('course_assessments.study_id', $arrayOfProgrammes)
             ->where('course_assessments.ca_type', $caType)
             ->where('course_assessments.academic_year', $academicYear)
             ->where('course_assessment_scores.student_id', $studentNumber)
