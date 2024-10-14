@@ -511,24 +511,29 @@ class StudentsController extends Controller
         
         // Get all the results for the year 2023 without filtering grades
         $results2023 = $results2023PreviouseYear->get();
-        
-        $courseName = $results2023->first()->CourseNo;
-        
-        $courses = EduroleCourses::where('Name', $courseName)
-            // ->where('Year', 2023) // Uncomment if you want to filter by year
-            ->get();
-        
-        $previousYearOfStudy = $courses->first()->Year;
-        $currentYearOfStudy = $previousYearOfStudy + 1;
-        
-        $studyId = $studentResults->StudyID;  // Make sure $studentResults is defined
-        
-        $studentStudy = Study::where('ID', $studyId)->first();
-        
-        $highestYear = StudyProgramLink::where('study-program-link.StudyID', $studyId)
-            ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
+
+        try{        
+            $courseName = $results2023->first()->CourseNo;
+            
+            $courses = EduroleCourses::where('Name', $courseName)
+                // ->where('Year', 2023) // Uncomment if you want to filter by year
+                ->get();
+            
+            $previousYearOfStudy = $courses->first()->Year;
+            $currentYearOfStudy = $previousYearOfStudy + 1;
+            
+            $studyId = $studentResults->StudyID;  // Make sure $studentResults is defined
+            
+            $studentStudy = Study::where('ID', $studyId)->first();
+            
+            $highestYear = StudyProgramLink::where('study-program-link.StudyID', $studyId)
+                ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
             ->max('programmes.Year');
         // return 'highestYear: ' . $highestYear . ', currentYearOfStudy: ' . $currentYearOfStudy;
+        }catch(\Exception $e){
+            $highestYear = 0;
+            $currentYearOfStudy =20;
+        }
         
         // Check the conditions
         if (($highestYear != $currentYearOfStudy) ) {
