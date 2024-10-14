@@ -7,7 +7,7 @@ WITH MaxYearTable AS (
     JOIN `student-study-link` ssl2 ON ssl2.StudentID = ss.ID
     JOIN `study-program-link` spl ON spl.StudyID = ssl2.StudyID
     JOIN programmes p ON p.ID = spl.ProgramID
-    GROUP BY spl.StudyID, ss.ID
+    GROUP BY spl.StudyID, ss.ID 
 ),
 YearOfReporting AS (
     SELECT
