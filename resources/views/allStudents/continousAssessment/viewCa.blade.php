@@ -102,6 +102,7 @@
                                         <td>{{$courseName}}-{{$courseCode}}</td>
                                         {{-- <td>{{$result->total_marks}}</td> --}}
 
+                                        
                                         @php
                                             $numberOfUniqueInstances = App\Models\LMMAXStudentsContinousAssessment::where('students_continous_assessments.course_id', $result->course_id)
                                                 ->where('students_continous_assessments.delivery_mode', $result->delivery_mode)
@@ -111,9 +112,16 @@
                                                 ->count('students_continous_assessments.component_id');
                                         @endphp
                                         <td>
-                                            <span class="badge bg-primary">{{ number_format($result->total_marks / $numberOfUniqueInstances, 2) }}</span> <b>/</b>
-                                            <span class="badge bg-secondary">40</span>
+                                            @if ($numberOfUniqueInstances > 0)
+                                                <span class="badge bg-primary">{{ number_format($result->total_marks / $numberOfUniqueInstances, 2) }}</span> <b>/</b>
+                                                <span class="badge bg-secondary">40</span>
+                                            @else
+                                                <span class="badge bg-danger">No components available</span>
+                                            @endif
                                         </td>
+
+
+                                        
                                         <td class="text-end">
                                             <form action="{{ route('docket.viewCaComponentsWithComponent', encrypt($result->course_id)) }}" method="GET">
                                                 <input type="hidden" name="study_id" value="{{encrypt($result->study_id)}}">
