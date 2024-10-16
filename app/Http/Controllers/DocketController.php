@@ -922,7 +922,7 @@ class DocketController extends Controller
         $status = $student->status;
         
         // if($status == 3){
-        $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
+        // $studentExistsInStudentsTable = Courses::where('Student', $studentId)->whereNotNull('updated_at')->exists();
         if ((!Courses::where('Student', $studentId)
         ->whereNotNull('updated_at')
         ->where('updated_at', '>', '2024-09-19')
@@ -931,9 +931,8 @@ class DocketController extends Controller
                 $this->setAndUpdateRegisteredCourses($studentId);
             }else{
             $this->setAndUpdateCoursesForCurrentYear($studentId); 
-        }}else {
-            $this->setAndUpdateCourses($studentId);
-        }                      
+            }
+        }                    
         // }        // Retrieve all unique Student values from the Course model
         // $courses = Courses::where('Student', $studentId)->get();     THIS IS THE OLD LOGIC
         // return $courses;

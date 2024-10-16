@@ -105,39 +105,39 @@
 
                     <!-- Course Table -->
                     <div class="table-responsive mb-4">
-                    <form id="myForm" action="" method="POST">
-                    @csrf
-                        <table class="table table-sm table-bordered" id="courseTable">
-                        <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Course</th>
-                                    <th>Date / Time</th>
-                                    <th>Venue</th>
-                                    <th>Signature Invigilator</th>
-                                    {{-- <th class="no-print">Action</th> --}}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($courses as $course)
-                                <tr>
-                                    <td>{{$course->Course}} - {{$course->Program}}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    {{-- <td>
-                                        <button class="block no-print" style="background-color: #dc3545; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="button" onclick="removeRow(this)">Remove</button>
-                                    </td> --}}
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        {{-- <button class="block no-print" style="background-color: #28a745; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;" type="submit">Update</button> --}}
+                        <form id="myForm" action="{{ route('update.courses', ['studentId' => $studentResults->StudentID]) }}" method="POST">
+                            @csrf
+                            <table class="table table-sm table-bordered" id="courseTable">
+                            <input type="hidden" class="studentsId" id="studentsId" name="studentsId" value="{{$studentResults->StudentID}}">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Date / Time</th>
+                                        <th>Venue</th>
+                                        <th>Signature Invigilator</th>
+                                        <th class="no-print">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($courses as $course)
+                                    <tr>
+                                        <td>{{$course->Course}} - {{$course->Program}}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>
+                                            <button class="block no-print btn btn-danger" type="button" onclick="removeRow(this)">Remove</button>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            <button class="block no-print btn btn-success" type="submit">Update</button>
                         </form>
                     </div>
-                    {{-- <a href="{{ route('courses.select', $studentResults->StudentID) }}">
+                    <a href="{{ route('courses.select', $studentResults->StudentID) }}">
                         <button class="block no-print" style="background-color: #007bff; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Add Course(s)</button>
-                    </a> --}}
+                    </a>
 
                     <!-- Important Information -->
                     <div class="text-muted small">
@@ -218,20 +218,16 @@
         });
     }
 
-        $('#myForm').on('submit', function(e) {
+    $('#myForm').on('submit', function(e) {
         e.preventDefault();
         
-
-        var coursePairs = $('.course-pair');
+        var rows = $('#courseTable tbody tr');
         var dataArray = [];
-        var studentId = $('#studentId').val(); // Get the studentId from the hidden input
+        var studentId = $('#studentsId').val(); // Get the studentId from the hidden input
 
-        coursePairs.each(function(index, pair) {
-            var courseInput = $(pair).find('input[name="courses[][Course]"]');
-            var programInput = $(pair).find('input[name="courses[][Program]"]');
-
-            var courseValue = courseInput.val();
-            var programValue = programInput.val();
+        rows.each(function() {
+            var courseValue = $(this).find('td:eq(0)').text().split(' - ')[0];
+            var programValue = $(this).find('td:eq(0)').text().split(' - ')[1];
 
             if (courseValue && programValue) {
                 dataArray.push({
@@ -241,7 +237,6 @@
             }
         });
 
-        var studentId = $('#studentsId').val();
         var url = '/docket/updateCourses/' + studentId;
         console.log('Student ID:', studentId);
         $.ajax({
@@ -252,55 +247,37 @@
                 dataArray: dataArray
             },
             success: function(response) {
-                // Handle the success response from the server
-                console.log(response);
                 if (response.success) {
-                    // Display a success message to the user
                     alert('Courses updated successfully.');
                 } else {
-                    // Display an error message to the user
-                    alert('Courses updated successfully.');
+                    alert('Courses updated successfully.'+ response.error);
                 }
             },
             error: function(xhr, status, error) {
-                // Handle the error
                 console.log(error);
-                // Display an error message to the user
                 alert('Error: ' + error);
             }
         });
     });
 
     $(document).ready(function() {
-      // Add Row
-      
-
-      document.getElementById("addRow").addEventListener("click", function () {
-            var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];
-            var newRow = table.insertRow(table.rows.length);
-            var cell1 = newRow.insertCell(0);
-            var cell2 = newRow.insertCell(1);
-            var cell3 = newRow.insertCell(1);
-            var cell4 = newRow.insertCell(1);
-            var cell5 = newRow.insertCell(4);
-
-            cell1.innerHTML = '<div class="course-pair">' +
-                '<input type="text" name="courses[][Course]" placeholder="Course Code" required>' +
-                '<input type="text" name="courses[][Program]" placeholder="Course Name" required>' +
-                '</div>';
-            cell2.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
-            cell3.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
-            cell4.innerHTML ='<td style="border: 1px solid #ccc; padding: 5px; width: 250px; height: 35px;">&nbsp;</td>'
-            cell5.innerHTML = '<button type="button" onclick="removeRow(this)">Remove</button>';
+        $('#addRow').on('click', function() {
+            var tableBody = $('#courseTable tbody');
+            var newRow = `<tr>
+                            <td><input type="text" name="courses[][Course]" placeholder="Course Code" required> - <input type="text" name="courses[][Program]" placeholder="Program Name" required></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td><button type="button" class="btn btn-danger" onclick="removeRow(this)">Remove</button></td>
+                        </tr>`;
+            tableBody.append(newRow);
         });
-
-        // Remove the clicked row from the table
-        
     });
+
     function removeRow(button) {
-            var row = button.parentNode.parentNode;
-            row.parentNode.removeChild(row);
-        }
+        var row = button.closest('tr');
+        row.remove();
+    }
 </script>
 
 <script>
@@ -315,7 +292,7 @@
   // Format the date as "dd-mm-yyyy"
   var formattedDate = day + '-' + month + '-' + year;
 
-  // Find the HTML element with the id "currentDate" and set its text content to the formatted date
+  // Set the formatted date in the HTML element with the id "currentDate"
   document.getElementById('currentDate').textContent = formattedDate;
 </script>
 

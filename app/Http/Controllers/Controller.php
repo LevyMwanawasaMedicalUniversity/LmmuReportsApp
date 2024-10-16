@@ -1592,7 +1592,16 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024'),            
+                END) AS TotalPayment2024'),  
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.TxDate < \'2022-01-01\' THEN 0
+                WHEN pa.TxDate > \'2022-12-31\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2022'),          
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -1678,6 +1687,15 @@ class Controller extends BaseController
             'DCLink',
             'Account',
             'Name',
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+                WHEN pa.TxDate < \'2022-01-01\' THEN 0
+                WHEN pa.TxDate > \'2022-12-31\' THEN 0
+                ELSE pa.Credit 
+                END) AS TotalPayment2022'),
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
