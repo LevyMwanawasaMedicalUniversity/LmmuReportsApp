@@ -860,26 +860,26 @@ class DocketController extends Controller
             return back()->with('error', 'NOT FOUND.');               
         }
 
-        try{
-            $subQuery = Billing::select(
-                'StudentID',
-                'Amount',
-                'Year',
-                DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
-            )
-            ->where('Description', 'NOT LIKE', '%NULL%')
-            ->where('PackageName', 'NOT LIKE', '%NULL%')
-            ->where ('Year', 2024)
-            ->where('StudentID', $studentId)
-            ->first();
-            $invoice2024 = $subQuery->Amount;
-        }catch(\Exception $e){
-            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
-        }
+        // try{
+        //     $subQuery = Billing::select(
+        //         'StudentID',
+        //         'Amount',
+        //         'Year',
+        //         DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
+        //     )
+        //     ->where('Description', 'NOT LIKE', '%NULL%')
+        //     ->where('PackageName', 'NOT LIKE', '%NULL%')
+        //     ->where ('Year', 2024)
+        //     ->where('StudentID', $studentId)
+        //     ->first();
+        //     $invoice2024 = $subQuery->Amount;
+        // }catch(\Exception $e){
+        //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        // }
 
-        if(!$invoice2024){
-            return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
-        }
+        // if(!$invoice2024){
+        //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and your have been invoiced for 2024. Visit your coordinator for courses approval and accounts for invoicing if you have not been invoiced.');
+        // }
 
         $studentPaymentInformation = SageClient::select    (
             'DCLink',
@@ -904,7 +904,7 @@ class DocketController extends Controller
         ->first();
         $balance = $studentPaymentInformation->TotalBalance;
 
-        $percentageOfInvoice = ($balance / $invoice2024) * 100;  
+        // $percentageOfInvoice = ($balance / $invoice2024) * 100;  
         
         $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png";
         $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
@@ -938,6 +938,8 @@ class DocketController extends Controller
         // $courses = Courses::where('Student', $studentId)->get();     THIS IS THE OLD LOGIC
         // return $courses;
         $courses = Courses::where('Student', $studentId)->get();
+
+        // return $courses;
         if($courses->isEmpty()){
             $courses = CourseElectives::select('courses.Name as CourseID', 'courses.CourseDescription as CourseName')
             ->join('courses', 'courses.ID', '=', 'course-electives.CourseID')
