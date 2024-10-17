@@ -1222,7 +1222,7 @@ class DocketController extends Controller
     public function viewExaminationList($courseId){
 
         $theCourse = AllCourses::find($courseId);
-        $academicYear = 2023;
+        $academicYear = 2024;
         $courseCode = $theCourse->course_code;
         $courseName = $theCourse->course_name;
 
@@ -1236,7 +1236,7 @@ class DocketController extends Controller
 
     public function exportListExamList($courseId){
         $theCourse = AllCourses::find($courseId);
-        $academicYear = 2023;
+        $academicYear = 2024;
         $courseCode = $theCourse->course_code;
         $courseName = $theCourse->course_name;
 

@@ -544,9 +544,9 @@ class StudentsController extends Controller
                     return redirect()->back()->with('error', 'Student not registered.');
                 }
 
-                if (!$checkIfApproved) {
-                    return redirect()->back()->with('error', 'Courses not approved. Please contact your coordinator for Course Approval.');
-                }
+                // if (!$checkIfApproved) {
+                //     return redirect()->back()->with('error', 'Courses not approved. Please contact your coordinator for Course Approval.');
+                // }
                 // Update courses based on the student's status
                 if (!Courses::where('Student', $user->name)
                     ->whereNotNull('updated_at')
@@ -561,55 +561,55 @@ class StudentsController extends Controller
                     $this->setAndUpdateCourses($user->name);
                 }
 
-                try {
-                    $subQuery = Billing::select(
-                        'StudentID',
-                        'Amount',
-                        'Year',
-                        DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
-                    )
-                    ->where('Description', 'NOT LIKE', '%NULL%')
-                    ->where('PackageName', 'NOT LIKE', '%NULL%')
-                    // ->whereNotNull('Approval')
-                    ->where('Year', 2024)
-                    ->where('StudentID', $user->name)
-                    ->first();
+                // try {
+                //     $subQuery = Billing::select(
+                //         'StudentID',
+                //         'Amount',
+                //         'Year',
+                //         DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
+                //     )
+                //     ->where('Description', 'NOT LIKE', '%NULL%')
+                //     ->where('PackageName', 'NOT LIKE', '%NULL%')
+                //     // ->whereNotNull('Approval')
+                //     ->where('Year', 2024)
+                //     ->where('StudentID', $user->name)
+                //     ->first();
 
-                    $invoice2024 = $subQuery->Amount;
-                } catch (\Exception $e) {
-                    return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
-                }
+                //     $invoice2024 = $subQuery->Amount;
+                // } catch (\Exception $e) {
+                //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
+                // }
                 // return $invoice2024;
-                if (!$invoice2024) {
-                    return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
-                }
+                // if (!$invoice2024) {
+                //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
+                // }
 
-                $studentPaymentInformation = SageClient::select(
-                    'DCLink',
-                    'Account',
-                    'Name',
-                    DB::raw('SUM(CASE 
-                        WHEN pa.Description LIKE \'%reversal%\' THEN 0  
-                        WHEN pa.Description LIKE \'%FT%\' THEN 0
-                        WHEN pa.Description LIKE \'%DE%\' THEN 0  
-                        WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
-                        ELSE pa.Credit 
-                        END) AS TotalPayments'),
-                    DB::raw('SUM(pa.Credit) as TotalCredit'),
-                    DB::raw('SUM(pa.Debit) as TotalDebit'),
-                    DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-                )
-                ->where('Account', $user->name)
-                ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-                ->groupBy('DCLink', 'Account', 'Name')
-                ->first();
+                // $studentPaymentInformation = SageClient::select(
+                //     'DCLink',
+                //     'Account',
+                //     'Name',
+                //     DB::raw('SUM(CASE 
+                //         WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                //         WHEN pa.Description LIKE \'%FT%\' THEN 0
+                //         WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                //         WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                //         ELSE pa.Credit 
+                //         END) AS TotalPayments'),
+                //     DB::raw('SUM(pa.Credit) as TotalCredit'),
+                //     DB::raw('SUM(pa.Debit) as TotalDebit'),
+                //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
+                // )
+                // ->where('Account', $user->name)
+                // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+                // ->groupBy('DCLink', 'Account', 'Name')
+                // ->first();
 
-                $balance = $studentPaymentInformation->TotalBalance;
-                $percentageOfInvoice = ($balance / $invoice2024) * 100;
+                // $balance = $studentPaymentInformation->TotalBalance;
+                // $percentageOfInvoice = ($balance / $invoice2024) * 100;
 
-                if ($percentageOfInvoice > 25) {
-                    return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
-                }
+                // if ($percentageOfInvoice > 25) {
+                //     return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
+                // }
             }
         }
 
