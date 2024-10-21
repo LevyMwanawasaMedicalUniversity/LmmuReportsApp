@@ -702,8 +702,8 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function checkIfStudentIsRegisteredOnSisReports($studentId){
-        $results = $this->queryIfStudentIsRegisteredOnSisReports($studentId);
+    public function checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear) {
+        $results = $this->queryIfStudentIsRegisteredOnSisReports($studentId, $academicYear);
         return $results;
     }
 
