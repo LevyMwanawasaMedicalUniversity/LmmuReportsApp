@@ -240,6 +240,8 @@ class StudentsController extends Controller
                         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
                     }
                     $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+
+                    $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, 2024)->exists();
                     if ($studentsProgramme->isEmpty() || $isStudentRegistered) {
                         Student::updateOrCreate(
                             ['student_number' => $studentId],
@@ -498,7 +500,7 @@ class StudentsController extends Controller
         $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
         $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();
         $checkIfApproved = $this->checkIfStudentIsRegistered($user->name)->where('course-electives.Approved', 1)->exists();
-
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($student, 2024)->exists();
         // return $checkIfApproved;
         // return $user->name;
         $results2023PreviouseYear = Grades::where('StudentNo', $user->name)
@@ -540,7 +542,7 @@ class StudentsController extends Controller
             // Make sure $isStudentRegistered is defined somewhere before this block
             if( $repeatCourses->isEmpty()){
             
-                if (!$isStudentRegistered) {
+                if (!$isStudentRegistered || !$isStudentRegisteredOnSisReports) {
                     return redirect()->back()->with('error', 'Student not registered.');
                 }
 
@@ -847,13 +849,13 @@ class StudentsController extends Controller
             return redirect()->route('nmcz.registration', $studentId);
         }
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-04-20';       
+        $deadLine = '2024-12-20';       
         
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-        $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
-        if (!$isStudentsStatus4) {
-            return redirect()->back()->with('error', 'Student can not register.');
-        }
+        // $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
+        // if (!$isStudentsStatus4) {
+        //     return redirect()->back()->with('error', 'Student can not register.');
+        // }
         if ($isStudentRegistered) {
             return redirect()->back()->with('error', 'Student already registered On Edurole.');
         }
@@ -941,9 +943,9 @@ class StudentsController extends Controller
         // return $todaysDate;
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
-        if (!$isStudentsStatus4) {
-            return redirect()->back()->with('error', 'Student can not register.');
-        }
+        // if (!$isStudentsStatus4) {
+        //     return redirect()->back()->with('error', 'Student can not register.');
+        // }
         if ($isStudentRegistered) {
             return redirect()->back()->with('error', 'Student already registered On Edurole.');
         }
