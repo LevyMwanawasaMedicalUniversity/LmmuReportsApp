@@ -542,7 +542,7 @@ class StudentsController extends Controller
             // Make sure $isStudentRegistered is defined somewhere before this block
             if( $repeatCourses->isEmpty()){
             
-                if (!$isStudentRegistered || !$isStudentRegisteredOnSisReports) {
+                if (!$isStudentRegistered && !$isStudentRegisteredOnSisReports) {
                     return redirect()->back()->with('error', 'Student not registered.');
                 }
 
