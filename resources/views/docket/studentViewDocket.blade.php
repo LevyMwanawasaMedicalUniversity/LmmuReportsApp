@@ -100,7 +100,11 @@
                             <tbody>
                                 @foreach($courses as $course)
                                 <tr>
-                                    <td>{{$course->Course}} - {{$course->Program}}</td>
+                                @if($registeredOnEdurole == 1)
+                                    <td>{{$course->Name}} - {{$course->CourseDescription}}</td>
+                                @else
+                                    <td>{{$course->course_name}} - {{$course->course_description}}</td>
+                                @endif
                                     <td></td>
                                     <td></td>
                                     <td></td>
