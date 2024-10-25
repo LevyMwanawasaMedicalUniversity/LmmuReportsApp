@@ -11,13 +11,14 @@ $(document).ready(function() {
         $('input[id^="course' + index + '"]:checked').each(function() {
             courses.push($(this).val());
         });
-        console.log(courses);
-        console.log(registrationFee);
-        console.log(payments2024);
-        console.log(totalFee);
+        // console.log(courses);
+        // console.log(registrationFee);
+        // console.log(payments2024);
+        // console.log(totalFee);
+        // console.log("Actual" + actualBalance);
 
         // Show the modal
-        if (registrationFee <= payments2024) {
+        if ((registrationFee <= payments2024) && actualBalance <= 0) {
             $('#eligibleModal').modal('show');
 
             // Populate the modal with the courses
@@ -30,9 +31,12 @@ $(document).ready(function() {
 
             // Update the hidden input field with the selected courses
             $('#coursesInput').val(courses.join(','));
-        } else {
+        } else if (registrationFee > payments2024) {
             var shortfall = registrationFee - payments2024;
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
+            $('#ineligibleModal').modal('show');
+        } else {
+            $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
             $('#ineligibleModal').modal('show');
         }
     });
@@ -52,13 +56,14 @@ $(document).ready(function() {
         $('input[id^="courseRepeat' + index + '"]:checked').each(function() {
             coursesRepeat.push($(this).val());
         });
-        console.log(coursesRepeat);
-        console.log(registrationFee);
-        console.log(totalFee);
-        console.log(payments2024);
+        // console.log(coursesRepeat);
+        // console.log(registrationFee);
+        // console.log(totalFee);
+        // console.log(payments2024);
+        // console.log("Actual" + actualBalance);
 
         // Show the modal
-        if (registrationFee <= payments2024) {
+        if ((registrationFee <= payments2024) && actualBalance <= 0) {
             $('#eligibleModal').modal('show');
 
             // Populate the modal with the courses
@@ -71,9 +76,12 @@ $(document).ready(function() {
 
             // Update the hidden input field with the selected courses
             $('#coursesInput').val(coursesRepeat.join(','));
-        } else {
+        } else if (registrationFee > payments2024) {
             var shortfall = registrationFee - payments2024;
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
+            $('#ineligibleModal').modal('show');
+        } else {
+            $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
             $('#ineligibleModal').modal('show');
         }
     });

@@ -11,6 +11,8 @@
         var payments2024 = {{ isset($studentsPayments->TotalPayment2024) ? $studentsPayments->TotalPayment2024 : '0' }};
         
         var balance = {{ isset($amountAfterInvoicing) ? $amountAfterInvoicing : $studentDetails->Amount }};
+
+        var actualBalance = {{ $actualBalance }};
     </script>
     <div class="card-body">
         <div class="table-responsive">
@@ -41,8 +43,8 @@
                             K {{$amountAfterInvoicing}}
                         </td>
                         @else
-                        <td style="font-weight:bold; color :{{ $studentDetails->Amount >= 0 ? 'red' : 'green' }};">
-                            K {{$studentDetails->Amount}}
+                        <td style="font-weight:bold; color :{{ $actualBalance >= 0 ? 'red' : 'green' }};">
+                            K {{$actualBalance}}
                         </td>
                         @endif
                         <td>@isset($studentsPayments->LatestInvoiceDate) {{ $studentsPayments->LatestInvoiceDate }} @endisset</td>

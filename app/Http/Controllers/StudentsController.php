@@ -989,6 +989,7 @@ class StudentsController extends Controller
     }
 
     public function studentRegisterForCourses($studentId) {
+        set_time_limit(100000000);
         $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
         $studentStatus = $getStudentStaus->status;
 
@@ -1073,11 +1074,35 @@ class StudentsController extends Controller
     
         $currentStudentsCourses = $studentsProgramme;
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
+
+        $studentPaymentInformation = SageClient::select    (
+            'DCLink',
+            'Account',
+            'Name',            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+        $actualBalance = $studentPaymentInformation->TotalBalance;
     
-        return view('allStudents.studentSelfRegistration', compact('studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.studentSelfRegistration', compact('actualBalance','studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
     public function registerStudent($studentId) {
+        set_time_limit(100000000);
         $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
         $studentStatus = $getStudentStaus->status;
 
@@ -1085,7 +1110,7 @@ class StudentsController extends Controller
             return redirect()->route('nmcz.registration', $studentId);
         }
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-04-20'; 
+        $deadLine = '2024-12-20'; 
         
         // return $todaysDate;
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
@@ -1149,7 +1174,9 @@ class StudentsController extends Controller
     
         $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
             return [trim($item['InvoiceDescription']) => $item];
-        })->toArray();        
+        })->toArray();      
+        
+        
     
         // $currentStudentsCourses = $studentsProgramme->map($processCourse);
         $currentStudentsCourses = $studentsProgramme;
@@ -1162,8 +1189,31 @@ class StudentsController extends Controller
             });
         }
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
+
+        $studentPaymentInformation = SageClient::select    (
+            'DCLink',
+            'Account',
+            'Name',            
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                ELSE pa.Credit 
+                END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+        $actualBalance = $studentPaymentInformation->TotalBalance;
     
-        return view('allStudents.adminRegisterStudent', compact('studentStatus','studentDetails','courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
+        return view('allStudents.adminRegisterStudent', compact('actualBalance','studentStatus','studentDetails','courses', 'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }  
 
     public function adminSubmitCourses(Request $request){
