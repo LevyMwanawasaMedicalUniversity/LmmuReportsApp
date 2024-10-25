@@ -84,20 +84,21 @@
                                 $courseName = $course->CourseDescription;
                                 $courseCode = $course->Name;
 
-                                $totalMarks = \App\Models\LMMAXAssessmentTypes::join('c_a_type_marks_allocations', 'c_a_type_marks_allocations.assessment_type_id', '=', 'assessment_types.id')
-                                    ->join('students_continous_assessments','students_continous_assessments.ca_type', '=', 'assessment_types.id')
-                                    ->where('students_continous_assessments.students_continous_assessment_id', $result->students_continous_assessment_id)
-                                    ->where('students_continous_assessments.student_id', $studentNumber)
-                                    ->where('students_continous_assessments.ca_type', $result->ca_type)
-                                    ->where('c_a_type_marks_allocations.delivery_mode', $result->delivery_mode)
-                                    ->where('c_a_type_marks_allocations.study_id', $result->study_id)
-                                    ->where('c_a_type_marks_allocations.course_id', $result->course_id)
-                                    ->where('c_a_type_marks_allocations.component_id', $result->component_id)
-                                    //->where('students_continous_assessments.students_continous_assessment_id', $result->students_continous_assessment_id)
-                                    ->select('c_a_type_marks_allocations.total_marks')
-                                    ->first();
+                                
+    $totalMarksRecord = \App\Models\LMMAXAssessmentTypes::join('c_a_type_marks_allocations', 'c_a_type_marks_allocations.assessment_type_id', '=', 'assessment_types.id')
+        ->join('students_continous_assessments','students_continous_assessments.ca_type', '=', 'assessment_types.id')
+        ->where('students_continous_assessments.students_continous_assessment_id', $result->students_continous_assessment_id)
+        ->where('students_continous_assessments.student_id', $studentNumber)
+        ->where('students_continous_assessments.ca_type', $result->ca_type)
+        ->where('c_a_type_marks_allocations.delivery_mode', $result->delivery_mode)
+        ->where('c_a_type_marks_allocations.study_id', $result->study_id)
+        ->where('c_a_type_marks_allocations.course_id', $result->course_id)
+        ->where('c_a_type_marks_allocations.component_id', $result->component_id)
+        ->select('c_a_type_marks_allocations.total_marks')
+        ->first();
 
-                                $totalMarks = $totalMarks->total_marks;
+    $totalMarks = $totalMarksRecord ? $totalMarksRecord->total_marks : 'N/A'; // or use a default value like 0
+
 
                             @endphp
                                 <tr>
