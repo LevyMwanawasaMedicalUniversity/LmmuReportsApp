@@ -1036,27 +1036,26 @@ class StudentsController extends Controller
             ->where('Semester', 1)
             ->exists();
 
-        $studentsPayments = SageClient::select    (
-            'DCLink',
-            'Account',
-            'Name',            
+            $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
+            DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
                 WHEN pa.Description LIKE \'%DE%\' THEN 0  
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
+                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayments'),
-            DB::raw('SUM(pa.Credit) as TotalCredit'),
-            DB::raw('SUM(pa.Debit) as TotalDebit'),
-            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+                END) AS TotalPayment2024'),            
             
         )
         ->where('Account', $studentId)
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        
         ->groupBy('DCLink', 'Account', 'Name')
         ->first();
+    
         $actualBalance = $studentsPayments->TotalBalance;
     
         if ($checkRegistration) {
