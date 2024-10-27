@@ -1101,27 +1101,27 @@ class StudentsController extends Controller
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
 
         // Fetch student balance in a more efficient query
-        $studentPaymentInformation = SageClient::select(
-            'DCLink',
-            'Account',
-            'Name',
-            DB::raw('SUM(CASE 
-                        WHEN pa.Description LIKE \'%reversal%\' THEN 0
-                        WHEN pa.Description LIKE \'%FT%\' THEN 0
-                        WHEN pa.Description LIKE \'%DE%\' THEN 0
-                        WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
-                        ELSE pa.Credit
-                    END) AS TotalPayments'),
-            DB::raw('SUM(pa.Credit) as TotalCredit'),
-            DB::raw('SUM(pa.Debit) as TotalDebit'),
-            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-        )
-        ->where('Account', $studentId)
-        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        ->groupBy('DCLink', 'Account', 'Name')
-        ->first();
+        // $studentPaymentInformation = SageClient::select(
+        //     'DCLink',
+        //     'Account',
+        //     'Name',
+        //     DB::raw('SUM(CASE 
+        //                 WHEN pa.Description LIKE \'%reversal%\' THEN 0
+        //                 WHEN pa.Description LIKE \'%FT%\' THEN 0
+        //                 WHEN pa.Description LIKE \'%DE%\' THEN 0
+        //                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+        //                 ELSE pa.Credit
+        //             END) AS TotalPayments'),
+        //     DB::raw('SUM(pa.Credit) as TotalCredit'),
+        //     DB::raw('SUM(pa.Debit) as TotalDebit'),
+        //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
+        // )
+        // ->where('Account', $studentId)
+        // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        // ->groupBy('DCLink', 'Account', 'Name')
+        // ->first();
 
-        $actualBalance = $studentPaymentInformation->TotalBalance;
+        // $actualBalance = $studentPaymentInformation->TotalBalance;
 
         // Return the view with compacted data
         return view('allStudents.studentSelfRegistration', compact(
@@ -1138,128 +1138,128 @@ class StudentsController extends Controller
     }
 
 
-    // public function registerStudent($studentId) {
-    //     set_time_limit(100000000);
+    public function registerStudent($studentId) {
+        set_time_limit(100000000);
         
-    //     // Fetch student status with select to reduce data load
-    //     $getStudentStaus = Student::query()->select('status')->where('student_number', $studentId)->first();
-    //     $studentStatus = $getStudentStaus->status;
+        // Fetch student status with select to reduce data load
+        $getStudentStaus = Student::query()->select('status')->where('student_number', $studentId)->first();
+        $studentStatus = $getStudentStaus->status;
     
-    //     if ($studentStatus == 5) {
-    //         return redirect()->route('nmcz.registration', $studentId);
-    //     }
+        if ($studentStatus == 5) {
+            return redirect()->route('nmcz.registration', $studentId);
+        }
     
-    //     $todaysDate = date('Y-m-d');
-    //     $deadLine = '2024-12-20'; 
+        $todaysDate = date('Y-m-d');
+        $deadLine = '2024-12-20'; 
         
-    //     // Check if student is already registered
-    //     $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-    //     $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
+        // Check if student is already registered
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
         
-    //     if ($isStudentRegistered) {
-    //         return redirect()->back()->with('error', 'Student already registered On Edurole.');
-    //     }
+        if ($isStudentRegistered) {
+            return redirect()->back()->with('error', 'Student already registered On Edurole.');
+        }
     
-    //     // Check if the student has registered courses for the specified year and semester
-    //     $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-    //         ->where('Year', 2024)
-    //         ->where('Semester', 1)
-    //         ->exists();
+        // Check if the student has registered courses for the specified year and semester
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2024)
+            ->where('Semester', 1)
+            ->exists();
     
-    //     // Optimize student payment query
-    //     $studentPaymentInformation = SageClient::select('DCLink', 'Account', 'Name',
-    //         DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
-    //         DB::raw('SUM(pa.Credit) as TotalCredit'),
-    //         DB::raw('SUM(pa.Debit) as TotalDebit'),
-    //         DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-    //     )
-    //     ->where('Account', $studentId)
-    //     ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-    //     ->groupBy('DCLink', 'Account', 'Name')
-    //     ->first();
+        // Optimize student payment query
+        // $studentPaymentInformation = SageClient::select('DCLink', 'Account', 'Name',
+        //     DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
+        //     DB::raw('SUM(pa.Credit) as TotalCredit'),
+        //     DB::raw('SUM(pa.Debit) as TotalDebit'),
+        //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
+        // )
+        // ->where('Account', $studentId)
+        // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        // ->groupBy('DCLink', 'Account', 'Name')
+        // ->first();
     
-    //     $actualBalance = $studentPaymentInformation->TotalBalance;
+        // $actualBalance = $studentPaymentInformation->TotalBalance;
     
-    //     if ($checkRegistration) {
-    //         $checkRegistration = collect($this->getStudentRegistration($studentId));
-    //         $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+        if ($checkRegistration) {
+            $checkRegistration = collect($this->getStudentRegistration($studentId));
+            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
     
-    //         $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
             
-    //         // Cache appeal student details to avoid redundant calls
-    //         $studentInformation = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
-    //             return $this->getAppealStudentDetails(2024, [$studentId])->first();
-    //         });
+            // Cache appeal student details to avoid redundant calls
+            $studentInformation = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
+                return $this->getAppealStudentDetails(2024, [$studentId])->first();
+            });
     
-    //         return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation'));
-    //     }
+            return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation'));
+        }
     
-    //     if ($todaysDate > $deadLine) {
-    //         return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
-    //     }
+        if ($todaysDate > $deadLine) {
+            return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
+        }
     
-    //     // Fetch students payment once and use where needed
-    //     $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // Fetch students payment once and use where needed
+        $studentsPayments = $this->getStudentsPayments($studentId)->first();
     
-    //     // Handle registration process
-    //     $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-    //     $courses = $registrationResults['dataArray'];
-    //     $failed = $registrationResults['failed'];
+        // Handle registration process
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
     
-    //     $coursesArray = $courses->pluck('Course')->toArray();
-    //     $coursesNamesArray = $courses->pluck('Program')->toArray();
+        $coursesArray = $courses->pluck('Course')->toArray();
+        $coursesNamesArray = $courses->pluck('Program')->toArray();
     
-    //     $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-    //     if ($studentsProgramme->isEmpty()) {
-    //         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
-    //     }
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        if ($studentsProgramme->isEmpty()) {
+            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+        }
     
-    //     // Update CodeRegisteredUnder for students with IDs starting with 190
-    //     if (str_starts_with($studentId, '190')) {
-    //         $studentsProgramme->transform(function ($studentProgramme) {
-    //             $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
-    //             return $studentProgramme;
-    //         });
-    //     }
+        // Update CodeRegisteredUnder for students with IDs starting with 190
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme->transform(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
     
-    //     if ($studentsProgramme->isEmpty()) {
-    //         return redirect()->back()->with('warning', 'No courses found for the student. Student Has Graduated');
-    //     }
+        if ($studentsProgramme->isEmpty()) {
+            return redirect()->back()->with('warning', 'No courses found for the student. Student Has Graduated');
+        }
     
-    //     $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
     
-    //     // Fetch course count with optimized query
-    //     $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
+        // Fetch course count with optimized query
+        $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
     
-    //     // Cache all invoices to avoid loading from database multiple times
-    //     $allInvoicesArray = Cache::remember('sis_reports_sage_invoices', 60, function () {
-    //         return SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
-    //             return [trim($item['InvoiceDescription']) => $item];
-    //         })->toArray();
-    //     });
+        // Cache all invoices to avoid loading from database multiple times
+        $allInvoicesArray = Cache::remember('sis_reports_sage_invoices', 60, function () {
+            return SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+                return [trim($item['InvoiceDescription']) => $item];
+            })->toArray();
+        });
     
-    //     $currentStudentsCourses = $studentsProgramme;
+        $currentStudentsCourses = $studentsProgramme;
     
-    //     // Get all courses and modify CodeRegisteredUnder if student ID starts with 190
-    //     $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
-    //     if (str_starts_with($studentId, '190')) {
-    //         $allCourses->transform(function ($allCourse) {
-    //             $allCourse->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $allCourse->CodeRegisteredUnder);
-    //             return $allCourse;
-    //         });
-    //     }
+        // Get all courses and modify CodeRegisteredUnder if student ID starts with 190
+        $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
+        if (str_starts_with($studentId, '190')) {
+            $allCourses->transform(function ($allCourse) {
+                $allCourse->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $allCourse->CodeRegisteredUnder);
+                return $allCourse;
+            });
+        }
     
-    //     // Cache appeal student details to avoid redundant calls
-    //     $studentDetails = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
-    //         return $this->getAppealStudentDetails(2024, [$studentId])->first();
-    //     });
+        // Cache appeal student details to avoid redundant calls
+        $studentDetails = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
+            return $this->getAppealStudentDetails(2024, [$studentId])->first();
+        });
     
-    //     return view('allStudents.adminRegisterStudent', compact(
-    //         'actualBalance', 'studentStatus', 'studentDetails', 'courses',
-    //         'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
-    //         'studentId', 'theNumberOfCourses'
-    //     ));
-    // }
+        return view('allStudents.adminRegisterStudent', compact(
+            'actualBalance', 'studentStatus', 'studentDetails', 'courses',
+            'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
+            'studentId', 'theNumberOfCourses'
+        ));
+    }
     
 
     public function adminSubmitCourses(Request $request){
