@@ -707,6 +707,58 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function checkIfStudentIsRegisteredOnSisReportsForApi($studentId, $academicYear) {
+        $results = $this->queryIfStudentIsRegisteredOnSisReportsForApi($studentId, $academicYear);
+        return $results;
+    }
+
+    private function queryIfStudentIsRegisteredOnSisReportsForApi($studentId, $academicYear) {
+        $result = BasicInformation::query()
+            ->select([
+                'basic-information.FirstName',
+                'basic-information.MiddleName',
+                'basic-information.Surname',
+                'basic-information.StudyType',
+                'basic-information.Sex',
+                'basic-information.PrivateEmail',
+                'student-study-link.StudentID',
+                'basic-information.GovernmentID',
+                'study.Name as ProgrammeName',
+                'study.ID as StudyID',
+                'schools.Name as School',
+                'courses.Name as CourseName',
+                'course-electives.Approved',
+                'courses.CourseDescription as CourseDescription',
+                DB::raw("
+                    CASE
+                        WHEN programmes.ProgramName LIKE '%y1' THEN 'YEAR 1'
+                        WHEN programmes.ProgramName LIKE '%y2' THEN 'YEAR 2'
+                        WHEN programmes.ProgramName LIKE '%y3' THEN 'YEAR 3'
+                        WHEN programmes.ProgramName LIKE '%y4' THEN 'YEAR 4'
+                        WHEN programmes.ProgramName LIKE '%y5' THEN 'YEAR 5'
+                        WHEN programmes.ProgramName LIKE '%y6' THEN 'YEAR 6'
+                        WHEN programmes.ProgramName LIKE '%y8' THEN 'YEAR 1'
+                        WHEN programmes.ProgramName LIKE '%y9' THEN 'YEAR 2'
+                    END AS 'YearOfStudy'
+                ")
+            ])
+            ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+            ->join('study', 'study.ID', '=', 'student-study-link.StudyID')
+            ->join('schools', 'study.ParentID', '=', 'schools.ID')
+            ->join('course-electives', function ($join) {
+                $join->on('course-electives.StudentID', '=', 'basic-information.ID')
+                    ->where('course-electives.Year', '=', 2024);
+            })
+            ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+            ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
+            ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
+            ->where('course-electives.StudentID', $studentId)
+            ->where('course-electives.Year', 2024)
+            ->groupBy('courses.Name');
+
+        return $result;
+    }
+
     private function queryIfStudentIsRegisteredOnSisReports($studentId, $academicYear) {
         $results = CourseRegistration::where('course_registration.StudentID', $studentId)
             ->where('course_registration.created_at', '>', '2024-10-01')
@@ -1952,6 +2004,13 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent( $studentId){
+        $academicYear = 2024;
+        $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent($academicYear)
+            ->where('basic_information_s_r_s.StudentID', $studentId);
+        return $results;
+    }
+
     public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear){
         $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear);
         return $results;
@@ -1962,15 +2021,18 @@ class Controller extends BaseController
             'basic_information_s_r_s.FirstName',
             'basic_information_s_r_s.MiddleName',
             'basic_information_s_r_s.Surname',
-            'basic_information_s_r_s.StudentID as ID',
+            'basic_information_s_r_s.StudentID',
             'basic_information_s_r_s.GovernmentID',
             'basic_information_s_r_s.Sex',
             'basic_information_s_r_s.PrivateEmail',
-            'basic_information_s_r_s.MobilePhone',
-            DB::raw('study_s_r_s.study_name AS ProgrammeName'),
-            DB::raw('study_s_r_s.study_shortname AS ProgrammeCode'),
-            DB::raw('schools_s_r_s.school_name AS School'),
+            // 'basic_information_s_r_s.MobilePhone',
             'basic_information_s_r_s.StudyType',
+            DB::raw('study_s_r_s.study_name AS ProgrammeName'),
+            // DB::raw('study_s_r_s.study_shortname AS ProgrammeCode'),
+            DB::raw('study_s_r_s.study_id AS StudyID'),
+            DB::raw('courses_s_r_s.course_name AS CourseName'),
+            DB::raw('schools_s_r_s.school_name AS School'),
+            
             DB::raw("
                 CASE 
                     WHEN `basic_information_s_r_s`.StudentID LIKE '240%' THEN 'NEWLY ADMITTED'
@@ -2002,6 +2064,7 @@ class Controller extends BaseController
         ->join('program_course_links_s_r_s', 'courses_s_r_s.course_id', '=', 'program_course_links_s_r_s.course_id')
         ->join('program_s_r_s', 'program_course_links_s_r_s.program_id', '=', 'program_s_r_s.programme_id')
         ->whereRaw('LENGTH(`basic_information_s_r_s`.StudentID) > 7')
+        ->where('course_registration.created_at', '>', '2024-10-01')
         // ->whereNotIn('basic_information_s_r_s.StudentID', $eduroleArray)
         ->distinct('basic_information_s_r_s.StudentID');
         

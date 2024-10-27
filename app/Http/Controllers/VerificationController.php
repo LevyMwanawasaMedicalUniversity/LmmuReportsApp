@@ -10,7 +10,10 @@ class VerificationController extends Controller
         $results = $this->checkIfStudentIsRegistered($studentNumber)->get()
             ->values(); 
     
-        // if ($results->isEmpty()) {
+        if ($results->isEmpty()) {
+            $results = $this->getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent($studentNumber)->get()
+                ->values();
+        }
 
     
         return response()->json(['data' =>  $results]);
