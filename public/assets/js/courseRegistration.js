@@ -1,5 +1,6 @@
 $(document).ready(function() {
     $('.registerButton').click(function(e) {
+        $.ajaxSetup({ cache: false });
         e.preventDefault();
 
         var index = $(this).attr('id').replace('registerButton', '');
