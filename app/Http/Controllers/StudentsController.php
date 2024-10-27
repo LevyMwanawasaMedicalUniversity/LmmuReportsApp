@@ -1045,6 +1045,28 @@ class StudentsController extends Controller
             ->where('Semester', 1)
             ->exists();
 
+        $studentsPayments = SageClient::select(
+            'DCLink',
+            'Account',
+            'Name',
+            DB::raw('SUM(CASE 
+                        WHEN pa.Description LIKE \'%reversal%\' THEN 0
+                        WHEN pa.Description LIKE \'%FT%\' THEN 0
+                        WHEN pa.Description LIKE \'%DE%\' THEN 0
+                        WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+                        ELSE pa.Credit
+                    END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+
+        $actualBalance = $studentsPayments->TotalBalance;
+
         if ($checkRegistration) {
             // Fetch student registration and course details
             $studentCourses = $this->getStudentRegistration($studentId);
@@ -1057,7 +1079,7 @@ class StudentsController extends Controller
         }
 
         // Fetch student payments (using first() to get only one record)
-        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // $studentsPayments = $this->getStudentsPayments($studentId)->first();
 
         // Handle the course registration process
         $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
@@ -1101,27 +1123,7 @@ class StudentsController extends Controller
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
 
         // Fetch student balance in a more efficient query
-        $studentPaymentInformation = SageClient::select(
-            'DCLink',
-            'Account',
-            'Name',
-            DB::raw('SUM(CASE 
-                        WHEN pa.Description LIKE \'%reversal%\' THEN 0
-                        WHEN pa.Description LIKE \'%FT%\' THEN 0
-                        WHEN pa.Description LIKE \'%DE%\' THEN 0
-                        WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
-                        ELSE pa.Credit
-                    END) AS TotalPayments'),
-            DB::raw('SUM(pa.Credit) as TotalCredit'),
-            DB::raw('SUM(pa.Debit) as TotalDebit'),
-            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-        )
-        ->where('Account', $studentId)
-        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        ->groupBy('DCLink', 'Account', 'Name')
-        ->first();
-
-        $actualBalance = $studentPaymentInformation->TotalBalance;
+        
 
         // Return the view with compacted data
         return view('allStudents.studentSelfRegistration', compact(
@@ -1167,18 +1169,27 @@ class StudentsController extends Controller
             ->exists();
     
         // Optimize student payment query
-        // $studentPaymentInformation = SageClient::select('DCLink', 'Account', 'Name',
-        //     DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
-        //     DB::raw('SUM(pa.Credit) as TotalCredit'),
-        //     DB::raw('SUM(pa.Debit) as TotalDebit'),
-        //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-        // )
-        // ->where('Account', $studentId)
-        // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        // ->groupBy('DCLink', 'Account', 'Name')
-        // ->first();
+        $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
+            DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
+                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2024'),            
+            
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
     
-        // $actualBalance = $studentPaymentInformation->TotalBalance;
+        $actualBalance = $studentsPayments->TotalBalance;
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
