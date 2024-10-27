@@ -1199,7 +1199,7 @@ class StudentsController extends Controller
         }
     
         // Fetch students payment once and use where needed
-        $studentsPayments = $this->getStudentsPayments($studentId)->first();
+        // $studentsPayments = $this->getStudentsPayments($studentId)->first();
     
         // Handle registration process
         $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
