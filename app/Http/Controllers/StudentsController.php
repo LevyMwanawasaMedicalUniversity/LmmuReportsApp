@@ -1178,7 +1178,7 @@ class StudentsController extends Controller
         // ->groupBy('DCLink', 'Account', 'Name')
         // ->first();
     
-        $actualBalance = $studentPaymentInformation->TotalBalance;
+        // $actualBalance = $studentPaymentInformation->TotalBalance;
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
