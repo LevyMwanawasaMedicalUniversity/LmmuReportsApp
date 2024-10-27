@@ -1101,27 +1101,27 @@ class StudentsController extends Controller
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
 
         // Fetch student balance in a more efficient query
-        // $studentPaymentInformation = SageClient::select(
-        //     'DCLink',
-        //     'Account',
-        //     'Name',
-        //     DB::raw('SUM(CASE 
-        //                 WHEN pa.Description LIKE \'%reversal%\' THEN 0
-        //                 WHEN pa.Description LIKE \'%FT%\' THEN 0
-        //                 WHEN pa.Description LIKE \'%DE%\' THEN 0
-        //                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
-        //                 ELSE pa.Credit
-        //             END) AS TotalPayments'),
-        //     DB::raw('SUM(pa.Credit) as TotalCredit'),
-        //     DB::raw('SUM(pa.Debit) as TotalDebit'),
-        //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-        // )
-        // ->where('Account', $studentId)
-        // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        // ->groupBy('DCLink', 'Account', 'Name')
-        // ->first();
+        $studentPaymentInformation = SageClient::select(
+            'DCLink',
+            'Account',
+            'Name',
+            DB::raw('SUM(CASE 
+                        WHEN pa.Description LIKE \'%reversal%\' THEN 0
+                        WHEN pa.Description LIKE \'%FT%\' THEN 0
+                        WHEN pa.Description LIKE \'%DE%\' THEN 0
+                        WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0
+                        ELSE pa.Credit
+                    END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
 
-        // $actualBalance = $studentPaymentInformation->TotalBalance;
+        $actualBalance = $studentPaymentInformation->TotalBalance;
 
         // Return the view with compacted data
         return view('allStudents.studentSelfRegistration', compact(
@@ -1153,12 +1153,12 @@ class StudentsController extends Controller
         $deadLine = '2024-12-20'; 
         
         // Check if student is already registered
-        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        // $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
         
-        if ($isStudentRegistered) {
-            return redirect()->back()->with('error', 'Student already registered On Edurole.');
-        }
+        // if ($isStudentRegistered) {
+        //     return redirect()->back()->with('error', 'Student already registered On Edurole.');
+        // }
     
         // Check if the student has registered courses for the specified year and semester
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
@@ -1178,7 +1178,7 @@ class StudentsController extends Controller
         // ->groupBy('DCLink', 'Account', 'Name')
         // ->first();
     
-        // $actualBalance = $studentPaymentInformation->TotalBalance;
+        $actualBalance = $studentPaymentInformation->TotalBalance;
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
