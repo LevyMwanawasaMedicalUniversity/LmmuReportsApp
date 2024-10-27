@@ -1057,6 +1057,12 @@ class StudentsController extends Controller
         ->first();
     
         $actualBalance = $studentsPayments->TotalBalance;
+
+        // $studentsPayments = $this->getStudentsPayments($studentId)->first();
+    
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
@@ -1066,17 +1072,11 @@ class StudentsController extends Controller
             
             $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
             
-            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation'));
+            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation','failed'));
         }
         if($todaysDate > $deadLine){
             return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
-        }
-    
-        // $studentsPayments = $this->getStudentsPayments($studentId)->first();
-    
-        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId); 
-        $courses = $registrationResults['dataArray'];
-        $failed = $registrationResults['failed'];
+        }       
         
         $coursesArray = $courses->pluck('Course')->toArray();
         $coursesNamesArray = $courses->pluck('Program')->toArray();
@@ -1176,6 +1176,11 @@ class StudentsController extends Controller
         ->first();
     
         $actualBalance = $studentsPayments->TotalBalance;
+
+        // Handle registration process
+        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
+        $courses = $registrationResults['dataArray'];
+        $failed = $registrationResults['failed'];
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
@@ -1188,7 +1193,7 @@ class StudentsController extends Controller
                 return $this->getAppealStudentDetails(2024, [$studentId])->first();
             });
     
-            return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation'));
+            return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation','failed'));
         }
     
         if ($todaysDate > $deadLine) {
@@ -1196,12 +1201,7 @@ class StudentsController extends Controller
         }
     
         // Fetch students payment once and use where needed
-        // $studentsPayments = $this->getStudentsPayments($studentId)->first();
-    
-        // Handle registration process
-        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-        $courses = $registrationResults['dataArray'];
-        $failed = $registrationResults['failed'];
+        // $studentsPayments = $this->getStudentsPayments($studentId)->first();       
     
         $coursesArray = $courses->pluck('Course')->toArray();
         $coursesNamesArray = $courses->pluck('Program')->toArray();

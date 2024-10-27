@@ -52,21 +52,21 @@
                 <div class="col-md-6 text-right">
                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
                         @if($studentStatus != 7)
-                            {{-- @if($actualBalance <= 0) --}}
+                            @if($actualBalance <= 0 || $failed == 1)
                                 <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
                                     <button class="btn btn-info">PRINT ID CARD</button>
                                 </a>
-                            {{-- @else
+                            @else
                                 <p>Student has a balance of K{{ $actualBalance }}</p>
-                            @endif --}}
+                            @endif
                         @else
-                            {{-- @if($actualBalance <= 0) --}}
+                            @if($actualBalance <= 0 || $failed == 1)
                                 <a href="{{ route('printIDCard.studentNurandMid', ['studentId' => $studentId]) }}" class="mr-3">
                                     <button class="btn btn-info">PRINT ID CARD</button>
                                 </a>
-                            {{-- @else --}}
-                                {{-- <p>Student has a balance of K{{ $actualBalance }}</p> --}}
-                            {{-- @endif --}}
+                            @else
+                                <p>Student has a balance of K{{ $actualBalance }}</p>
+                            @endif
                         @endif
                     @endif            
                 </div>              
