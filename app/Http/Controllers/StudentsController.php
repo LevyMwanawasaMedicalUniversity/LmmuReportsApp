@@ -1261,14 +1261,10 @@ class StudentsController extends Controller
 
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
-        $courses = explode(',', $request->input('courses'));
-
-        // return $courses;
-
-        // return $courses;
+        $courses = $request->input('courses'); // Directly retrieve courses as an array
         $academicYear = 2024;
 
-        $moodleController = new MoodleController();       
+        $moodleController = new MoodleController();
 
         // Insert into CourseRegistration table
         foreach ($courses as $course) {
@@ -1280,17 +1276,18 @@ class StudentsController extends Controller
                 'Semester' => 1,
             ]);
         }
-        $moodleController->addStudentsToMoodleAndEnrollInCourses([$studentId]);
+            $moodleController->addStudentsToMoodleAndEnrollInCourses([$studentId]);
 
-        return redirect()->back()->with('success', 'Courses submitted successfully.');
-    }  
-    
+            return redirect()->back()->with('success', 'Courses submitted successfully.');
+        }  
+        
     public function studentSubmitCourseRegistration(Request $request){
         $studentId = $request->input('studentNumber');
-        $courses = explode(',', $request->input('courses'));
+        $courses = $request->input('courses'); // Directly retrieve courses as an array
         $academicYear = 2024;
-        
-        $moodleController = new MoodleController();  
+
+        $moodleController = new MoodleController();
+
         // Insert into CourseRegistration table
         foreach ($courses as $course) {
             CourseRegistration::create([

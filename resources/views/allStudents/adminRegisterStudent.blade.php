@@ -34,7 +34,6 @@
                 <div class="card-body">
                     @include('allStudents.components.finacialInformation')
                     @include('allStudents.components.studentCoursesForRegistration')                                                                    
-                    <!-- <div class="container"> -->
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">ALL COURSES</h4>
@@ -66,7 +65,7 @@
                                     </h2>
                                     <div id="collapse{{$loop->index}}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}">
                                         <div class="accordion-body">
-                                            {{-- <form method="post" action=""> --}}
+                                            <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
                                                 @csrf
                                                 <div class="table-responsive">
                                                     <table class="table">
@@ -82,7 +81,7 @@
                                                         @foreach($courses as $course)
                                                             <tr>
                                                                 <td>
-                                                                    <input type="checkbox" name="course[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
+                                                                    <input type="checkbox" name="courses[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
                                                                 </td>
                                                                 <td>{{$course->CourseCode}}</td>
                                                                 <td class="text-end">{{$course->CourseName}}</td>
@@ -92,26 +91,104 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <button type="submit" class="btn btn-primary registerButton" id="registerButton{{$loop->index}}">Register</button>
-                                            {{-- </form> --}}
+                                                <input type="hidden" name="studentNumber" value="{{ $studentId }}">
+                                                
+                                                {{-- Blade Conditional Logic to show modals based on balance and payments --}}
+                                                @php
+                                                    $isEligible = ($registrationFees[$index] <= $studentsPayments->TotalPayment2024) && ($actualBalance <= 0);
+                                                    $shortfall = $registrationFees[$index] - $studentsPayments->TotalPayment2024;
+                                                @endphp
+
+                                                {{-- Show eligibility modal --}}
+                                                @if($isEligible)
+                                                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeat{{$loop->index}}">Register</button>
+                                <!-- Eligible Modal -->
+                                <div class="modal fade" id="eligibleModalRepeat{{$loop->index}}" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Eligible To Register</h5>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>You are submitting the following repeat courses for registration:</p>
+                                                <ul>
+                                                    @foreach($courses as $course)
+                                                        <li>{{ $course->CourseCode }} - {{ $course->CourseName }}</li>
+                                                    @endforeach
+                                                </ul>
+                                                <p>Total Invoice: K {{ number_format($totalFees[$index], 2) }}</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <!-- Form for submitting courses -->
+                                                <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
+                                                    @csrf
+                                                    <input type="hidden" name="studentNumber" value="{{ $studentId }}">
+                                                    
+                                                    <!-- Pass the selected courses as a hidden input -->
+                                                    @foreach($courses as $course)
+                                                        <input type="hidden" name="courses[]" value="{{ $course->CourseCode }}">
+                                                    @endforeach
+                                                    
+                                                    <button type="submit" class="btn btn-success">Yes</button>
+                                                </form>
+                                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                                @elseif($registrationFees[$index] > $studentsPayments->TotalPayment2024)
+                                                    {{-- Show ineligible modal for insufficient registration fee --}}
+                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModal{{$loop->index}}">Register</button>
+                                                    <!-- Ineligible Modal for Shortfall -->
+                                                    <div class="modal fade" id="ineligibleModal{{$loop->index}}" tabindex="-1" aria-labelledby="ineligibleModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Not Eligible for Registration</h5>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p style="color:red;">You are short of the registration fee by: K {{ number_format($shortfall, 2) }}</p>
+                                                                    <p>Kindly make a payment to proceed with the registration.</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @elseif($actualBalance > 0)
+                                                    {{-- Show ineligible modal for outstanding balance --}}
+                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#balanceModal{{$loop->index}}">Register</button>
+                                                    <!-- Ineligible Modal for Outstanding Balance -->
+                                                    <div class="modal fade" id="balanceModal{{$loop->index}}" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Outstanding Balance</h5>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p style="color:red;">You currently have a balance on your account of: K {{ number_format($actualBalance, 2) }}</p>
+                                                                    <p>Please clear your balance to proceed with registration.</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                            </form>
                                         </div>
                                     </div>
                                     @endisset                              
                                 </div>
                             </div>
                             @endforeach
-                            <script>
-                                var registrationFeesArray = {!! json_encode($registrationFees) !!};
-                                var totalFeesArray = {!! json_encode($totalFees) !!};
-                            </script>
                         </div>
                     </div> 
-                    <!-- </div> -->
                 </div>               
             </div>
         </div>
     </div>
 </div>
-@include('allStudents.components.registrationModals')
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 @endsection

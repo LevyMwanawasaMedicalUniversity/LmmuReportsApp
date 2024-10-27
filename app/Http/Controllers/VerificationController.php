@@ -8,7 +8,7 @@ class VerificationController extends Controller
 {
     public function verifyStudent($studentNumber) {
         $results = $this->checkIfStudentIsRegistered($studentNumber)->get()
-        ->values(); 
+            ->values(); 
     
         // Group the results by student ID
         // $groupedResults = $results->groupBy('StudentID');
