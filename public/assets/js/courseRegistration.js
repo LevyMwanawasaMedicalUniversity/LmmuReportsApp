@@ -45,6 +45,7 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $('.registerButtonRepeat').click(function(e) {
+        $.ajaxSetup({ cache: false });
         e.preventDefault();
 
         var index = $(this).attr('id').replace('registerButtonRepeat', '');
