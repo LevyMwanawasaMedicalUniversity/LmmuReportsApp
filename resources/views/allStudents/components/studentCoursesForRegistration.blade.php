@@ -83,7 +83,7 @@
                                                 <h5 class="modal-title">Eligible To Register</h5>
                                             </div>
                                             <div class="modal-body">
-                                                <p>You are submitting the following repeat courses for registration:</p>
+                                                <p>You are submitting the following @if($failed == 1)repeat @endif courses for registration:</p>
                                                 <ul>
                                                     @foreach($courses as $course)
                                                         <li>{{ $course->CourseCode }} - {{ $course->CourseName }}</li>

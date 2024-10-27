@@ -98,19 +98,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($courses as $course)
-                                <tr>
-                                @if($registeredOnEdurole == 1)
-                                    <td>{{$course->Name}} - {{$course->CourseDescription}}</td>
-                                @else
-                                    <td>{{$course->course_name}} - {{$course->course_description}}</td>
-                                @endif
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                                @endforeach
-                            </tbody>
+    @php
+        // Filter out unique instances based on the registered condition
+        $uniqueCourses = $registeredOnEdurole == 1
+            ? $courses->unique('Name', 'CourseDescription')
+            : $courses->unique('course_name', 'course_description');
+    @endphp
+
+    @foreach($uniqueCourses as $course)
+    <tr>
+        @if($registeredOnEdurole == 1)
+            <td>{{ $course->Name }} - {{ $course->CourseDescription }}</td>
+        @else
+            <td>{{ $course->course_name }} - {{ $course->course_description }}</td>
+        @endif
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    @endforeach
+</tbody>
                         </table>
                     </div>
 

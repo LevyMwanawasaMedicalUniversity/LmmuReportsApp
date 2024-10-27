@@ -859,6 +859,7 @@ class StudentsController extends Controller
     }
 
     public function deleteEntireRegistration(Request $request){
+        set_time_limit(12000000);
         $studentId = $request->input('studentId');
         $year = $request->input('year');
         $courses = CourseRegistration::where('StudentID', $studentId)
