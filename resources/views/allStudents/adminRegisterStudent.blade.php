@@ -101,41 +101,41 @@
 
                                                 {{-- Show eligibility modal --}}
                                                 @if(($isEligible || ($failed == 1)))
-                                                                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeat{{$loop->index}}">Register</button>
-                                <!-- Eligible Modal -->
-                                <div class="modal fade" id="eligibleModalRepeat{{$loop->index}}" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Eligible To Register</h5>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p>You are submitting the following repeat courses for registration:</p>
-                                                <ul>
-                                                    @foreach($courses as $course)
-                                                        <li>{{ $course->CourseCode }} - {{ $course->CourseName }}</li>
-                                                    @endforeach
-                                                </ul>
-                                                <p>Total Invoice: K {{ number_format($totalFees[$index], 2) }}</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <!-- Form for submitting courses -->
-                                                <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
-                                                    @csrf
-                                                    <input type="hidden" name="studentNumber" value="{{ $studentId }}">
-                                                    
-                                                    <!-- Pass the selected courses as a hidden input -->
-                                                    @foreach($courses as $course)
-                                                        <input type="hidden" name="courses[]" value="{{ $course->CourseCode }}">
-                                                    @endforeach
-                                                    
-                                                    <button type="submit" class="btn btn-success">Yes</button>
-                                                </form>
-                                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeat{{$loop->index}}">Register</button>
+                                                    <!-- Eligible Modal -->
+                                                    <div class="modal fade" id="eligibleModalRepeat{{$loop->index}}" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Eligible To Register</h5>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>You are submitting the following repeat courses for registration:</p>
+                                                                    <ul>
+                                                                        @foreach($courses as $course)
+                                                                            <li>{{ $course->CourseCode }} - {{ $course->CourseName }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                    <p>Total Invoice: K {{ number_format($totalFees[$index], 2) }}</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <!-- Form for submitting courses -->
+                                                                    <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
+                                                                        @csrf
+                                                                        <input type="hidden" name="studentNumber" value="{{ $studentId }}">
+                                                                        
+                                                                        <!-- Pass the selected courses as a hidden input -->
+                                                                        @foreach($courses as $course)
+                                                                            <input type="hidden" name="courses[]" value="{{ $course->CourseCode }}">
+                                                                        @endforeach
+                                                                        
+                                                                        <button type="submit" class="btn btn-success">Yes</button>
+                                                                    </form>
+                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 @elseif($registrationFees[$index] > $studentsPayments->TotalPayment2024)
                                                     {{-- Show ineligible modal for insufficient registration fee --}}
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModal{{$loop->index}}">Register</button>
