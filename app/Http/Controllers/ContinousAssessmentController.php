@@ -50,9 +50,10 @@ class ContinousAssessmentController extends Controller
             ->where('Year', 2024)
             // ->where('Semester', 1)
             ->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentNumber, 2024)->exists();
 
         // return $checkRegistration;
-        if (!$checkRegistration) {            
+        if (!$checkRegistration && !$isStudentRegisteredOnSisReports) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
 
@@ -103,11 +104,12 @@ class ContinousAssessmentController extends Controller
 
         $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
             ->where('Year', 2024)
-            ->where('Semester', 1)
+            // ->where('Semester', 1)
             ->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentNumber, 2024)->exists();
 
         // return $checkRegistration;
-        if (!$checkRegistration) {            
+        if (!$checkRegistration && !$isStudentRegisteredOnSisReports) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
 
@@ -150,11 +152,12 @@ class ContinousAssessmentController extends Controller
 
         $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
             ->where('Year', 2024)
-            ->where('Semester', 1)
+            // ->where('Semester', 1)
             ->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentNumber, 2024)->exists();
 
         // return $checkRegistration;
-        if (!$checkRegistration) {            
+        if (!$checkRegistration && !$isStudentRegisteredOnSisReports) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
         $studentDetails = $this->getStudentDetails($studentNumber);
@@ -198,11 +201,12 @@ class ContinousAssessmentController extends Controller
         
         $checkRegistration = CourseElectives::where('StudentID', $studentNumber)
             ->where('Year', 2024)
-            ->where('Semester', 1)
+            // ->where('Semester', 1)
             ->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentNumber, 2024)->exists();
 
         // return $checkRegistration;
-        if (!$checkRegistration) {            
+        if (!$checkRegistration && !$isStudentRegisteredOnSisReports) {            
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT. Complete Course Registration In Order To View Results');
         }
 
