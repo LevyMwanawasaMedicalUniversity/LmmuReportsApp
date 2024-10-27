@@ -708,8 +708,10 @@ class Controller extends BaseController
     }
 
     private function queryIfStudentIsRegisteredOnSisReports($studentId, $academicYear) {
-        $results = CourseRegistration::where('course_registration.StudentID', $studentId);
-
+        $results = CourseRegistration::where('course_registration.StudentID', $studentId)
+            ->where('course_registration.created_at', '>', '2024-10-01')
+            ->where('course_registration.Year', $academicYear);
+    
         return $results;
     }
 
