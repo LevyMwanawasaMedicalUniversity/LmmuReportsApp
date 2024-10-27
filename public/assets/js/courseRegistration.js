@@ -18,7 +18,7 @@ $(document).ready(function() {
         // console.log("Actual" + actualBalance);
 
         // Show the modal
-        if ((registrationFee <= payments2024) && actualBalance <= 0) {
+        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
             $('#eligibleModal').modal('show');
 
             // Populate the modal with the courses
@@ -35,7 +35,7 @@ $(document).ready(function() {
             var shortfall = registrationFee - payments2024;
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
             $('#ineligibleModal').modal('show');
-        } else {
+        } else if (actualBalance > 0) {
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
             $('#ineligibleModal').modal('show');
         }
@@ -63,7 +63,7 @@ $(document).ready(function() {
         // console.log("Actual" + actualBalance);
 
         // Show the modal
-        if ((registrationFee <= payments2024) && actualBalance <= 0) {
+        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
             $('#eligibleModal').modal('show');
 
             // Populate the modal with the courses
@@ -80,7 +80,7 @@ $(document).ready(function() {
             var shortfall = registrationFee - payments2024;
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
             $('#ineligibleModal').modal('show');
-        } else {
+        } else if (actualBalance > 0) {
             $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
             $('#ineligibleModal').modal('show');
         }
