@@ -2016,24 +2016,25 @@ class Controller extends BaseController
             'basic_information_s_r_s.FirstName',
             'basic_information_s_r_s.MiddleName',
             'basic_information_s_r_s.Surname',
-            'basic_information_s_r_s.StudentID',
-            'basic_information_s_r_s.GovernmentID',
+            'basic_information_s_r_s.StudyType',
             'basic_information_s_r_s.Sex',
             'basic_information_s_r_s.PrivateEmail',
-            // 'basic_information_s_r_s.MobilePhone',
-            'basic_information_s_r_s.StudyType',
+            'basic_information_s_r_s.StudentID',
+            'basic_information_s_r_s.GovernmentID',
             DB::raw('study_s_r_s.study_name AS ProgrammeName'),
             // DB::raw('study_s_r_s.study_shortname AS ProgrammeCode'),
-            DB::raw('study_s_r_s.study_id AS StudyID'),
-            DB::raw('courses_s_r_s.course_name AS CourseName'),
+            DB::raw('study_s_r_s.study_id AS StudyID'),            
             DB::raw('schools_s_r_s.school_name AS School'),
+            DB::raw('courses_s_r_s.course_name AS CourseName'),
+            DB::raw('course_registration.Approved AS Approved'),
+            DB::raw('courses_s_r_s.course_description AS CourseDescription'),
             
-            DB::raw("
-                CASE 
-                    WHEN `basic_information_s_r_s`.StudentID LIKE '240%' THEN 'NEWLY ADMITTED'
-                    ELSE 'RETURNING STUDENT'
-                END AS 'StudentType'
-            "), 
+            // DB::raw("
+            //     CASE 
+            //         WHEN `basic_information_s_r_s`.StudentID LIKE '240%' THEN 'NEWLY ADMITTED'
+            //         ELSE 'RETURNING STUDENT'
+            //     END AS 'StudentType'
+            // "), 
             DB::raw("
                 CASE 
                     WHEN program_s_r_s.program_name LIKE '%y1' THEN 'YEAR 1'
