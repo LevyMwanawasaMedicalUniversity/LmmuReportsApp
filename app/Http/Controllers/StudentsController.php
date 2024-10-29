@@ -1221,10 +1221,11 @@ class StudentsController extends Controller
         }
     
         if ($studentsProgramme->isEmpty()) {
-            return redirect()->back()->with('warning', 'No courses found for the student. Student Has Graduated');
+            // $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+            $currentStudentsCourses = [];
         }
     
-        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
+       
     
         // Fetch course count with optimized query
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
@@ -1236,7 +1237,7 @@ class StudentsController extends Controller
             })->toArray();
         });
     
-        $currentStudentsCourses = $studentsProgramme;
+        
     
         // Get all courses and modify CodeRegisteredUnder if student ID starts with 190
         $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
