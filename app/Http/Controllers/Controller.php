@@ -525,7 +525,7 @@ class Controller extends BaseController
             ->whereNotIn('AcademicYear', ['2024'])
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
-                    ->from('grades')
+                    ->from('grades-published')
                     ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX']);
             })
             ->where('StudentNo', $studentId)
@@ -966,7 +966,7 @@ class Controller extends BaseController
             })
             ->where('StudyType', '!=', 'Staff')
             ->whereRaw('LENGTH(`ID`) > 7')
-            ->where('Status','!=', 'Suspended')
+            // ->where('Status','!=', 'Suspended')
             ->get();
         return $basicInformation;
     }
@@ -2003,6 +2003,16 @@ class Controller extends BaseController
 
         return $results;
     }
+
+    // public function getAllRegisteredStudentsInACourse($academicYear,$courseCode, $courseId){
+
+    //     $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear)
+    //         ->where('courses_registrations.CourseID', $courseId);
+    //         ;
+        
+        
+    //     // return $results;
+    // }
 
     public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent( $studentId){
         $academicYear = 2024;
