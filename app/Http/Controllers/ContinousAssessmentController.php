@@ -35,6 +35,32 @@ class ContinousAssessmentController extends Controller
         return $studentDetails;
     }
 
+    public function cleanUpDuplicatesForStudent($studentId)
+    {
+        // Step 1: Find IDs to delete by keeping the one with the latest updated_at
+        $idsToDelete = LMMAXStudentsContinousAssessment::select('students_continous_assessment_id')
+            ->where('student_id', $studentId)
+            ->whereExists(function ($query) {
+                $query->select(DB::raw(1))
+                    ->from('students_continous_assessments as sca2')
+                    ->whereColumn('students_continous_assessments.student_id', 'sca2.student_id')
+                    ->whereColumn('students_continous_assessments.course_id', 'sca2.course_id')
+                    ->whereColumn('students_continous_assessments.academic_year', 'sca2.academic_year')
+                    ->whereColumn('students_continous_assessments.ca_type', 'sca2.ca_type')
+                    ->whereColumn('students_continous_assessments.delivery_mode', 'sca2.delivery_mode')
+                    ->whereColumn('students_continous_assessments.study_id', 'sca2.study_id')
+                    ->whereRaw('students_continous_assessments.component_id <=> sca2.component_id') // NULL-safe comparison
+                    ->whereColumn('students_continous_assessments.updated_at', '<', 'sca2.updated_at'); // Keep the one with the latest updated_at
+            })
+            ->pluck('students_continous_assessment_id') // Fetch duplicate IDs into an array
+            ->toArray();
+
+        // Step 2: Delete duplicates
+        if (!empty($idsToDelete)) {
+            LMMAXStudentsContinousAssessment::whereIn('students_continous_assessment_id', $idsToDelete)->delete();
+        }
+    }
+
     public function studentsCAResults()
     {
         // $courseAssessments = LMMAXCourseAssessment::join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
@@ -65,7 +91,9 @@ class ContinousAssessmentController extends Controller
         
         $studyId = $studentDetails->studyId; 
 
-        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);        
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId); 
+        
+        $this->cleanUpDuplicatesForStudent($studentNumber);
 
         $results = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')
             // ->join('course_assessment_scores', 'course_assessments.course_assessments_id', '=', 'course_assessment_scores.course_assessment_id')
