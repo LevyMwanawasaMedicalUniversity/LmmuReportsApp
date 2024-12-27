@@ -11,7 +11,7 @@
 </div>
 <div class="content">
     <div class="row">
-        @if($isStudentRegisteredOnEdurole || $isStudentRegisteredOnSisReports)            
+        {{-- @if($isStudentRegisteredOnEdurole || $isStudentRegisteredOnSisReports)            
             @foreach($allResults->groupBy('AcademicYear') as $yearOfStudy => $grades)
                 <div class="col-md-12">
                     <div class="card">
@@ -41,11 +41,11 @@
                     </div>
                 </div>
             @endforeach            
-        @else
+        @else --}}
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title no-print">2023 RESULTS for {{ $studentNumber }}</h4>
+                        <h4 class="card-title no-print">2024 RESULTS for {{ $studentNumber }}</h4>
                     </div>
                     <div class="card-body">
                         <table class="table table-bordered">
@@ -69,7 +69,7 @@
                     </div>
                 </div>
             </div>
-        @endif
+        {{-- @endif --}}
     </div>
 </div>
 @endsection

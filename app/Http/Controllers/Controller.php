@@ -190,7 +190,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getStudent2023ExamResults($studentNumber,$academicYear){
+    public function getStudentExamResults($studentNumber,$academicYear){
         $results = $this->queryStudentResults($studentNumber,$academicYear);
         return $results;
     }

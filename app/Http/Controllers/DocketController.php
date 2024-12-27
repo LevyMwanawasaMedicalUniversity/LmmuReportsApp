@@ -631,12 +631,12 @@ class DocketController extends Controller
     }
 
     public function students2023ExamResults($studentNumber){
-        $academicYear= 2023;
+        $academicYear= 2024;
         $studentNumbers = [$studentNumber];
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
         $student = $studentsDetails->first();
         $isStudentRegisteredOnEdurole = $this->checkIfStudentIsRegistered($studentNumber)->exists();
-        $allResults = $this->getAllStudentExamResults($studentNumber);
+        $allResults = $this->getAllStudentExamResults($studentNumber);        
 
         // return $allResults;
         // return "we here";
@@ -644,8 +644,11 @@ class DocketController extends Controller
             ->where('Year', 2024)
             ->where('Semester', 1)
             ->exists();
-        
-        $results = $this->getStudent2023ExamResults($studentNumber,$academicYear);
+        if(!$isStudentRegisteredOnSisReports && !$isStudentRegisteredOnEdurole){
+            return back()->with('error', 'Student not registered on Edurole or SIS Reports.');
+        }
+        $results = $this->getStudentExamResults($studentNumber,$academicYear);
+        // return $results;
         return view('docket.examinationResults', compact('results','studentNumber','allResults','isStudentRegisteredOnEdurole','isStudentRegisteredOnSisReports'));
         
     }
