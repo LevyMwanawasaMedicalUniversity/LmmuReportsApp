@@ -35,7 +35,7 @@
           </a>
         </li>
         <li class = "@if ($activePage == 'studentExaminationResults') active @endif">
-          <a href="{{ route('docket.studentsExamResults' , auth()->user()->name) }}">
+          <a href="{{ route('studentsExamResults' , auth()->user()->name) }}">
             <i class="now-ui-icons education_hat"></i>
             <p>{{ __('Exam Results') }}</p>
           </a>
