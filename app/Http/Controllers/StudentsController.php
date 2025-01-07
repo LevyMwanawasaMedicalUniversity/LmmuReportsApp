@@ -480,338 +480,55 @@ class StudentsController extends Controller
         return view('allStudents.printIdCard',compact('studentInformation'));
     }
 
-    
-    // public function viewDocketOld()
-    // {
-    //     $user = Auth::user(); // Get the currently logged-in user
-
-    //     // If the user doesn't have the "Student" role, return the home view
-    //     if (!$user->hasRole('Student')) {
-    //         return view('home');
-    //     }
-
-    //     $student = Student::where('student_number', $user->name)->first();
-
-    //     // If the student doesn't exist, return back with an error message
-    //     if (is_null($student)) {
-    //         return back()->with('error', 'NOT STUDENT.');
-    //     }
-
-    //     $academicYear = 2023;
-    //     $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
-    //     $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();
-    //     $checkIfApproved = $this->checkIfStudentIsRegistered($user->name)->where('course-electives.Approved', 1)->exists();
-    //     $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($student, 2024)->exists();
-    //     // return $checkIfApproved;
-    //     // return $user->name;
-    //     $results2023PreviouseYear = Grades::where('StudentNo', $user->name)
-    //         ->where('AcademicYear', 2023);
-        
-    //     // Clone the base query to get repeat courses with specific grades
-    //     $repeatCourses = (clone $results2023PreviouseYear)
-    //         ->whereIn('Grade', ['D', 'D+', 'F', 'NE'])
-    //         ->get();
-        
-    //     // Get all the results for the year 2023 without filtering grades
-    //     $results2023 = $results2023PreviouseYear->get();
-
-    //     try{        
-    //         $courseName = $results2023->first()->CourseNo;
-            
-    //         $coursesResults = EduroleCourses::where('Name', $courseName)
-    //             // ->where('Year', 2023) // Uncomment if you want to filter by year
-    //             ->get();
-            
-    //         $previousYearOfStudy = $coursesResults->first()->Year;
-    //         $currentYearOfStudy = $previousYearOfStudy + 1;
-            
-    //         $studyId = $studentResults->StudyID;  // Make sure $studentResults is defined
-            
-    //         $studentStudy = Study::where('ID', $studyId)->first();
-            
-    //         $highestYear = StudyProgramLink::where('study-program-link.StudyID', $studyId)
-    //             ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
-    //         ->max('programmes.Year');
-    //     // return 'highestYear: ' . $highestYear . ', currentYearOfStudy: ' . $currentYearOfStudy;
-    //     }catch(\Exception $e){
-    //         $highestYear = 0;
-    //         $currentYearOfStudy =20;
-    //     }
-    //     $registeredOnEdurole   = 0;
-        
-    //     // Check the conditions
-    //     if (($highestYear != $currentYearOfStudy) ) {
-    //         // Make sure $isStudentRegistered is defined somewhere before this block
-    //         if( $repeatCourses->isEmpty()){
-            
-    //             if (!$isStudentRegistered && !$isStudentRegisteredOnSisReports) {
-    //                 return redirect()->back()->with('error', 'Student not registered.');
-    //             }
-
-    //             // if (!$checkIfApproved) {
-    //             //     return redirect()->back()->with('error', 'Courses not approved. Please contact your coordinator for Course Approval.');
-    //             // }
-    //             // Update courses based on the student's status
-
-
-    //             if($isStudentRegistered){
-
-    //                 $courses = CourseElectives::join('courses', 'course-electives.CourseID', '=', 'courses.ID')
-    //                     ->where('course-electives.StudentID', $user->name)
-    //                     ->where('course-electives.Year', 2024)
-    //                     ->select('course-electives.*', 'courses.*')
-    //                     ->get();
-
-    //                 $registeredOnEdurole = 1;
-
-    //                     // return $courses;
-    //             }elseif($isStudentRegisteredOnSisReports){
-    //                 $courses= "none";
-    //                 $registeredOnEdurole = 0;
-
-    //                     // return $courses;                    
-    //             }else{
-    //                 return redirect()->back()->with('error', 'Student not registered.');
-    //             }
-    //             // if (!Courses::where('Student', $user->name)
-    //             //     ->whereNotNull('updated_at')
-    //             //     ->where('updated_at', '>', '2024-09-19')
-    //             //     ->exists()) {
-    //             //     if ($isStudentRegistered) {
-    //             //         $this->setAndUpdateRegisteredCourses($user->name);
-    //             //     } else {
-    //             //         $this->setAndUpdateCoursesForCurrentYear($user->name);
-    //             //     }
-    //             // } else {
-    //             //     $this->setAndUpdateCourses($user->name);
-    //             // }
-
-    //             // try {
-    //             //     $subQuery = Billing::select(
-    //             //         'StudentID',
-    //             //         'Amount',
-    //             //         'Year',
-    //             //         DB::raw('ROW_NUMBER() OVER (PARTITION BY StudentID, Year ORDER BY Date DESC) AS rn')
-    //             //     )
-    //             //     ->where('Description', 'NOT LIKE', '%NULL%')
-    //             //     ->where('PackageName', 'NOT LIKE', '%NULL%')
-    //             //     // ->whereNotNull('Approval')
-    //             //     ->where('Year', 2024)
-    //             //     ->where('StudentID', $user->name)
-    //             //     ->first();
-
-    //             //     $invoice2024 = $subQuery->Amount;
-    //             // } catch (\Exception $e) {
-    //             //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
-    //             // }
-    //             // return $invoice2024;
-    //             // if (!$invoice2024) {
-    //             //     return redirect()->back()->with('error', 'No invoice found for 2024. Please ensure that your courses are approved and you have been invoiced for 2024. Visit your coordinator for course approval and accounts for invoicing if you have not been invoiced.');
-    //             // }
-
-    //             // $studentPaymentInformation = SageClient::select(
-    //             //     'DCLink',
-    //             //     'Account',
-    //             //     'Name',
-    //             //     DB::raw('SUM(CASE 
-    //             //         WHEN pa.Description LIKE \'%reversal%\' THEN 0  
-    //             //         WHEN pa.Description LIKE \'%FT%\' THEN 0
-    //             //         WHEN pa.Description LIKE \'%DE%\' THEN 0  
-    //             //         WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0          
-    //             //         ELSE pa.Credit 
-    //             //         END) AS TotalPayments'),
-    //             //     DB::raw('SUM(pa.Credit) as TotalCredit'),
-    //             //     DB::raw('SUM(pa.Debit) as TotalDebit'),
-    //             //     DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance')
-    //             // )
-    //             // ->where('Account', $user->name)
-    //             // ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-    //             // ->groupBy('DCLink', 'Account', 'Name')
-    //             // ->first();
-
-    //             // $balance = $studentPaymentInformation->TotalBalance;
-    //             // $percentageOfInvoice = ($balance / $invoice2024) * 100;
-
-    //             // if ($percentageOfInvoice > 25) {
-    //             //     return redirect()->back()->with('error', 'You must have cleared at least 75% of your 2024 fees to view your docket.');
-    //             // }
-    //         }
-    //     }
-
-    //     $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$user->name}.png";
-    //     $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
-
-    //     $imageDataUri = $this->convertImageToDataUri($imageUrl);
-    //     $logoDataUri = $this->convertImageToDataUri($logoUrl);
-
-    //     // $courses = Courses::where('Student', $user->name)->get();
-
-    //     // Cast the status to an integer
-    //     $status = (int) $student->status;
-
-    //     // Update the student's status to 6 if it's not already 6
-    //     if ($status !== 6) {
-    //         $student->status = 6;
-    //         $student->save();
-    //     }
-
-    //     // Return the appropriate view based on the student's status
-    //     $viewName = match ($status) {
-    //         1, 6 => 'docket.studentViewDocket',
-    //         2 => 'docketNmcz.studentViewDocket',
-    //         3 => 'docketSupsAndDef.studentViewDocket',
-    //         default => 'home', // Fallback view if status doesn't match any case
-    //     };
-    //     return $courses . ' ' . $isStudentRegistered;
-
-    //     // return view($viewName, compact('studentResults', 'courses', 'imageDataUri', 'logoDataUri'));
-    // }
-
     public function viewDocket()
     {
-        $user = Auth::user(); // Get the currently logged-in user
+        $user = Auth::user();
 
-        // If the user doesn't have the "Student" role, return the home view
         if (!$user->hasRole('Student')) {
             return view('home');
         }
 
         $student = Student::where('student_number', $user->name)->first();
 
-        // If the student doesn't exist, return back with an error message
         if (is_null($student)) {
             return back()->with('error', 'NOT STUDENT.');
         }
 
-        $academicYear = 2023;
-        $studentResults = $this->getAppealStudentDetails($academicYear, [$user->name])->first();
-        $isStudentRegistered = $this->checkIfStudentIsRegistered($user->name)->exists();
-        $checkIfApproved = $this->checkIfStudentIsRegistered($user->name)->where('course-electives.Approved', 1)->exists();
-        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($user->name, 2024)->exists();
-
-        // return $isStudentRegisteredOnSisReports;
-        // return $checkIfApproved;
-        // return $user->name;
-        $results2023PreviouseYear = Grades::where('StudentNo', $user->name)
-            ->where('AcademicYear', 2023);
-        
-        // Clone the base query to get repeat courses with specific grades
-        $repeatCourses = (clone $results2023PreviouseYear)
-            ->whereIn('Grade', ['D', 'D+', 'F', 'NE'])
-            ->get();
-        
-        // Get all the results for the year 2023 without filtering grades
-        $results2023 = $results2023PreviouseYear->get();
-
-        try{        
-            $courseName = $results2023->first()->CourseNo;
-            
-            $coursesResults = EduroleCourses::where('Name', $courseName)
-                // ->where('Year', 2023) // Uncomment if you want to filter by year
-                ->get();
-            
-            $previousYearOfStudy = $coursesResults->first()->Year;
-            $currentYearOfStudy = $previousYearOfStudy + 1;
-            
-            $studyId = $studentResults->StudyID;  // Make sure $studentResults is defined
-            
-            $studentStudy = Study::where('ID', $studyId)->first();
-            
-            $highestYear = StudyProgramLink::where('study-program-link.StudyID', $studyId)
-                ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
-            ->max('programmes.Year');
-        // return 'highestYear: ' . $highestYear . ', currentYearOfStudy: ' . $currentYearOfStudy;
-        }catch(\Exception $e){
-            $highestYear = 0;
-            $currentYearOfStudy =20;
-        }
-        $courses = null; // Initialize courses as null to avoid undefined variable errors
-        $registeredOnEdurole = 0;
-        
-        // Check the conditions
-        // if ( ) {
-            // Make sure $isStudentRegistered is defined somewhere before this block
-            // if( ){
-            
-        if (!$isStudentRegistered && !$isStudentRegisteredOnSisReports && !($highestYear != $currentYearOfStudy)  && !$repeatCourses->isEmpty() ) {
-            return redirect()->back()->with('error', 'Student not registered.');
-        }
-        if($isStudentRegistered){
-
-            $courses = CourseElectives::join('courses', 'course-electives.CourseID', '=', 'courses.ID')
-                ->where('course-electives.StudentID', $user->name)
-                ->where('course-electives.Year', 2024)
-                ->select('courses.Name','courses.CourseDescription')
-                ->get();
-
-            $registeredOnEdurole = 1;
-
-                // return $courses;
-        }elseif($isStudentRegisteredOnSisReports){
-            $courses= CourseRegistration::join('courses_s_r_s', 'course_registration.CourseID', '=', 'courses_s_r_s.course_name')
-                ->where('course_registration.StudentID', $user->name)
-                ->where('course_registration.Year', 2024)
-                ->select('courses_s_r_s.course_name','courses_s_r_s.course_description')
-                ->get();
-            $registeredOnEdurole = 0;
-
-                // return $courses;                    
-        }else{
-            return redirect()->back()->with('error', 'Student not registered.');
-        }                
-            // }
-        // }
-
-        $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$user->name}.png";
-        $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
-
-        $imageDataUri = $this->convertImageToDataUri($imageUrl);
-        $logoDataUri = $this->convertImageToDataUri($logoUrl);
-
-        // $courses = Courses::where('Student', $user->name)->get();
-
-        // Cast the status to an integer
+        // Update student status if needed
         $status = (int) $student->status;
-
-        // Update the student's status to 6 if it's not already 6
         if ($status !== 6) {
             $student->status = 6;
             $student->save();
         }
 
-        // Return the appropriate view based on the student's status
-        // $viewName = match ($status) {
-        //     1, 6 => 'docket.studentViewDocket',
-        //     2 => 'docketNmcz.studentViewDocket',
-        //     3 => 'docketSupsAndDef.studentViewDocket',
-        //     default => 'home', // Fallback view if status doesn't match any case
-        // };
-        // return $courses . ' ' . $registeredOnEdurole;
-
-        return view('docket.studentViewDocket', compact('studentResults', 'courses', 'imageDataUri', 'logoDataUri','registeredOnEdurole'));
+        return $this->getDocketData($user->name);
     }
 
-    private function convertImageToDataUri($url)
+    public function viewSupplementaryDocket()
     {
-        try {
-            $response = Http::withOptions(['verify' => false])->get($url);
+        $user = Auth::user();
 
-            if ($response->successful()) {
-                $imageContent = $response->body();
-                $imageBase64 = base64_encode($imageContent);
-                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
-
-                // Create the data URI
-                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
-            } else {
-                // Handle cases where the image is not found or request failed
-                return null;
-            }
-        } catch (\Exception $e) {
-            // Handle exceptions (e.g., network errors)
-            return null;
+        if (!$user->hasRole('Student')) {
+            return view('home');
         }
+
+        $student = Student::where('student_number', $user->name)->first();
+
+        if (is_null($student)) {
+            return back()->with('error', 'NOT STUDENT.');
+        }
+
+        // Update student status if needed
+        $status = (int) $student->status;
+        if ($status !== 6) {
+            $student->status = 6;
+            $student->save();
+        }
+        $supplementary = 1;
+
+        return $this->getDocketData($user->name, $supplementary);
     }
+
     public function setAndSaveCoursesForCurrentYearRegistration($studentId){
         // First, attempt to get courses for failed students
         $dataArray = $this->getCoursesForFailedStudents($studentId);

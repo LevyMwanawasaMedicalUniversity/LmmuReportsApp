@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class Controller extends BaseController
@@ -217,6 +218,100 @@ class Controller extends BaseController
     
         return $results;
     }
+
+    public function getDocketData($studentId, $supplementary = null)
+    {
+        $academicYear = 2024;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        // Get course data based on registration status
+        if ($supplementary) {
+            $courses = $this->getSupplemetaryCourses($studentId);
+            $registeredOnEdurole = 2;
+        }elseif ($isStudentRegistered) {
+            $courses = $this->getEduroleCoursesForStudent($studentId, $academicYear);
+            $registeredOnEdurole = 1;
+        } elseif ($isStudentRegisteredOnSisReports) {
+            $courses = $this->getSisReportsCoursesForStudent($studentId, $academicYear);
+        } else {
+            return redirect()->back()->with('error', 'Student not registered.');
+        }
+
+        
+
+        // Get image data
+        $imageDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png");
+        $logoDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/templates/mobile/images/header.png");
+        
+        return view('docket.studentViewDocket', compact(
+            'studentResults', 
+            'courses', 
+            'imageDataUri', 
+            'logoDataUri',
+            'registeredOnEdurole'
+        ));
+    }
+
+    public function getSupplemetaryCourses($studentId){
+
+        $academicYear = 2024;
+        $supplementaryCourses = Grades::select('CourseNo', 'ProgramNo')
+            ->where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->whereIn('Grade', ['D+', 'NE', 'DEF'])
+            ->get();
+        
+        return $supplementaryCourses;
+    }
+
+    private function getEduroleCoursesForStudent($studentId, $academicYear)
+    {
+        return CourseElectives::join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+            ->where('course-electives.StudentID', $studentId)
+            ->where('course-electives.Year', $academicYear)
+            ->select('courses.Name', 'courses.CourseDescription')
+            ->get();
+    }
+
+    private function getSisReportsCoursesForStudent($studentId, $academicYear)
+    {
+        return CourseRegistration::join('courses_s_r_s', 'course_registration.CourseID', '=', 'courses_s_r_s.course_name')
+            ->where('course_registration.StudentID', $studentId)
+            ->where('course_registration.Year', $academicYear)
+            ->select('courses_s_r_s.course_name', 'courses_s_r_s.course_description')
+            ->get();
+    }
+
+    public function convertImageToDataUri($url)
+    {
+        try {
+            $response = Http::withOptions(['verify' => false])->get($url);
+
+            if ($response->successful()) {
+                $imageContent = $response->body();
+                $imageBase64 = base64_encode($imageContent);
+                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
+
+                // Create the data URI
+                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
+            } else {
+                // Handle cases where the image is not found or request failed
+                return null;
+            }
+        } catch (\Exception $e) {
+            // Handle exceptions (e.g., network errors)
+            return null;
+        }
+    }
+
 
     public function getCoursesWithResults(){
         $results = $this->queryCoursesWithResults();

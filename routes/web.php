@@ -105,6 +105,7 @@ Route::group(['middleware' => 'auth'], function () {
         Route::middleware('can:Student')->group(function () {
             Route::prefix('student')->group(function () {
                 Route::get('/viewDocket', [StudentsController::class, 'viewDocket'])->name('student.viewDocket');
+                Route::get('/viewSupplementaryDocket', [StudentsController::class, 'viewSupplementaryDocket'])->name('student.viewSupplementaryDocket');
                 Route::get('/viewResults', [StudentsController::class, 'viewResults'])->name('student.viewResults');
                 Route::get('/coursesRegistration/{studentId}', [StudentsController::class, 'studentRegisterForCourses'])->name('student.coursesRegistration');
                 Route::get('/nmczRegistration/{id?}', [StudentsController::class, 'studentNMCZRegisterForRepeatCourses'])->name('nmcz.registration');

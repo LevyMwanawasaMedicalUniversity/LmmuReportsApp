@@ -28,8 +28,14 @@
             <p>{{ __('Course Registration') }}</p>
           </a>
         </li>
-        <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
+        {{-- <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
           <a href="{{route('student.viewDocket')}}">
+            <i class="now-ui-icons education_paper"></i>
+            <p>{{ __('Docket') }}</p>
+          </a>
+        </li> --}}
+        <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
+          <a href="{{route('student.viewSupplementaryDocket')}}">
             <i class="now-ui-icons education_paper"></i>
             <p>{{ __('Docket') }}</p>
           </a>

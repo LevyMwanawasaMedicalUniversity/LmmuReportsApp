@@ -1011,62 +1011,23 @@ class DocketController extends Controller
         return view('docket.show',compact('courses','studentResults','status','imageDataUri','logoDataUri'));
     }
 
-    public function showStudent($studentId)
+    public function showStudentDocket($studentId)
+    {
+        return $this->getDocketData($studentId);
+    }
+
+    public function showSupplementaryStudentDocket($studentId)
     {
         
-        $academicYear = 2023;
+        $academicYear = 2024;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-        $checkIfApproved = $this->checkIfStudentIsRegistered($studentId)->where('course-electives.Approved', 1)->exists();
+        
         $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, 2024)->exists();
 
-        // return $isStudentRegisteredOnSisReports;
-        // return $checkIfApproved;
-        // return $user->name;
-        $results2023PreviouseYear = Grades::where('StudentNo', $studentId)
-            ->where('AcademicYear', 2023);
-        
-        // Clone the base query to get repeat courses with specific grades
-        $repeatCourses = (clone $results2023PreviouseYear)
-            ->whereIn('Grade', ['D', 'D+', 'F', 'NE'])
-            ->get();
-        
-        // Get all the results for the year 2023 without filtering grades
-        $results2023 = $results2023PreviouseYear->get();
-
-        try{        
-            $courseName = $results2023->first()->CourseNo;
-            
-            $coursesResults = EduroleCourses::where('Name', $courseName)
-                // ->where('Year', 2023) // Uncomment if you want to filter by year
-                ->get();
-            
-            $previousYearOfStudy = $coursesResults->first()->Year;
-            $currentYearOfStudy = $previousYearOfStudy + 1;
-            
-            $studyId = $studentResults->StudyID;  // Make sure $studentResults is defined
-            
-            $studentStudy = Study::where('ID', $studyId)->first();
-            
-            $highestYear = StudyProgramLink::where('study-program-link.StudyID', $studyId)
-                ->join('programmes', 'study-program-link.ProgramID', '=', 'programmes.ID')
-            ->max('programmes.Year');
-        // return 'highestYear: ' . $highestYear . ', currentYearOfStudy: ' . $currentYearOfStudy;
-        }catch(\Exception $e){
-            $highestYear = 0;
-            $currentYearOfStudy =20;
-        }
         $courses = null; // Initialize courses as null to avoid undefined variable errors
-        $registeredOnEdurole = 0;
+        $registeredOnEdurole = 0;       
         
-        // Check the conditions
-        // if ( ) {
-            // Make sure $isStudentRegistered is defined somewhere before this block
-            // if( ){
-            
-        if (!$isStudentRegistered && !$isStudentRegisteredOnSisReports && !($highestYear != $currentYearOfStudy)  && !$repeatCourses->isEmpty() ) {
-            return redirect()->back()->with('error', 'Student not registered.');
-        }
         if($isStudentRegistered){
 
             $courses = CourseElectives::join('courses', 'course-electives.CourseID', '=', 'courses.ID')
@@ -1085,13 +1046,10 @@ class DocketController extends Controller
                 ->select('courses_s_r_s.course_name','courses_s_r_s.course_description')
                 ->get();
             $registeredOnEdurole = 0;
-
-                // return $courses;                    
+                        
         }else{
             return redirect()->back()->with('error', 'Student not registered.');
-        }                
-            // }
-        // }
+        }
 
         $imageUrl = "https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png";
         $logoUrl = "https://edurole.lmmu.ac.zm/templates/mobile/images/header.png";
@@ -1099,50 +1057,10 @@ class DocketController extends Controller
         $imageDataUri = $this->convertImageToDataUri($imageUrl);
         $logoDataUri = $this->convertImageToDataUri($logoUrl);
 
-        // $courses = Courses::where('Student', $user->name)->get();
-
-        // Cast the status to an integer
-        // $status = (int) $student->status;
-
-        // // Update the student's status to 6 if it's not already 6
-        // if ($status !== 6) {
-        //     $student->status = 6;
-        //     $student->save();
-        // }
-
-        // Return the appropriate view based on the student's status
-        // $viewName = match ($status) {
-        //     1, 6 => 'docket.studentViewDocket',
-        //     2 => 'docketNmcz.studentViewDocket',
-        //     3 => 'docketSupsAndDef.studentViewDocket',
-        //     default => 'home', // Fallback view if status doesn't match any case
-        // };
-        // return $courses . ' ' . $registeredOnEdurole;
-
         return view('docket.studentViewDocket', compact('studentResults', 'courses', 'imageDataUri', 'logoDataUri','registeredOnEdurole'));
     }
 
-    private function convertImageToDataUri($url)
-    {
-        try {
-            $response = Http::withOptions(['verify' => false])->get($url);
-
-            if ($response->successful()) {
-                $imageContent = $response->body();
-                $imageBase64 = base64_encode($imageContent);
-                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
-
-                // Create the data URI
-                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
-            } else {
-                // Handle cases where the image is not found or request failed
-                return null;
-            }
-        } catch (\Exception $e) {
-            // Handle exceptions (e.g., network errors)
-            return null;
-        }
-    }
+    
 
     public function showStudentNmcz($studentId){
         // try{
