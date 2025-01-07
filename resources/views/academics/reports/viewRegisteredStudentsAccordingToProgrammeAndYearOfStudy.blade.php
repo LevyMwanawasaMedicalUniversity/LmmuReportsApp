@@ -57,7 +57,7 @@
                                     <option value="SOPHES" {{ $schoolName == 'SOPHES' ? 'selected' : '' }}>School of Public Health and Environmental Sciences</option>
                                     <option value="IBBS" {{ $schoolName == 'IBBS' ? 'selected' : '' }}>Institute of Basic and Biomedical Sciences</option>
                                     <option value="SON" {{ $schoolName == 'SON' ? 'selected' : '' }}>School Of Nursing</option>
-                                    <option value="DRGS" {{ $schoolName == 'DRGS' ? 'selected' : '' }}>Directorate Of Research And Graduate Studies</option>
+                                    <option value="DRPGS" {{ $schoolName == 'DRPGS' ? 'selected' : '' }}>Directorate Of Research And Graduate Studies</option>
                                 </select>
                             </div>
                         </div>
