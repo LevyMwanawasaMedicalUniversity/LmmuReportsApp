@@ -642,8 +642,9 @@ class DocketController extends Controller
         // return "we here";
         $isStudentRegisteredOnSisReports = CourseRegistration::where('StudentID', $studentNumber)
             ->where('Year', 2024)
-            ->where('Semester', 1)
+            // ->where('Semester', 1)
             ->exists();
+        return $studentNumber;
         $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
             DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
             DB::raw('SUM(pa.Credit) as TotalCredit'),
@@ -688,6 +689,8 @@ class DocketController extends Controller
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
         ->groupBy('DCLink', 'Account', 'Name')
         ->first();
+
+        return $studentsPayments;
 
         $balanceFrom2023 = $studentsPayments->BalanceFrom2023;
 
