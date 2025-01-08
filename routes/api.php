@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VerificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,4 +18,4 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::get('/verifyStudentsRegistration/{studentNumber}', 'App\Http\Controllers\VerificationController@verifyStudent')->name('registration.verify');
+Route::get('/verifyStudentsRegistration/{studentNumber}',[VerificationController::class, 'verifyStudent'] )->name('registration.verify');
