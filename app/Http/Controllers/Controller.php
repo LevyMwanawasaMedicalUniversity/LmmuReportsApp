@@ -266,7 +266,7 @@ class Controller extends BaseController
         $supplementaryCourses = Grades::select('CourseNo', 'ProgramNo')
             ->where('StudentNo', $studentId)
             ->where('AcademicYear', $academicYear)
-            ->whereIn('Grade', ['D+', 'NE', 'DEF'])
+            ->whereIn('Grade', ['D+', 'NE', 'DEF','D','F'])
             ->get();
         
         return $supplementaryCourses;
