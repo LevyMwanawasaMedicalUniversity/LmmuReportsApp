@@ -35,7 +35,7 @@
           </a>
         </li> --}}
         <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
-          <a href="{{url('/viewSupplementaryDocket')}}">
+          <a href="{{url('/student/viewSupplementaryDocket')}}">
             <i class="now-ui-icons education_paper"></i>
             <p>{{ __('Docket') }}</p>
           </a>
