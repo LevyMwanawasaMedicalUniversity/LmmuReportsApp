@@ -515,10 +515,16 @@ class StudentsController extends Controller
                 return back()->with('error', 'NOT STUDENT.');
             }
 
-            $studentNumber = (string) $student->student_number;
+            
         }elseif($studentId){
-            $studentNumber = $studentId;
-        }        
+            $student = Student::where('student_number', $studentId)->first();
+            if (is_null($student)) {
+                return back()->with('error', 'NOT STUDENT.');
+            }
+        }
+        
+        $studentNumber = (string) $student->student_number;
+        
 
         $isStudentRegisteredOnEdurole = $this->checkIfStudentIsRegistered($studentNumber)->exists();
         // $allResults = $this->getAllStudentExamResults($student);        
@@ -594,7 +600,7 @@ class StudentsController extends Controller
         }
         $supplementary = 1;
 
-        return $this->getDocketData($user->name, $supplementary);
+        return $this->getDocketSupplementaryData($studentNumber, $supplementary);
     }
 
     public function setAndSaveCoursesForCurrentYearRegistration($studentId){

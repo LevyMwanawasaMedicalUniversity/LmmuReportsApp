@@ -19,6 +19,7 @@ use App\Models\Grades;
 use App\Models\GradesModified;
 use App\Models\GradesPublished;
 use App\Models\LMMAXCourseAssessmentScores;
+use App\Models\LMMAXStudentsContinousAssessment;
 use App\Models\Program;
 use App\Models\ProgramCourseLink;
 use App\Models\SageClient;
@@ -219,10 +220,17 @@ class Controller extends BaseController
         return $results;
     }
 
+    
+
     public function getDocketSupplementaryData($studentId, $supplementary = null)
     {
         $academicYear = 2024;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+
+        $studyId = $studentResults->StudyID;
+
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
+        
         
         // Check registration status
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
@@ -232,9 +240,29 @@ class Controller extends BaseController
         $courses = null;
         $registeredOnEdurole = 0;
 
+        $coursesFromAssessments = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')        
+            ->where('students_continous_assessments.student_id', $studentId)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes )
+            ->where('course_assessments.academic_year', $academicYear)    
+            // ->where('students_continous_assessments.ca_type', '=', DB::raw('course_assessments.ca_type')) // Ensures ca_type matches
+            ->select('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode',
+                    DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'))
+            ->groupBy('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode')
+            ->get();
+
+        $courseIds = $coursesFromAssessments->pluck('course_id')->toArray();
+        
+
         // Get course data based on registration status
         if ($supplementary) {
-            $courses = $this->getSupplemetaryCourses($studentId);
+            $courses = $this->getSupplemetaryCourses($studentId, $courseIds); 
+            // return $courses;           
             $registeredOnEdurole = 2;
         }elseif ($isStudentRegistered) {
             $courses = $this->getEduroleCoursesForStudent($studentId, $academicYear);
@@ -301,15 +329,39 @@ class Controller extends BaseController
         ));
     }
 
-    public function getSupplemetaryCourses($studentId){
-
+    public function getSupplemetaryCourses($studentId, $courseIds = null) {
         $academicYear = 2024;
-        $supplementaryCourses = Grades::select('CourseNo', 'ProgramNo')
-            ->where('StudentNo', $studentId)
-            ->where('AcademicYear', $academicYear)
-            ->whereIn('Grade', ['D+', 'NE', 'DEF','D','F'])
-            ->get();
         
+        // Get IDs of courses with failing grades
+        $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->where('grades-published.StudentNo', $studentId)
+            ->where('grades-published.AcademicYear', $academicYear)
+            ->whereIn('grades-published.Grade', ['D+', 'NE', 'DEF','D','F'])
+            ->pluck('courses.ID')
+            ->toArray();
+    
+        // Get IDs of courses that should have results but don't
+        $existingGradeIds = Grades::where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->pluck('courses.ID')
+            ->toArray();
+        
+        // Find missing course IDs (courses in $courseIds but not in existing grades)
+        $missingCourseIds = $courseIds ? array_diff($courseIds, $existingGradeIds) : [];
+    
+        // Combine all course IDs that need to be returned
+        $allRequiredCourseIds = array_unique(array_merge($failedCourseIds, $missingCourseIds));
+    
+        // Final query to get course details
+        $supplementaryCourses = EduroleCourses::select(
+                'courses.Name as CourseNo', 
+                'courses.CourseDescription as ProgramNo',
+                'courses.ID'
+            )
+            ->whereIn('courses.ID', $allRequiredCourseIds)
+            ->get();
+    
         return $supplementaryCourses;
     }
 
