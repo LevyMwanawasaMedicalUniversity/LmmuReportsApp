@@ -107,8 +107,10 @@
                                 <p>
                                     Course Registration LMMU
                                 </p>  
-                            </a>   
-                            <a href="{{route('docket.showStudent',$user->name)}}">
+                            </a>  
+
+                            <a href="{{url('/student/viewSupplementaryDocket/' .$user->name)}}"> 
+                            {{-- <a href="{{route('docket.showStudent',$user->name)}}"> --}}
                                 <p>
                                     Examination Docket
                                 </p>   

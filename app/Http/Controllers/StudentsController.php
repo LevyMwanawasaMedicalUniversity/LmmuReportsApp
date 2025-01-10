@@ -504,21 +504,21 @@ class StudentsController extends Controller
         return $this->getDocketData($user->name);
     }
 
-    public function viewSupplementaryDocket()
+    public function viewSupplementaryDocket( $studentId = null)
     {
         $user = Auth::user();
 
-        if (!$user->hasRole('Student')) {
-            return view('home');
-        }
+        if ($user->hasRole('Student')) {
+            $student = Student::where('student_number', $user->name)->first();
 
-        $student = Student::where('student_number', $user->name)->first();
+            if (is_null($student)) {
+                return back()->with('error', 'NOT STUDENT.');
+            }
 
-        if (is_null($student)) {
-            return back()->with('error', 'NOT STUDENT.');
-        }
-
-        $studentNumber = (string) $student->student_number;
+            $studentNumber = (string) $student->student_number;
+        }elseif($studentId){
+            $studentNumber = $studentId;
+        }        
 
         $isStudentRegisteredOnEdurole = $this->checkIfStudentIsRegistered($studentNumber)->exists();
         // $allResults = $this->getAllStudentExamResults($student);        

@@ -219,6 +219,47 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getDocketSupplementaryData($studentId, $supplementary = null)
+    {
+        $academicYear = 2024;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        // Get course data based on registration status
+        if ($supplementary) {
+            $courses = $this->getSupplemetaryCourses($studentId);
+            $registeredOnEdurole = 2;
+        }elseif ($isStudentRegistered) {
+            $courses = $this->getEduroleCoursesForStudent($studentId, $academicYear);
+            $registeredOnEdurole = 1;
+        } elseif ($isStudentRegisteredOnSisReports) {
+            $courses = $this->getSisReportsCoursesForStudent($studentId, $academicYear);
+        } else {
+            return redirect()->back()->with('error', 'Student not registered.');
+        }
+
+        
+
+        // Get image data
+        $imageDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png");
+        $logoDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/templates/mobile/images/header.png");
+        
+        return view('docket.studentViewDocket', compact(
+            'studentResults', 
+            'courses', 
+            'imageDataUri', 
+            'logoDataUri',
+            'registeredOnEdurole'
+        ));
+    }
+
     public function getDocketData($studentId, $supplementary = null)
     {
         $academicYear = 2024;
