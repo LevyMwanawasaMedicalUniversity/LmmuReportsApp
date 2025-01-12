@@ -1040,8 +1040,7 @@ class Controller extends BaseController
         $courses = $this->getSupplemetaryCoursesVerification($studentId, $courseIds); 
         
         return $courses;
-    }
-    
+    }    
 
     public function getSupplemetaryCoursesVerification($studentId, $courseIds = null) {
         $academicYear = 2024;        
