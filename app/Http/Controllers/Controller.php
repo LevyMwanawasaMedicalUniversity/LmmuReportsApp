@@ -1001,6 +1001,98 @@ class Controller extends BaseController
 
         return $result;
     }
+
+    public function getSupplemetaryDetails($studentId) {
+        
+        $academicYear = 2024;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+
+        $studyId = $studentResults->StudyID;
+
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
+        
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        $coursesFromAssessments = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')        
+            ->where('students_continous_assessments.student_id', $studentId)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes )
+            ->where('course_assessments.academic_year', $academicYear)    
+            // ->where('students_continous_assessments.ca_type', '=', DB::raw('course_assessments.ca_type')) // Ensures ca_type matches
+            ->select('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode',
+                    DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'))
+            ->groupBy('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode')
+            ->get();
+
+        $courseIds = $coursesFromAssessments->pluck('course_id')->toArray();        
+        $courses = $this->getSupplemetaryCoursesVerification($studentId, $courseIds); 
+        
+        return $courses;
+    }
+    
+
+    public function getSupplemetaryCoursesVerification($studentId, $courseIds = null) {
+        $academicYear = 2024;        
+        // Get IDs of courses with failing grades
+        $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->where('grades-published.StudentNo', $studentId)
+            ->where('grades-published.AcademicYear', $academicYear)
+            ->whereIn('grades-published.Grade', ['D+', 'NE', 'DEF','D','F'])
+            ->pluck('courses.ID')
+            ->toArray();
+    
+        // Get IDs of courses that should have results but don't
+        $existingGradeIds = Grades::where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->pluck('courses.ID')
+            ->toArray();
+        
+        // Find missing course IDs (courses in $courseIds but not in existing grades)
+        $missingCourseIds = $courseIds ? array_diff($courseIds, $existingGradeIds) : [];
+    
+        // Combine all course IDs that need to be returned
+        $allRequiredCourseIds = array_unique(array_merge($failedCourseIds, $missingCourseIds));
+    
+        $result = BasicInformation::query()
+            ->select([
+                'basic-information.FirstName',
+                'basic-information.MiddleName',
+                'basic-information.Surname',
+                'basic-information.StudyType',
+                'basic-information.Sex',
+                'basic-information.PrivateEmail',
+                'student-study-link.StudentID',
+                'basic-information.GovernmentID',
+                'study.Name as ProgrammeName',
+                'study.ID as StudyID',
+                'schools.Name as School',
+                'courses.Name as CourseName',
+                'course-electives.Approved',
+                'courses.CourseDescription as CourseDescription',
+                DB::raw("'YEAR 0' AS 'YearOfStudy'")
+            ])
+            ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+            ->join('study', 'study.ID', '=', 'student-study-link.StudyID')
+            ->join('schools', 'study.ParentID', '=', 'schools.ID')
+            ->whereIn('courses.ID', $allRequiredCourseIds)
+            ->groupBy('courses.Name');
+
+        return $result;
+    }
+    
     
 
     public function setAndUpdateCoursesForCurrentYear($studentId) {
