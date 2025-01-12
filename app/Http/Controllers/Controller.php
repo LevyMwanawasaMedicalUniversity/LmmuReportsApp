@@ -1079,7 +1079,7 @@ class Controller extends BaseController
                 'study.ID as StudyID',
                 'schools.Name as School',
                 'courses.Name as CourseName',
-                'course-electives.Approved',
+                'courses.CourseCoordinatorInternal as Approved',
                 'courses.CourseDescription as CourseDescription',
                 DB::raw("'YEAR 0' AS 'YearOfStudy'")
             ])
