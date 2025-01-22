@@ -508,13 +508,14 @@ class StudentsController extends Controller
     {
         $user = Auth::user();
 
-        $studentNumber = $user->hasRole('Student') ? $user->name : $studentId;
+        $studentNumber = $user->hasRole('Student') ? (int) $user->name : (int) $studentId;
 
         if (!$studentNumber) {
             return back()->with('error', 'No student number provided.');
         }
 
         $student = Student::where('student_number', $studentNumber)->first();
+        // return $student;
 
         if (is_null($student)) {
             return back()->with('error', 'NOT STUDENT.');
