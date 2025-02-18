@@ -45,7 +45,7 @@ class SisReportsEduroleDataManagementController extends Controller
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);
-        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
+        // Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $studentIds = CourseElectives::pluck('StudentID')
                         ->where('course-electives.Year', 2025)
                         ->unique()
@@ -65,7 +65,7 @@ class SisReportsEduroleDataManagementController extends Controller
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);
 
-        Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
+        // Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');
         // Log::info('Students enrolled successfully.');
     }
