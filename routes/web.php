@@ -64,6 +64,7 @@ Route::group(['middleware' => 'auth'], function () {
         
         Route::middleware('can:Administrator')->group(function () {   
             Route::get('/importOrUpdateSisReportsEduroleData/Update', [SisReportsEduroleDataManagementController::class, 'importOrUpdateSisReportsEduroleData'])->name('importOrUpdatexSisReportsEduroleData.admin');     
+            Route::get('/importOrUpdateMoodleWithEduroleData/Update', [SisReportsEduroleDataManagementController::class, 'importOrUpdateMoodleWithEduroleData'])->name('importOrUpdateMoodleWithEduroleData.admin');     
             
             Route::group(['prefix' => 'user'], function () {
                 Route::get('/user/searchForUser', [UserController::class, 'searchForUser'])->name('users.searchForUser');

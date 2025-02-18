@@ -96,6 +96,12 @@
                   <p> {{ __("Sync With Edurole") }} </p>
                 </a>
               </li>
+              <li class="@if ($activePage == 'roles') active @endif">
+                <a href="{{ route('importOrUpdateMoodleWithEduroleData.admin') }}">
+                  <i class="now-ui-icons loader_refresh"></i>
+                  <p> {{ __("Sync With Moodle") }} </p>
+                </a>
+              </li>
             </ul>
           </div>
         </li>
