@@ -37,8 +37,8 @@ class MoodleController extends Controller
     public function addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds){   
         ini_set('memory_limit', '1024M'); // Increase memory limit
         set_time_limit(12000000);
-        MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2025-12-31')]);    
+        // MoodleUserEnrolments::where('timeend', '>', 0)        
+        //     ->update(['timeend' => strtotime('2025-12-31')]);    
         foreach($studentIds as $studentId){            
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
@@ -88,8 +88,8 @@ class MoodleController extends Controller
     
     private function assignUserToRoleIfNotAssigned($courseIds, $userId){
         set_time_limit(12000000);
-        MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2025-12-31')]);
+        // MoodleUserEnrolments::where('timeend', '>', 0)        
+        //     ->update(['timeend' => strtotime('2025-12-31')]);
         try {
             $roleId = 5; // Assuming role ID 5 is the default role
             
@@ -115,46 +115,96 @@ class MoodleController extends Controller
             // Log::error('Error assigning user to role: ' . $e->getMessage());
         }
     }
-    
+
     private function enrollUserIntoCourses($courses, $userId){
         set_time_limit(12000000);  
-        MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2025-12-31')]);
         $date = '2025-12-31';
         $timeend = strtotime($date);     
         try {
-            $enrolIds = [];
-
             foreach($courses as $course){
                 $course = MoodleCourses::where('idnumber', $course)->first();
-                $courseId = $course->id;
-
-                $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
-                // Log::info($enrolId);
-                // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
-
+                if (!$course) {
+                    continue; // Skip if course doesn't exist
+                }
                 
-                MoodleUserEnrolments::updateOrCreate(
-                    [
+                $courseId = $course->id;
+                $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
+                
+                if (!$enrolId) {
+                    continue; // Skip if enrol record doesn't exist
+                }
+                
+                // Check if enrollment already exists
+                $existingEnrollment = MoodleUserEnrolments::where('userid', $userId)
+                    ->where('enrolid', $enrolId->id)
+                    ->first();
+                    
+                if ($existingEnrollment) {
+                    // Only update the timeend if it's earlier than our target date
+                    if ($existingEnrollment->timeend < $timeend || $existingEnrollment->timeend == 0) {
+                        $existingEnrollment->timeend = $timeend;
+                        $existingEnrollment->timemodified = time();
+                        $existingEnrollment->save();
+                    }
+                } else {
+                    // Create new enrollment only if it doesn't exist
+                    MoodleUserEnrolments::create([
                         'enrolid' => $enrolId->id,                        
                         'userid' => $userId,
-                    ],
-                    [
-                        'status' => 0, // Assuming status 0 is 'active
+                        'status' => 0,
                         'timestart' => time(),
                         'timeend' => $timeend,
                         'modifierid' => time(),
                         'timecreated' => time(),
                         'timemodified' => time(),
-                    ]
-                );                
-
-                $enrolIds[] = $enrolId->id;
+                    ]);
+                }
             }
-            // Delete all enrollments where enrolid is not in $enrolIds
-            // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
         } catch (\Exception $e) {
+            // Log the error if needed
             // Log::error('Error enrolling user into courses: ' . $e->getMessage());
         }
-    }    
+    }
+    
+    // private function enrollUserIntoCourses($courses, $userId){
+    //     set_time_limit(12000000);  
+    //     // MoodleUserEnrolments::where('timeend', '>', 0)        
+    //     //     ->update(['timeend' => strtotime('2025-12-31')]);
+    //     $date = '2025-12-31';
+    //     $timeend = strtotime($date);     
+    //     try {
+    //         $enrolIds = [];
+
+    //         foreach($courses as $course){
+    //             $course = MoodleCourses::where('idnumber', $course)->first();
+    //             $courseId = $course->id;
+
+    //             $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
+    //             // Log::info($enrolId);
+    //             // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
+
+                
+    //             MoodleUserEnrolments::updateOrCreate(
+    //                 [
+    //                     'enrolid' => $enrolId->id,                        
+    //                     'userid' => $userId,
+    //                 ],
+    //                 [
+    //                     'status' => 0, // Assuming status 0 is 'active
+    //                     'timestart' => time(),
+    //                     'timeend' => $timeend,
+    //                     'modifierid' => time(),
+    //                     'timecreated' => time(),
+    //                     'timemodified' => time(),
+    //                 ]
+    //             );                
+
+    //             $enrolIds[] = $enrolId->id;
+    //         }
+    //         // Delete all enrollments where enrolid is not in $enrolIds
+    //         // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
+    //     } catch (\Exception $e) {
+    //         // Log::error('Error enrolling user into courses: ' . $e->getMessage());
+    //     }
+    // }    
 }

@@ -24,8 +24,8 @@ class EnrollStudentsCommand extends Command
         // return "we are here";
         ini_set('memory_limit', '1024M'); // Increase memory limit
         set_time_limit(12000000);
-        MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2025-12-31')]);
+        // MoodleUserEnrolments::where('timeend', '>', 0)        
+        //     ->update(['timeend' => strtotime('2025-12-31')]);
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $studentIds = CourseElectives::where('course-electives.Year', 2025)
                         ->pluck('StudentID')
@@ -43,8 +43,8 @@ class EnrollStudentsCommand extends Command
         // $studentsController = new StudentsController();
         // $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
-        MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2025-12-31')]);
+        // MoodleUserEnrolments::where('timeend', '>', 0)        
+        //     ->update(['timeend' => strtotime('2025-12-31')]);
 
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');
