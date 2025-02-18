@@ -24,9 +24,10 @@ class EnrollStudentsCommand extends Command
         
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2024-12-31')]);
+            ->update(['timeend' => strtotime('2025-12-31')]);
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         $studentIds = CourseElectives::pluck('StudentID')
+                        ->where('course-electives.Year', 2025)
                         ->unique()
                         ->toArray();
         // $studentIdSisReports = CourseRegistration::pluck('StudentID')
@@ -42,7 +43,7 @@ class EnrollStudentsCommand extends Command
         $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
         MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2024-12-31')]);
+            ->update(['timeend' => strtotime('2025-12-31')]);
 
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
         $this->info('Students enrolled successfully.');

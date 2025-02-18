@@ -100,7 +100,7 @@ class Controller extends BaseController
                 ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
                 ->where('course-electives.StudentID', $studentId)
                 ->where(function ($query) {
-                    $query->where('course-electives.Year', 2024)
+                    $query->where('course-electives.Year', 2025)
                             ->orWhereNull('course-electives.Year');
                 })
                 ->get();
@@ -224,7 +224,7 @@ class Controller extends BaseController
 
     public function getDocketSupplementaryData($studentId, $supplementary = null)
     {
-        $academicYear = 2024;
+        $academicYear = 2025;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
 
         $studyId = $studentResults->StudyID;
@@ -290,7 +290,7 @@ class Controller extends BaseController
 
     public function getDocketData($studentId, $supplementary = null)
     {
-        $academicYear = 2024;
+        $academicYear = 2025;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
         
         // Check registration status
@@ -330,7 +330,7 @@ class Controller extends BaseController
     }
 
     public function getSupplemetaryCourses($studentId, $courseIds = null) {
-        $academicYear = 2024;
+        $academicYear = 2025;
         
         // Get IDs of courses with failing grades
         $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
@@ -1004,7 +1004,7 @@ class Controller extends BaseController
 
     public function getSupplemetaryDetails($studentId) {
         
-        $academicYear = 2024;
+        $academicYear = 2025;
         $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
 
         $studyId = $studentResults->StudyID;
@@ -1043,7 +1043,7 @@ class Controller extends BaseController
     }    
 
     public function getSupplemetaryCoursesVerification($studentId, $courseIds = null) {
-        $academicYear = 2024;        
+        $academicYear = 2025;        
         // Get IDs of courses with failing grades
         $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
             ->where('grades-published.StudentNo', $studentId)
@@ -1945,7 +1945,15 @@ class Controller extends BaseController
                 WHEN pa.TxDate < \'2022-01-01\' THEN 0
                 WHEN pa.TxDate > \'2022-12-31\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2022'),          
+                END) AS TotalPayment2022'), 
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.TxDate < \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025'),          
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -1984,7 +1992,7 @@ class Controller extends BaseController
             ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
 
-        $academicYear = '2024';
+        $academicYear = '2025';
         $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
 
         $studentInformation = Schools::select(
@@ -2055,7 +2063,15 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024'),            
+                END) AS TotalPayment2024'),   
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.TxDate < \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025'),          
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -2294,7 +2310,7 @@ class Controller extends BaseController
     // }
 
     public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent( $studentId){
-        $academicYear = 2024;
+        $academicYear = 2025;
         $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent($academicYear, $studentId);
             // ->where('basic_information_s_r_s.StudentID', $studentId);
         return $results;
