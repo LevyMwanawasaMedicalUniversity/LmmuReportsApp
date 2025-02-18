@@ -42,12 +42,15 @@ class SisReportsEduroleDataManagementController extends Controller
     }
 
     public function importOrUpdateMoodleWithEduroleData(){
+
+        // return "we are here";
+        ini_set('memory_limit', '1024M'); // Increase memory limit
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);
         // Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
-        $studentIds = CourseElectives::pluck('StudentID')
-                        ->where('course-electives.Year', 2025)
+        $studentIds = CourseElectives::where('course-electives.Year', 2025)
+                        ->pluck('StudentID')
                         ->unique()
                         ->toArray();
         // $studentIdSisReports = CourseRegistration::pluck('StudentID')
@@ -59,8 +62,8 @@ class SisReportsEduroleDataManagementController extends Controller
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
 
-        $studentsController = new StudentsController();
-        $studentsController->importStudentsFromLMMAX();
+        // $studentsController = new StudentsController();
+        // $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);

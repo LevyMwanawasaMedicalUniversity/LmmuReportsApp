@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\ClearLog::class,
+        Commands\EnrollStudentsCommand::class, // Add this line
     ];
 
     /**
