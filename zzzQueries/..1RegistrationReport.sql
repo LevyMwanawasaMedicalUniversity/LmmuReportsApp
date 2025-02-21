@@ -365,7 +365,7 @@ SELECT DISTINCT
         ELSE 'NO REGISTRATION'
     END AS "Registration Status 2025",    
     CASE 
-        WHEN bi.ID LIKE '250%' THEN 0
+        WHEN bi.ID LIKE '250%' THEN pd.YEAR1
         WHEN bi.ID LIKE '190%' THEN pd190.YEAR2
         ELSE pd.YEAR2
     END as "2025 Invoice",
