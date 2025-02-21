@@ -632,7 +632,18 @@ class DocketController extends Controller
 
     public function students2023ExamResults($studentNumber){
         $academicYear= 2024;
-        $studentNumbers = [$studentNumber];
+        $getUserName = auth()->user()->name;
+       
+        if(auth()->user()->hasRole('Student')) {
+            // $getUserName = auth()->user()->name;
+            // return $getUserName;
+            $studentNumber = $getUserName;
+            $studentNumbers = [$getUserName];
+            // return $studentNumbers;
+            
+        }else{
+            $studentNumbers = [$studentNumber];
+        }
         $studentsDetails = $this->getAppealStudentDetails($academicYear, $studentNumbers)->get();
         $student = $studentsDetails->first();
         $isStudentRegisteredOnEdurole = $this->checkIfStudentIsRegistered($studentNumber)->exists();
@@ -650,6 +661,11 @@ class DocketController extends Controller
             DB::raw('SUM(pa.Credit) as TotalCredit'),
             DB::raw('SUM(pa.Debit) as TotalDebit'),
             DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            DB::raw('SUM(CASE
+            WHEN pa.TxDate > \'2025-01-01\' THEN 0 
+            ELSE pa.Debit
+            END
+            ) - SUM(pa.Credit) as TotalBalanceExcluding2025'),
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -691,6 +707,11 @@ class DocketController extends Controller
         ->first();
 
         $balanceFrom2023 = $studentsPayments->BalanceFrom2023;
+        $totalBalanceExcluding2025 = $studentsPayments->TotalBalanceExcluding2025;
+
+        if ($totalBalanceExcluding2025 > 0) {
+            return back()->with('error', 'Student has a balance from Previous Years of K'.$totalBalanceExcluding2025);
+        }
 
         // return $balanceFrom2023;
         

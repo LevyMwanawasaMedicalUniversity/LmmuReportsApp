@@ -577,8 +577,12 @@ class StudentsController extends Controller
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
         ->groupBy('DCLink', 'Account', 'Name')
         ->first();
-
-        $balanceFrom2023 = $studentsPayments->BalanceFrom2023;
+        if (!$studentsPayments) {
+            return back()->with('error', 'Student not found in Sage.');
+        }else{
+            $balanceFrom2023 = $studentsPayments->BalanceFrom2023;
+        }
+        // $balanceFrom2023 = $studentsPayments->BalanceFrom2023;
 
         // return $balanceFrom2023;
         
