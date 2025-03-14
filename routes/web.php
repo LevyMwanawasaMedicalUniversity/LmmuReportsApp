@@ -93,6 +93,10 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
 
+            // Moodle Status Dashboard Routes
+            Route::get('/moodle/status', 'MoodleStatusController@index')->name('moodle.status');
+            Route::get('/moodle/check-student/{studentId}', 'MoodleStatusController@checkStudentStatus')->name('moodle.check-student');
+
         });
         
         
@@ -222,4 +226,3 @@ Route::group(['middleware' => 'auth'], function () {
     });
             
 });
-
