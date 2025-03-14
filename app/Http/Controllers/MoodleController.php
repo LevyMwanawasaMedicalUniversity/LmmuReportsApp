@@ -166,20 +166,20 @@ class MoodleController extends Controller
         try {
             $enrolIds = [];
 
-            foreach($courses as $course){
+            foreach($courses as $courseId){
                 try {
-                    $course = MoodleCourses::where('idnumber', $course)->first();
+                    $course = MoodleCourses::where('idnumber', $courseId)->first();
                     if (!$course) {
-                        Log::warning("Course with idnumber '$course' not found in Moodle");
+                        Log::warning("Course with idnumber '$courseId' not found in Moodle");
                         $failedEnrollments++;
                         continue;
                     }
                     
-                    $courseId = $course->id;
-                    $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
+                    $moodleCourseId = $course->id;
+                    $enrolId = MoodleEnroll::where('courseid', $moodleCourseId)->first();
                     
                     if (!$enrolId) {
-                        Log::warning("No enrollment method found for course $courseId");
+                        Log::warning("No enrollment method found for course $moodleCourseId");
                         $failedEnrollments++;
                         continue;
                     }
@@ -202,7 +202,7 @@ class MoodleController extends Controller
                     $enrolIds[] = $enrolId->id;
                     $enrolledCourses++;
                 } catch (\Exception $e) {
-                    Log::error("Error enrolling user $userId in course: " . $e->getMessage());
+                    Log::error("Error enrolling user $userId in course $courseId: " . $e->getMessage());
                     $failedEnrollments++;
                 }
             }
