@@ -35,24 +35,52 @@ class MoodleController extends Controller
     }
 
     public function addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds){   
-        ini_set('memory_limit', '1024M'); // Increase memory limit
-        set_time_limit(12000000);
-        // MoodleUserEnrolments::where('timeend', '>', 0)        
-        //     ->update(['timeend' => strtotime('2025-12-31')]);    
-        foreach($studentIds as $studentId){            
-            $student = BasicInformation::where('ID', $studentId)->first();
-            $courses = $this->getStudentRegistrationFromEdurole($studentId);
-            $courseIds = $courses->pluck('Name');
-            $user = $this->createUserAccountIfDoesNotExist($student);
-            if ($user) {
-                $this->assignUserToRoleIfNotAssigned($courseIds, $user->id);
-                $this->enrollUserIntoCourses($courseIds, $user->id);
+        // Use a more reasonable timeout (30 minutes)
+        set_time_limit(1800);
+        $failedEnrollments = [];
+        
+        foreach($studentIds as $studentId){
+            try {
+                $student = BasicInformation::where('ID', $studentId)->first();
+                if (!$student) {
+                    Log::error("Student with ID $studentId not found in BasicInformation");
+                    $failedEnrollments[] = ['studentId' => $studentId, 'reason' => 'Student not found'];
+                    continue;
+                }
+                
+                $courses = $this->getStudentRegistrationFromEdurole($studentId);
+                if ($courses->isEmpty()) {
+                    Log::warning("No courses found for student $studentId");
+                    continue;
+                }
+                
+                $courseIds = $courses->pluck('Name');
+                $user = $this->createUserAccountIfDoesNotExist($student);
+                
+                if ($user) {
+                    $this->assignUserToRoleIfNotAssigned($courseIds, $user->id);
+                    $this->enrollUserIntoCourses($courseIds, $user->id);
+                    Log::info("Successfully enrolled student $studentId in " . $courseIds->count() . " courses");
+                } else {
+                    Log::error("Failed to create or retrieve user account for student $studentId");
+                    $failedEnrollments[] = ['studentId' => $studentId, 'reason' => 'Failed to create user account'];
+                }
+            } catch (\Exception $e) {
+                Log::error("Error enrolling student $studentId: " . $e->getMessage());
+                $failedEnrollments[] = ['studentId' => $studentId, 'reason' => $e->getMessage()];
             }
         }
+        
+        if (!empty($failedEnrollments)) {
+            Log::warning("Failed to enroll " . count($failedEnrollments) . " students. See logs for details.");
+        }
+        
+        return $failedEnrollments;
     }
 
     private function createUserAccountIfDoesNotExist($student){
-        set_time_limit(12000000);
+        // Use a more reasonable timeout (5 minutes)
+        set_time_limit(300);
         try {
             $existingUser = MoodleUsers::where('username', $student->ID)->first();
             
@@ -78,133 +106,115 @@ class MoodleController extends Controller
                     'timecreated' => time(),
                 ]);
             }
-
-            return $existingUser;
         } catch (\Exception $e) {
-            // Log::error('Error creating user account: ' . $e->getMessage());
+            Log::error('Error creating user account: ' . $e->getMessage());
             return null;
         }
     }
     
     private function assignUserToRoleIfNotAssigned($courseIds, $userId){
-        set_time_limit(12000000);
-        // MoodleUserEnrolments::where('timeend', '>', 0)        
-        //     ->update(['timeend' => strtotime('2025-12-31')]);
+        // Use a more reasonable timeout (5 minutes)
+        set_time_limit(300);
+        $assignedCourses = 0;
+        $failedAssignments = 0;
+        
         try {
-            $roleId = 5; // Assuming role ID 5 is the default role
+            $roleId = 5; // Student role ID
             
-            // $existingUserRole = MoodleRoleAssignments::where('userid', $userId)->first();
-
             foreach($courseIds as $courseId){
-                $course = MoodleCourses::where('shortname', $courseId)->first();                
-                if ($course) {
-                    MoodleRoleAssignments::updateOrCreate(
-                        [
-                            'userid' => $userId,
-                            'contextid' => $course->id
-                        ],
-                        [
-                            'roleid' => 5,
-                            'timemodified' => time(),
-                        ]
-                    );
-                }
-            }
-            // }
-        } catch (\Exception $e) {
-            // Log::error('Error assigning user to role: ' . $e->getMessage());
-        }
-    }
-
-    private function enrollUserIntoCourses($courses, $userId){
-        set_time_limit(12000000);  
-        $date = '2025-12-31';
-        $timeend = strtotime($date);     
-        try {
-            foreach($courses as $course){
-                $course = MoodleCourses::where('idnumber', $course)->first();
-                if (!$course) {
-                    continue; // Skip if course doesn't exist
-                }
-                
-                $courseId = $course->id;
-                $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
-                
-                if (!$enrolId) {
-                    continue; // Skip if enrol record doesn't exist
-                }
-                
-                // Check if enrollment already exists
-                $existingEnrollment = MoodleUserEnrolments::where('userid', $userId)
-                    ->where('enrolid', $enrolId->id)
-                    ->first();
-                    
-                if ($existingEnrollment) {
-                    // Only update the timeend if it's earlier than our target date
-                    if ($existingEnrollment->timeend < $timeend || $existingEnrollment->timeend == 0) {
-                        $existingEnrollment->timeend = $timeend;
-                        $existingEnrollment->timemodified = time();
-                        $existingEnrollment->save();
+                try {
+                    $course = MoodleCourses::where('shortname', $courseId)->first();                
+                    if ($course) {
+                        MoodleRoleAssignments::updateOrCreate(
+                            [
+                                'userid' => $userId,
+                                'contextid' => $course->id
+                            ],
+                            [
+                                'roleid' => 5,
+                                'timemodified' => time(),
+                            ]
+                        );
+                        $assignedCourses++;
+                    } else {
+                        Log::warning("Course with shortname '$courseId' not found in Moodle");
+                        $failedAssignments++;
                     }
-                } else {
-                    // Create new enrollment only if it doesn't exist
-                    MoodleUserEnrolments::create([
-                        'enrolid' => $enrolId->id,                        
-                        'userid' => $userId,
-                        'status' => 0,
-                        'timestart' => time(),
-                        'timeend' => $timeend,
-                        'modifierid' => time(),
-                        'timecreated' => time(),
-                        'timemodified' => time(),
-                    ]);
+                } catch (\Exception $e) {
+                    Log::error("Error assigning user $userId to course $courseId: " . $e->getMessage());
+                    $failedAssignments++;
                 }
             }
+            
+            if ($failedAssignments > 0) {
+                Log::warning("Failed to assign $failedAssignments courses for user $userId");
+            }
+            if ($assignedCourses > 0) {
+                Log::info("Successfully assigned $assignedCourses courses to user $userId");
+            }
         } catch (\Exception $e) {
-            // Log the error if needed
-            // Log::error('Error enrolling user into courses: ' . $e->getMessage());
+            Log::error('Error in assignUserToRoleIfNotAssigned: ' . $e->getMessage());
         }
     }
     
-    // private function enrollUserIntoCourses($courses, $userId){
-    //     set_time_limit(12000000);  
-    //     // MoodleUserEnrolments::where('timeend', '>', 0)        
-    //     //     ->update(['timeend' => strtotime('2025-12-31')]);
-    //     $date = '2025-12-31';
-    //     $timeend = strtotime($date);     
-    //     try {
-    //         $enrolIds = [];
+    private function enrollUserIntoCourses($courses, $userId){
+        // Use a more reasonable timeout (5 minutes)
+        set_time_limit(300);
+        $enrolledCourses = 0;
+        $failedEnrollments = 0;
+        
+        try {
+            $enrolIds = [];
 
-    //         foreach($courses as $course){
-    //             $course = MoodleCourses::where('idnumber', $course)->first();
-    //             $courseId = $course->id;
-
-    //             $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
-    //             // Log::info($enrolId);
-    //             // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
-
-                
-    //             MoodleUserEnrolments::updateOrCreate(
-    //                 [
-    //                     'enrolid' => $enrolId->id,                        
-    //                     'userid' => $userId,
-    //                 ],
-    //                 [
-    //                     'status' => 0, // Assuming status 0 is 'active
-    //                     'timestart' => time(),
-    //                     'timeend' => $timeend,
-    //                     'modifierid' => time(),
-    //                     'timecreated' => time(),
-    //                     'timemodified' => time(),
-    //                 ]
-    //             );                
-
-    //             $enrolIds[] = $enrolId->id;
-    //         }
-    //         // Delete all enrollments where enrolid is not in $enrolIds
-    //         // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
-    //     } catch (\Exception $e) {
-    //         // Log::error('Error enrolling user into courses: ' . $e->getMessage());
-    //     }
-    // }    
+            foreach($courses as $courseId){
+                try {
+                    $course = MoodleCourses::where('idnumber', $courseId)->first();
+                    if (!$course) {
+                        Log::warning("Course with idnumber '$courseId' not found in Moodle");
+                        $failedEnrollments++;
+                        continue;
+                    }
+                    
+                    $moodleCourseId = $course->id;
+                    $enrolId = MoodleEnroll::where('courseid', $moodleCourseId)->first();
+                    
+                    if (!$enrolId) {
+                        Log::warning("No enrollment method found for course $moodleCourseId");
+                        $failedEnrollments++;
+                        continue;
+                    }
+                    
+                    MoodleUserEnrolments::updateOrCreate(
+                        [
+                            'enrolid' => $enrolId->id,                        
+                            'userid' => $userId,
+                        ],
+                        [
+                            'status' => 0, // Active enrollment
+                            'timestart' => time(),
+                            'timeend' => 1720959600, // Consider making this dynamic
+                            'modifierid' => time(),
+                            'timecreated' => time(),
+                            'timemodified' => time(),
+                        ]
+                    );
+                    
+                    $enrolIds[] = $enrolId->id;
+                    $enrolledCourses++;
+                } catch (\Exception $e) {
+                    Log::error("Error enrolling user $userId in course $courseId: " . $e->getMessage());
+                    $failedEnrollments++;
+                }
+            }
+            
+            if ($failedEnrollments > 0) {
+                Log::warning("Failed to enroll in $failedEnrollments courses for user $userId");
+            }
+            if ($enrolledCourses > 0) {
+                Log::info("Successfully enrolled user $userId in $enrolledCourses courses");
+            }
+        } catch (\Exception $e) {
+            Log::error('Error in enrollUserIntoCourses: ' . $e->getMessage());
+        }
+    }
 }

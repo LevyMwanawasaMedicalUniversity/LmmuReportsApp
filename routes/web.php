@@ -59,8 +59,42 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/students/caResult/viewInSpecificCaComponent/{courseId}/{caType}', [ContinousAssessmentController::class, 'viewInSpecificCaComponent'])->name('docket.viewInSpecificCaComponent');
 
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
-        // Route::get('/report', [ReportController::class, 'registeredStudents'])->name('registered.students');
-        // Route::get('/export-data', [ReportController::class, 'exportRegisteredStudents'])->name('export.data');
+	Route::get('/report', 'ReportController@registeredStudents')->name('registered.students');
+    Route::get('/export-data', 'ReportController@exportRegisteredStudents')->name('export.data');
+    
+    Route::middleware('can:Administrator')->group(function () {   
+        Route::GET('/importOrUpdateSisReportsEduroleData/Update', 'SisReportsEduroleDataManagementController@importOrUpdateSisReportsEduroleData')->name('importOrUpdatexSisReportsEduroleData.admin');     
+        Route::group(['prefix' => 'user'], function () {
+
+            Route::get('/user/searchForUser', 'UserController@searchForUser')->name('users.searchForUser');
+            Route::get('', 'UserController@index')->name('users.index');
+            Route::get('/create', 'UserController@create')->name('users.create');
+            Route::post('/store', 'UserController@store')->name('users.store');
+            Route::get('/{user}/show', 'UserController@show')->name('users.show');
+            Route::get('/{user}/edit', 'UserController@edit')->name('users.edit');
+            Route::post('/{user}/resetUserPassword', 'UserController@resetUserPassword')->name('users.resetUserPassword');
+            Route::patch('/{user}/update', 'UserController@update')->name('users.update');
+            Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
+            Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
+            Route::post('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
+            Route::get('/import/single/students', 'StudentsController@importSingleStudent')->name('students.importSingleStudent');
+            Route::post('/upload/single/students', 'StudentsController@uploadSingleStudent')->name('students.uploadSingleStudent');
+            Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
+            Route::get('/viewStudents/showStudent/{studentNumber}', 'StudentsController@registerStudent')->name('students.showStudent');
+            Route::post('/viewStudents/submitRegistration', 'StudentsController@adminSubmitCourses')->name('sumbitRegistration.student');
+            Route::DELETE('/viewStudents/deleteEntireRegistration', 'StudentsController@deleteEntireRegistration')->name('deleteEntireRegistration.student');
+            Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
+            Route::DELETE('/viewStudents/deleteCourseFromNMCZCourses', 'StudentsController@deleteCourseFromNMCZCourses')->name('deleteCourseFromNMCZCourses.student');
+            Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
+            
+            Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
+            Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
+
+            // Moodle Status Dashboard Routes
+            Route::get('/moodle/status', 'MoodleStatusController@index')->name('moodle.status');
+            Route::get('/moodle/check-student/{studentId}', 'MoodleStatusController@checkStudentStatus')->name('moodle.check-student');
+
+        });
         
         Route::middleware('can:Administrator')->group(function () {   
             Route::get('/importOrUpdateSisReportsEduroleData/Update', [SisReportsEduroleDataManagementController::class, 'importOrUpdateSisReportsEduroleData'])->name('importOrUpdatexSisReportsEduroleData.admin');     
