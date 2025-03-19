@@ -19,6 +19,7 @@ use App\Models\Grades;
 use App\Models\GradesModified;
 use App\Models\GradesPublished;
 use App\Models\LMMAXCourseAssessmentScores;
+use App\Models\LMMAXStudentsContinousAssessment;
 use App\Models\Program;
 use App\Models\ProgramCourseLink;
 use App\Models\SageClient;
@@ -44,6 +45,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class Controller extends BaseController
@@ -97,17 +99,14 @@ class Controller extends BaseController
         $checkRegistration = CourseElectives::select('courses.Name')
                 ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
                 ->where('course-electives.StudentID', $studentId)
-                ->where(function ($query) {
-                    $query->where('course-electives.Year', 2024)
-                            ->orWhereNull('course-electives.Year');
-                })
+                ->where('course-electives.Year', 2025)
                 ->get();
         return $checkRegistration;
     }
 
     public function getStudentRegistration($studentId){
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-                ->where('Year', 2024)
+                ->where('Year', 2025)
                 // ->where('Semester', 1)
                 ->get();
         return $checkRegistration;
@@ -217,6 +216,192 @@ class Controller extends BaseController
     
         return $results;
     }
+
+    
+
+    public function getDocketSupplementaryData($studentId, $supplementary = null)
+    {
+        $academicYear = 2025;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+
+        $studyId = $studentResults->StudyID;
+
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
+        
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        $coursesFromAssessments = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')        
+            ->where('students_continous_assessments.student_id', $studentId)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes )
+            ->where('course_assessments.academic_year', $academicYear)    
+            // ->where('students_continous_assessments.ca_type', '=', DB::raw('course_assessments.ca_type')) // Ensures ca_type matches
+            ->select('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode',
+                    DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'))
+            ->groupBy('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode')
+            ->get();
+
+        $courseIds = $coursesFromAssessments->pluck('course_id')->toArray();
+        
+
+        // Get course data based on registration status
+        if ($supplementary) {
+            $courses = $this->getSupplemetaryCourses($studentId, $courseIds); 
+            // return $courses;           
+            $registeredOnEdurole = 2;
+        }elseif ($isStudentRegistered) {
+            $courses = $this->getEduroleCoursesForStudent($studentId, $academicYear);
+            $registeredOnEdurole = 1;
+        } elseif ($isStudentRegisteredOnSisReports) {
+            $courses = $this->getSisReportsCoursesForStudent($studentId, $academicYear);
+        } else {
+            return redirect()->back()->with('error', 'Student not registered.');
+        }
+
+        
+
+        // Get image data
+        $imageDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png");
+        $logoDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/templates/mobile/images/header.png");
+        
+        return view('docket.studentViewDocket', compact(
+            'studentResults', 
+            'courses', 
+            'imageDataUri', 
+            'logoDataUri',
+            'registeredOnEdurole'
+        ));
+    }
+
+    public function getDocketData($studentId, $supplementary = null)
+    {
+        $academicYear = 2025;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        // Get course data based on registration status
+        if ($supplementary) {
+            $courses = $this->getSupplemetaryCourses($studentId);
+            $registeredOnEdurole = 2;
+        }elseif ($isStudentRegistered) {
+            $courses = $this->getEduroleCoursesForStudent($studentId, $academicYear);
+            $registeredOnEdurole = 1;
+        } elseif ($isStudentRegisteredOnSisReports) {
+            $courses = $this->getSisReportsCoursesForStudent($studentId, $academicYear);
+        } else {
+            return redirect()->back()->with('error', 'Student not registered.');
+        }
+
+        
+
+        // Get image data
+        $imageDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/datastore/identities/pictures/{$studentId}.png");
+        $logoDataUri = $this->convertImageToDataUri("https://edurole.lmmu.ac.zm/templates/mobile/images/header.png");
+        
+        return view('docket.studentViewDocket', compact(
+            'studentResults', 
+            'courses', 
+            'imageDataUri', 
+            'logoDataUri',
+            'registeredOnEdurole'
+        ));
+    }
+
+    public function getSupplemetaryCourses($studentId, $courseIds = null) {
+        $academicYear = 2025;
+        
+        // Get IDs of courses with failing grades
+        $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->where('grades-published.StudentNo', $studentId)
+            ->where('grades-published.AcademicYear', $academicYear)
+            ->whereIn('grades-published.Grade', ['D+', 'NE', 'DEF','D','F'])
+            ->pluck('courses.ID')
+            ->toArray();
+    
+        // Get IDs of courses that should have results but don't
+        $existingGradeIds = Grades::where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->pluck('courses.ID')
+            ->toArray();
+        
+        // Find missing course IDs (courses in $courseIds but not in existing grades)
+        $missingCourseIds = $courseIds ? array_diff($courseIds, $existingGradeIds) : [];
+    
+        // Combine all course IDs that need to be returned
+        $allRequiredCourseIds = array_unique(array_merge($failedCourseIds, $missingCourseIds));
+    
+        // Final query to get course details
+        $supplementaryCourses = EduroleCourses::select(
+                'courses.Name as CourseNo', 
+                'courses.CourseDescription as ProgramNo',
+                'courses.ID'
+            )
+            ->whereIn('courses.ID', $allRequiredCourseIds)
+            ->get();
+    
+        return $supplementaryCourses;
+    }
+
+    private function getEduroleCoursesForStudent($studentId, $academicYear)
+    {
+        return CourseElectives::join('courses', 'course-electives.CourseID', '=', 'courses.ID')
+            ->where('course-electives.StudentID', $studentId)
+            ->where('course-electives.Year', $academicYear)
+            ->select('courses.Name', 'courses.CourseDescription')
+            ->get();
+    }
+
+    private function getSisReportsCoursesForStudent($studentId, $academicYear)
+    {
+        return CourseRegistration::join('courses_s_r_s', 'course_registration.CourseID', '=', 'courses_s_r_s.course_name')
+            ->where('course_registration.StudentID', $studentId)
+            ->where('course_registration.Year', $academicYear)
+            ->select('courses_s_r_s.course_name', 'courses_s_r_s.course_description')
+            ->get();
+    }
+
+    public function convertImageToDataUri($url)
+    {
+        try {
+            $response = Http::withOptions(['verify' => false])->get($url);
+
+            if ($response->successful()) {
+                $imageContent = $response->body();
+                $imageBase64 = base64_encode($imageContent);
+                $imageMimeType = $response->header('Content-Type') ?? 'image/png'; // Default to PNG if Content-Type is missing
+
+                // Create the data URI
+                return 'data:' . $imageMimeType . ';base64,' . $imageBase64;
+            } else {
+                // Handle cases where the image is not found or request failed
+                return null;
+            }
+        } catch (\Exception $e) {
+            // Handle exceptions (e.g., network errors)
+            return null;
+        }
+    }
+
 
     public function getCoursesWithResults(){
         $results = $this->queryCoursesWithResults();
@@ -813,6 +998,97 @@ class Controller extends BaseController
 
         return $result;
     }
+
+    public function getSupplemetaryDetails($studentId) {
+        
+        $academicYear = 2025;
+        $studentResults = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+
+        $studyId = $studentResults->StudyID;
+
+        $arrayOfProgrammes = $this->arrayOfValidProgrammes($studyId);
+        
+        
+        // Check registration status
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        $isStudentRegisteredOnSisReports = $this->checkIfStudentIsRegisteredOnSisReports($studentId, $academicYear)->exists();
+        
+        // Initialize variables
+        $courses = null;
+        $registeredOnEdurole = 0;
+
+        $coursesFromAssessments = LMMAXStudentsContinousAssessment::join('course_assessments', 'course_assessments.course_assessments_id', '=', 'students_continous_assessments.course_assessment_id')        
+            ->where('students_continous_assessments.student_id', $studentId)
+            ->whereIn('students_continous_assessments.study_id', $arrayOfProgrammes )
+            ->where('course_assessments.academic_year', $academicYear)    
+            // ->where('students_continous_assessments.ca_type', '=', DB::raw('course_assessments.ca_type')) // Ensures ca_type matches
+            ->select('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode',
+                    DB::raw('SUM(students_continous_assessments.sca_score) as total_marks'))
+            ->groupBy('students_continous_assessments.student_id',
+                    'students_continous_assessments.course_id',
+                    'students_continous_assessments.study_id',
+                    'students_continous_assessments.delivery_mode')
+            ->get();
+
+        $courseIds = $coursesFromAssessments->pluck('course_id')->toArray();        
+        $courses = $this->getSupplemetaryCoursesVerification($studentId, $courseIds); 
+        
+        return $courses;
+    }    
+
+    public function getSupplemetaryCoursesVerification($studentId, $courseIds = null) {
+        $academicYear = 2025;        
+        // Get IDs of courses with failing grades
+        $failedCourseIds = Grades::join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->where('grades-published.StudentNo', $studentId)
+            ->where('grades-published.AcademicYear', $academicYear)
+            ->whereIn('grades-published.Grade', ['D+', 'NE', 'DEF','D','F'])
+            ->pluck('courses.ID')
+            ->toArray();
+    
+        // Get IDs of courses that should have results but don't
+        $existingGradeIds = Grades::where('StudentNo', $studentId)
+            ->where('AcademicYear', $academicYear)
+            ->join('courses', 'grades-published.CourseNo', '=', 'courses.Name')
+            ->pluck('courses.ID')
+            ->toArray();
+        
+        // Find missing course IDs (courses in $courseIds but not in existing grades)
+        $missingCourseIds = $courseIds ? array_diff($courseIds, $existingGradeIds) : [];
+    
+        // Combine all course IDs that need to be returned
+        $allRequiredCourseIds = array_unique(array_merge($failedCourseIds, $missingCourseIds));
+    
+        $result = BasicInformation::query()
+            ->select([
+                'basic-information.FirstName',
+                'basic-information.MiddleName',
+                'basic-information.Surname',
+                'basic-information.StudyType',
+                'basic-information.Sex',
+                'basic-information.PrivateEmail',
+                'student-study-link.StudentID',
+                'basic-information.GovernmentID',
+                'study.Name as ProgrammeName',
+                'study.ID as StudyID',
+                'schools.Name as School',
+                'courses.Name as CourseName',
+                'courses.CourseCoordinatorInternal as Approved',
+                'courses.CourseDescription as CourseDescription',
+                DB::raw("'YEAR 0' AS 'YearOfStudy'")
+            ])
+            ->join('student-study-link', 'student-study-link.StudentID', '=', 'basic-information.ID')
+            ->join('study', 'study.ID', '=', 'student-study-link.StudyID')
+            ->join('schools', 'study.ParentID', '=', 'schools.ID')
+            ->whereIn('courses.ID', $allRequiredCourseIds)
+            ->groupBy('courses.Name');
+
+        return $result;
+    }
+    
     
 
     public function setAndUpdateCoursesForCurrentYear($studentId) {
@@ -1666,7 +1942,15 @@ class Controller extends BaseController
                 WHEN pa.TxDate < \'2022-01-01\' THEN 0
                 WHEN pa.TxDate > \'2022-12-31\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2022'),          
+                END) AS TotalPayment2022'), 
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.TxDate < \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025'),          
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -1705,7 +1989,7 @@ class Controller extends BaseController
             ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
 
-        $academicYear = '2024';
+        $academicYear = '2025';
         $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
 
         $studentInformation = Schools::select(
@@ -1776,7 +2060,15 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024'),            
+                END) AS TotalPayment2024'),   
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0  
+                WHEN pa.TxDate < \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025'),          
             DB::raw('SUM(CASE 
                 WHEN pa.Description LIKE \'%reversal%\' THEN 0  
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
@@ -2015,7 +2307,7 @@ class Controller extends BaseController
     // }
 
     public function getRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent( $studentId){
-        $academicYear = 2024;
+        $academicYear = 2025;
         $results = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudentsSingleStudent($academicYear, $studentId);
             // ->where('basic_information_s_r_s.StudentID', $studentId);
         return $results;

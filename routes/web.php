@@ -28,7 +28,6 @@ Route::get('/', function () {
     }
 });
 
-Route::get('/testsAssess','App\Http\Controllers\DocketController@testAssess');
 
 // Route::get('exportAllStudents', 'StudentsController@exportAllStudents')->name('students.exportAllStudents');
 Auth::routes(['register' => false]);
@@ -50,7 +49,6 @@ Route::group(['middleware' => 'auth'], function () {
     // Route::get('/moodle', 'App\Http\Controllers\MoodleController@index')->name('home');
     Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
         Route::get('/landing', [App\Http\Controllers\HomeController::class, 'landingPage'])->name('landing.page');
-        Route::get('/fetchData/{academicYear}', [App\Http\Controllers\HomeController::class, 'fetchData']);
     });
 	Route::resource('user', 'App\Http\Controllers\UserController');
     Route::resource('roles', 'App\Http\Controllers\RolesController');
@@ -60,12 +58,7 @@ Route::group(['middleware' => 'auth'], function () {
 	Route::put('profile', ['as' => 'profile.update', 'uses' => 'App\Http\Controllers\ProfileController@update']);
 	Route::put('profile/password', ['as' => 'profile.password', 'uses' => 'App\Http\Controllers\ProfileController@password']);
     Route::get('{page}', ['as' => 'page.index', 'uses' => 'App\Http\Controllers\PageController@index']);
-    ///route added
-    Route::get('/students/exam/results/{studentNumber}', [App\Http\Controllers\DocketController::class, 'students2023ExamResults'])->name('studentsExamResults');
-    // Route::get('/students/caResult/resultsViewCourses/', 'App\Http\Controllers\ContinousAssessmentController@studentsCAResults')->name('docket.studentsCAResults');
-    Route::get('/students/caResult/viewCaComponents/{courseId}/', 'App\Http\Controllers\ContinousAssessmentController@viewCaComponents')->name('docket.viewCaComponents');
-    Route::get('/students/caResult/viewCaComponentsWithComponent/{courseId}/', 'App\Http\Controllers\ContinousAssessmentController@viewCaComponentsWithComponent')->name('docket.viewCaComponentsWithComponent');
-    Route::get('/students/caResult/viewInSpecificCaComponent/{courseId}/{caType}', 'App\Http\Controllers\ContinousAssessmentController@viewInSpecificCaComponent')->name('docket.viewInSpecificCaComponent');
+    Route::get('/students/exam/results/{studentNumber}', 'App\Http\Controllers\DocketController@students2023ExamResults')->name('docket.students2023ExamResults');
 
     
     Route::group(['namespace' => 'App\Http\Controllers'], function () {
@@ -87,7 +80,6 @@ Route::group(['middleware' => 'auth'], function () {
             Route::post('/{user}/delete', 'UserController@destroy')->name('users.destroy');
             Route::post('/{user}/resetPassword', 'UserController@resetPassword')->name('admin.resetPassword');
             Route::post('/import/Students', 'StudentsController@importStudentsFromBasicInformation')->name('students.import');
-            Route::post('/import/importStudentsFromLMMAX', 'StudentsController@importStudentsFromLMMAX')->name('students.importStudentsFromLMMAX');
             Route::get('/import/single/students', 'StudentsController@importSingleStudent')->name('students.importSingleStudent');
             Route::post('/upload/single/students', 'StudentsController@uploadSingleStudent')->name('students.uploadSingleStudent');
             Route::get('/index/viewStudents/{id?}', 'StudentsController@viewAllStudents')->name('students.index');
@@ -97,10 +89,13 @@ Route::group(['middleware' => 'auth'], function () {
             Route::DELETE('/viewStudents/deleteCourseInRegistration', 'StudentsController@deleteCourseInRegistration')->name('deleteCourseInRegistration.student');
             Route::DELETE('/viewStudents/deleteCourseFromNMCZCourses', 'StudentsController@deleteCourseFromNMCZCourses')->name('deleteCourseFromNMCZCourses.student');
             Route::GET('/viewStudents/printIDCard/{studentId}', 'StudentsController@printIDCard')->name('printIDCard.student');
-            Route::GET('/viewStudents/studentNurandMid/{studentId}', 'StudentsController@printIDCardStudentNurandMid')->name('printIDCard.studentNurandMid');
             
             Route::post('/importStudentsToMoodle', 'StudentsController@bulkEnrollOnMooodle')->name('bulkEnrollOnMooodle');
             Route::post('/importStudentsFromEduroleToMoodle', 'StudentsController@bulkEnrollFromEduroleOnMooodle')->name('bulkEnrollFromEduroleOnMooodle');
+
+            // Moodle Status Dashboard Routes
+            Route::get('/moodle/status', 'MoodleStatusController@index')->name('moodle.status');
+            Route::get('/moodle/check-student/{studentId}', 'MoodleStatusController@checkStudentStatus')->name('moodle.check-student');
 
         });
         
@@ -118,7 +113,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::middleware('can:Student')->group(function () {
         
         Route::prefix('student')->group(function () {
-            Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
+            // Route::get('/viewDocket', 'StudentsController@viewDocket')->name('student.viewDocket');
             Route::get('/viewResults', 'StudentsController@viewResults')->name('student.viewResults');
             Route::get('/coursesRegistration/{studentId}', 'StudentsController@studentRegisterForCourses')->name('student.coursesRegistration');
             Route::get('/nmczRegistration/{id?}', 'StudentsController@studentNMCZRegisterForRepeatCourses')->name('nmcz.registration');
@@ -126,26 +121,18 @@ Route::group(['middleware' => 'auth'], function () {
         });
 
     });
-    
 
     Route::middleware('can:Examination')->group(function () {
-        Route::prefix('nurAndMid')->group(function () {
-            Route::get('/importNurAndMid', 'NursingAndMidwiferyController@import')->name('nurAndMid.import');
-            Route::post('/uploadNurAndMid', 'NursingAndMidwiferyController@uploadStudents')->name('nurAndMid.uploadStudents');
-            Route::get('/viewNurAndMid', 'NursingAndMidwiferyController@viewStudents')->name('nurAndMid.viewStudents');
-            Route::get('/showNurAndMid/{id}', 'NursingAndMidwiferyController@showStudents')->name('nurAndMid.showStudent');
-        });
         Route::prefix('docket')->group(function () {
             Route::get('/index/{id?}', 'DocketController@index')->name('docket.index');
             Route::get('/indexSupsAndDef/{id?}', 'DocketController@indexSupsAndDef')->name('docket.indexSupsAndDef');
             Route::get('/exportAppealingStudents', 'DocketController@exportAppealStudents')->name('docket.exportAppealStudents');
-            Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
+            // Route::get('/sendEmailNotice', 'DocketController@sendEmailNotice')->name('docket.sendEmailNotice');
             Route::get('/docketIndexNmcz/{id?}', 'DocketController@indexNmcz')->name('docket.indexNmcz');
             Route::get('/docketIndexNmczRepeating/{id?}', 'DocketController@indexNmczRepeating')->name('docket.indexNmczRepeating');
             
 
             Route::get('/import', 'DocketController@import')->name('docket.import');
-            
             Route::get('/importNMCZRepeat', 'DocketController@nmczRepeatImport')->name('docket.nmczRepeatImport');
             Route::get('/importSupsAndDef', 'DocketController@importSupsAndDef')->name('docket.importSupsAndDef');
             Route::get('/importNmcz', 'DocketController@importNmcz')->name('docket.importNmcz');
@@ -178,8 +165,6 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('/index', 'AcademicQueriesController@index')->name('academics.index');            
             Route::GET('/viewAllCoursesWithResults',  'AcademicQueriesController@viewAllCoursesWithResults')->name('viewAllCoursesWithResults');
             Route::get('/exportAllCoursesWithResults', 'AcademicQueriesController@exportAllCoursesWithResults')->name('exportAllCoursesWithResults');
-
-            Route::GET('/manageAdmissions',  'AcademicQueriesController@manageAdmissions')->name('academics.ManageAdmissions');
 
             Route::GET('/viewAllStudentsRegisteredInASpecificAcademicYear',  'AcademicQueriesController@viewAllStudentsRegisteredInASpecificAcademicYear')->name('viewAllStudentsRegisteredInASpecificAcademicYear');
             Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear/{academicYear}', 'AcademicQueriesController@exportAllStudentsRegisteredInASpecificAcademicYear')->name('exportAllStudentsRegisteredInASpecificAcademicYear');
@@ -241,4 +226,3 @@ Route::group(['middleware' => 'auth'], function () {
     });
             
 });
-

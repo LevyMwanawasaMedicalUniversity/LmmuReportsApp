@@ -14,7 +14,11 @@
             <div class="card shadow-sm border-0" id="docketCard" style="max-width: 1024px; margin: auto;">
                 <!-- Header -->
                 <div class="card-header bg-primary text-white text-center py-3">
+                    @if($registeredOnEdurole == 2)
+                    <h4 class="card-title no-print m-0">Supplementary And Deffered Exam Docket</h4>
+                    @else
                     <h4 class="card-title no-print m-0">Student Examination Docket</h4>
+                    @endif
 
                     @if (session('success'))
                         <div class="alert alert-success py-1 my-2">
@@ -67,10 +71,18 @@
                         </div>
 
                         <!-- Exam Details -->
+                        @if($registeredOnEdurole == 2)
+                        <div>
+                            <small>2024 SUPPLEMENTARY AND DEFFERED EXAMS DOCKET</small><br>
+                            <small>PRINTED ON: <span id="currentDate"></span></small>
+                        </div>
+
+                        @else
                         <div>
                             <small>FINAL EXAMINATION DOCKET 2024</small><br>
                             <small>PRINTED ON: <span id="currentDate"></span></small>
                         </div>
+                        @endif
 
                         <!-- QR Code -->
                         <div>
@@ -98,26 +110,30 @@
                                 </tr>
                             </thead>
                             <tbody>
-    @php
-        // Filter out unique instances based on the registered condition
-        $uniqueCourses = $registeredOnEdurole == 1
-            ? $courses->unique('Name', 'CourseDescription')
-            : $courses->unique('course_name', 'course_description');
-    @endphp
+                                @php
+                                    // Filter out unique instances based on the registered condition
+                                    $uniqueCourses = match($registeredOnEdurole) {
+                                        1 => $courses->unique('Name', 'CourseDescription'),
+                                        2 => $courses->unique('CourseNo', 'ProgramNo'),
+                                        default => $courses->unique('course_name', 'course_description'), // handles case 0
+                                    };
+                                @endphp
 
-    @foreach($uniqueCourses as $course)
-    <tr>
-        @if($registeredOnEdurole == 1)
-            <td>{{ $course->Name }} - {{ $course->CourseDescription }}</td>
-        @else
-            <td>{{ $course->course_name }} - {{ $course->course_description }}</td>
-        @endif
-        <td></td>
-        <td></td>
-        <td></td>
-    </tr>
-    @endforeach
-</tbody>
+                                @foreach($uniqueCourses as $course)
+                                    <tr>
+                                        @if($registeredOnEdurole == 1)
+                                            <td>{{ $course->Name }} - {{ $course->CourseDescription }}</td>
+                                        @elseif($registeredOnEdurole == 0)
+                                            <td>{{ $course->course_name }} - {{ $course->course_description }}</td>
+                                        @elseif($registeredOnEdurole == 2)
+                                            <td>{{ $course->CourseNo }} - {{ $course->ProgramNo }}</td>
+                                        @endif
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
 

@@ -34,6 +34,12 @@
             <p>{{ __('Docket') }}</p>
           </a>
         </li> --}}
+        <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
+          <a href="{{url('/student/viewSupplementaryDocket')}}">
+            <i class="now-ui-icons education_paper"></i>
+            <p>{{ __('Docket') }}</p>
+          </a>
+        </li>
         <li class = "@if ($activePage == 'studentExaminationResults') active @endif">
           <a href="{{ url('/students/exam/results/' . auth()->user()->name) }}">
             <i class="now-ui-icons education_hat"></i>
@@ -88,6 +94,12 @@
                 <a href="{{ route('importOrUpdatexSisReportsEduroleData.admin') }}">
                   <i class="now-ui-icons loader_refresh"></i>
                   <p> {{ __("Sync With Edurole") }} </p>
+                </a>
+              </li>
+              <li class="@if ($activePage == 'roles') active @endif">
+                <a href="{{ route('importOrUpdateMoodleWithEduroleData.admin') }}">
+                  <i class="now-ui-icons loader_refresh"></i>
+                  <p> {{ __("Sync With Moodle") }} </p>
                 </a>
               </li>
             </ul>

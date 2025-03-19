@@ -77,7 +77,7 @@ SELECT
 FROM `basic-information` bi
 INNER JOIN `student-study-link` ssl2 ON bi.ID = ssl2.StudentID 
 INNER JOIN study s ON ssl2.StudyID = s.ID 
-LEFT JOIN `grades-published` gp ON gp.StudentNo = bi.ID AND gp.AcademicYear = 2023
+LEFT JOIN `grades-published` gp ON gp.StudentNo = bi.ID AND gp.AcademicYear = 2024
 LEFT JOIN `grades-published` gp2 ON gp2.StudentNo = bi.ID
 LEFT JOIN courses c ON c.Name = gp.CourseNo
 LEFT JOIN `program-course-link` pcl ON pcl.CourseID = c.ID 
@@ -87,7 +87,7 @@ LEFT JOIN study s3 ON s3.ID = spl.StudyID
 LEFT JOIN MaxYearTable my ON my.StudentID = bi.ID
 LEFT JOIN YearOfReporting yor ON yor.StudentId = bi.ID
 INNER JOIN BillingData bd ON bd.StudentID = bi.ID
-INNER JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2024
+INNER JOIN `course-electives` ce ON bi.ID = ce.StudentID AND ce.`Year` = 2025
 INNER JOIN schools s2 ON s2.ID = s.ParentID 
 -- WHERE bi.ID = 190102249
 GROUP BY bi.ID;

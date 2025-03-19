@@ -43,6 +43,7 @@
                                     <option value="2022" @if (isset($academicYear) && $academicYear == '2022') selected @endif>2022</option>
                                     <option value="2023" @if (isset($academicYear) && $academicYear == '2023') selected @endif>2023</option>
                                     <option value="2024" @if (isset($academicYear) && $academicYear == '2024') selected @endif>2024</option>
+                                    <option value="2025" @if (isset($academicYear) && $academicYear == '2025') selected @endif>2025</option>
                                 </select>
                             </div>
                         </div>
