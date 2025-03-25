@@ -987,13 +987,13 @@ class Controller extends BaseController
             ->join('schools', 'study.ParentID', '=', 'schools.ID')
             ->join('course-electives', function ($join) {
                 $join->on('course-electives.StudentID', '=', 'basic-information.ID')
-                    ->where('course-electives.Year', '=', 2024);
+                    ->where('course-electives.Year', '=', 2025);
             })
             ->join('courses', 'course-electives.CourseID', '=', 'courses.ID')
             ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
             ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
             ->where('course-electives.StudentID', $studentId)
-            ->where('course-electives.Year', 2024)
+            ->where('course-electives.Year', 2025)
             ->groupBy('courses.Name');
 
         return $result;

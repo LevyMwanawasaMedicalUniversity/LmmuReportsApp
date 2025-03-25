@@ -22,8 +22,14 @@
       </li>
       @if (auth()->user()->hasRole('Student') && !auth()->user()->hasAnyRole(['Administrator', 'Developer', 'Dosa', 'Examination', 'Academic', 'Finance']))
       
-        <li class = "@if ($activePage == 'studentCourseRegistration') active @endif">
+        {{-- <li class = "@if ($activePage == 'studentCourseRegistration') active @endif">
           <a href="{{ route('student.coursesRegistration', auth()->user()->name) }}">
+            <i class="now-ui-icons gestures_tap-01"></i>
+            <p>{{ __('Course Registration') }}</p>
+          </a>
+        </li> --}}
+        <li class = "@if ($activePage == 'studentCourseRegistrationWithCarryOver') active @endif">
+          <a href="{{ route('student.coursesRegistrationWithCarryOver', auth()->user()->name) }}">
             <i class="now-ui-icons gestures_tap-01"></i>
             <p>{{ __('Course Registration') }}</p>
           </a>

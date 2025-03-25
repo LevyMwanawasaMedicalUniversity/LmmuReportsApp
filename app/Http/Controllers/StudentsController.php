@@ -891,6 +891,125 @@ class StudentsController extends Controller
         return view('allStudents.studentSelfRegistration', compact('actualBalance','studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
+    public function studentRegisterForCoursesWithCarryOver($studentId) {
+        set_time_limit(100000000);
+        
+        // Fetch student status with select to reduce data load
+        $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
+        $studentStatus = $getStudentStaus->status;
+
+        if ($studentStatus == 5) {
+            return redirect()->route('nmcz.registration', $studentId);
+        }
+        
+        $todaysDate = date('Y-m-d');
+        $deadLine = '2024-12-20';       
+        
+        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+        // if ($isStudentRegistered) {
+        //     return redirect()->back()->with('error', 'Student already registered On Edurole.');
+        // }
+        
+        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+            ->where('Year', 2025)
+            ->where('Semester', 1)
+            ->exists();
+
+        $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
+            DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
+            DB::raw('SUM(pa.Credit) as TotalCredit'),
+            DB::raw('SUM(pa.Debit) as TotalDebit'),
+            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
+                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2024')            
+        )
+        ->where('Account', $studentId)
+        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        ->groupBy('DCLink', 'Account', 'Name')
+        ->first();
+    
+        $actualBalance = $studentsPayments->TotalBalance ?? 0;
+        
+        // Get carry-over/repeat courses
+        $carryOverCourses = $this->getCoursesForFailedStudents($studentId);
+        $carryOverCoursesCount = count($carryOverCourses);
+        
+        // Get current year courses if needed
+        $currentYearCourses = [];
+        if ($carryOverCoursesCount <= 2) {
+            $currentYearCourses = $this->findUnregisteredStudentCourses($studentId);
+        }
+        
+        // Set the failed flag based on whether we have carry-over courses
+        $failed = !empty($carryOverCourses) ? 1 : 2;
+        
+        // Combine courses based on the carry-over count
+        if ($carryOverCoursesCount <= 2 && !empty($currentYearCourses)) {
+            // Combine carry-over and current year courses
+            $combinedCourses = array_merge($carryOverCourses, $currentYearCourses);
+            $courses = collect($combinedCourses)->map(function ($item) {
+                return (object)$item;
+            });
+        } else {
+            // Only use carry-over courses
+            $courses = collect($carryOverCourses)->map(function ($item) {
+                return (object)$item;
+            });
+        }
+    
+        if ($checkRegistration) {
+            $checkRegistration = collect($this->getStudentRegistration($studentId));
+            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+            
+            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+            
+            $studentInformation = $this->getAppealStudentDetails(2025, [$studentId])->first();
+            
+            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation','failed'));
+        }
+        
+        // if($todaysDate > $deadLine){
+        //     return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
+        // }       
+        
+        $coursesArray = $courses->pluck('Course')->toArray();
+        $coursesNamesArray = $courses->pluck('Program')->toArray();
+        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+        if($studentsProgramme->isEmpty()){
+            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+        }
+    
+        if (str_starts_with($studentId, '190')) {
+            $studentsProgramme->transform(function ($studentProgramme) {
+                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
+                return $studentProgramme;
+            });
+        }
+    
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder ?? 'N/A');
+        $theNumberOfCourses = $programeCode !== 'N/A' ? $this->getCoursesInASpecificProgrammeCode($programeCode)->count() : 0;
+    
+        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+            return [trim($item['InvoiceDescription']) => $item];
+        })->toArray();
+    
+        $currentStudentsCourses = $studentsProgramme;
+        $studentDetails = $this->getAppealStudentDetails(2025, [$studentId])->first();
+        
+        // Add carry-over courses count to the view data
+        return view('allStudents.studentSelfRegistrationWithCarryOver', compact(
+            'actualBalance', 'studentStatus', 'studentDetails', 'courses',
+            'currentStudentsCourses', 'studentsPayments', 'failed',
+            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
+        ));
+    }
+
     public function registerStudent($studentId) {
         set_time_limit(100000000);
     
