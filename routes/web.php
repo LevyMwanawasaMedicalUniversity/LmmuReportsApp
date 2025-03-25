@@ -86,6 +86,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::post('/upload/single/students', [StudentsController::class, 'uploadSingleStudent'])->name('students.uploadSingleStudent');
                 Route::get('/index/viewStudents/{id?}', [StudentsController::class, 'viewAllStudents'])->name('students.index');
                 Route::get('/viewStudents/showStudent/{studentNumber}', [StudentsController::class, 'registerStudent'])->name('students.showStudent');
+                Route::get('/viewStudents/showStudentWithCarryOver/{studentNumber}', [StudentsController::class, 'registerStudentWithCarryOver'])->name('students.showStudentWithCarryOver');
                 Route::post('/viewStudents/submitRegistration', [StudentsController::class, 'adminSubmitCourses'])->name('sumbitRegistration.student');
                 Route::delete('/viewStudents/deleteEntireRegistration', [StudentsController::class, 'deleteEntireRegistration'])->name('deleteEntireRegistration.student');
                 Route::delete('/viewStudents/deleteCourseInRegistration', [StudentsController::class, 'deleteCourseInRegistration'])->name('deleteCourseInRegistration.student');
