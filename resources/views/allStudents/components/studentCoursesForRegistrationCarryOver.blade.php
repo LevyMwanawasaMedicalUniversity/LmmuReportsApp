@@ -17,12 +17,18 @@
             $registrationFeesRepeat = [];
             $totalFeesRepeat = [];
             $allCoursesForRegistration = collect();
+            $uniqueCourses = collect();
+            $seenCourses = [];
             
-            // Combine all courses into a single collection
+            // Combine all courses into a single collection and filter out duplicates
             foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $programCourses) {
                 foreach($programCourses as $course) {
-                    $course->ProgramName = $programme;
-                    $allCoursesForRegistration->push($course);
+                    // Only add the course if we haven't seen this course code before
+                    if (!isset($seenCourses[$course->CourseCode])) {
+                        $course->ProgramName = $programme;
+                        $uniqueCourses->push($course);
+                        $seenCourses[$course->CourseCode] = true;
+                    }
                 }
             }
             
@@ -73,7 +79,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($allCoursesForRegistration as $index => $course)
+                                        @foreach($uniqueCourses as $index => $course)
                                         <tr>
                                             <td>
                                                 <input type="checkbox" name="courseRepeat[]" value="{{$course->CourseCode}}" class="courseRepeat" id="courseRepeatCombined{{ $studentId }}{{$index}}" checked>
@@ -127,7 +133,7 @@
                                             <div class="modal-body">
                                                 <p>You are submitting the following courses for registration:</p>
                                                 <ul>
-                                                    @foreach($allCoursesForRegistration as $course)
+                                                    @foreach($uniqueCourses as $course)
                                                         <li>
                                                             {{ $course->CourseCode }} - {{ $course->CourseName }}
                                                             @if(isset($carryOverCoursesCount) && $carryOverCoursesCount <= 2)
@@ -160,7 +166,7 @@
                                                     <input type="hidden" name="studentNumber" value="{{ $studentId }}">
                                                     
                                                     <!-- Pass the selected courses as a hidden input -->
-                                                    @foreach($allCoursesForRegistration as $course)
+                                                    @foreach($uniqueCourses as $course)
                                                         <input type="hidden" name="courses[]" value="{{ $course->CourseCode }}">
                                                     @endforeach
                                                     
