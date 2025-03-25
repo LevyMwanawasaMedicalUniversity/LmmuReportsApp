@@ -88,3 +88,64 @@ $(document).ready(function() {
         }
     });
 });
+
+// Combined courses registration function
+$(document).ready(function() {
+    $('.registerButtonCombined').click(function(e) {
+        $.ajaxSetup({ cache: false });
+        e.preventDefault();
+
+        var studentId = $(this).attr('id').replace('registerButtonCombined', '');
+        
+        // Get the registration fee and total fee from the accordion header
+        var registrationFee = parseFloat($('#registrationFeeRepeatCombined' + studentId).text().replace('Registration Fee = K', '').replace(/,/g, ''));
+        var totalFee = parseFloat($('#totalFeeRepeatCombined' + studentId).text().replace('Total Invoice = K', '').replace(/,/g, ''));
+        var payments2024 = parseFloat($('#payments2024').val().replace('K', '').replace(/,/g, ''));
+        var actualBalance = parseFloat($('#actualBalance').val().replace('K', '').replace(/,/g, ''));
+        
+        console.log("Registration Fee:", registrationFee);
+        console.log("Total Fee:", totalFee);
+        console.log("Payments:", payments2024);
+        console.log("Balance:", actualBalance);
+        
+        // Store the courses in a variable
+        var combinedCourses = [];
+        $('input.courseRepeat:checked').each(function() {
+            combinedCourses.push($(this).val());
+        });
+        
+        console.log("Selected courses:", combinedCourses);
+
+        // Show the modal based on eligibility
+        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
+            // Populate the modal with the courses
+            var courseListHtml = '';
+            $('input.courseRepeat:checked').each(function() {
+                var courseCode = $(this).val();
+                var courseRow = $(this).closest('tr');
+                var courseName = courseRow.find('td:nth-child(3)').text();
+                var courseType = courseRow.find('td:nth-child(5) span').text();
+                var badgeClass = courseType === 'Repeat' ? 'bg-warning' : 'bg-primary';
+                
+                courseListHtml += '<li>' + courseCode + ' - ' + courseName + ' <span class="badge ' + badgeClass + '">' + courseType + '</span></li>';
+            });
+            
+            $('#combinedCoursesList').html(courseListHtml);
+            $('#combinedTotalFee').text(totalFee.toFixed(2));
+            
+            // Update the hidden input field with the selected courses
+            $('#combinedCoursesInput').val(combinedCourses.join(','));
+            $('#combinedCoursesFormInput').val(JSON.stringify(combinedCourses));
+            
+            // Show the modal
+            $('#eligibleModalRepeatCombined').modal('show');
+        } else if (registrationFee > payments2024) {
+            var shortfall = registrationFee - payments2024;
+            $('#ineligibleModalRepeatCombined .modal-body p:first').html('You are short of registration by: K ' + shortfall.toFixed(2));
+            $('#ineligibleModalRepeatCombined').modal('show');
+        } else if (actualBalance > 0) {
+            $('#balanceModalRepeatCombined .modal-body p:first').html('You currently have a balance on your account of: K ' + actualBalance.toFixed(2));
+            $('#balanceModalRepeatCombined').modal('show');
+        }
+    });
+});
