@@ -546,15 +546,6 @@ class StudentsController extends Controller
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),
-            DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%FT%\' AND pa.TxDate < \'2024-01-01\' THEN pa.Debit 
-                WHEN pa.Description LIKE \'%DE%\' AND pa.TxDate < \'2024-01-01\' THEN pa.Debit 
-                ELSE 0 
-                END) - SUM(CASE 
-                WHEN pa.Description LIKE \'%FT%\' AND pa.TxDate < \'2024-01-01\' THEN pa.Credit 
-                WHEN pa.Description LIKE \'%DE%\' AND pa.TxDate < \'2024-01-01\' THEN pa.Credit 
-                ELSE 0 
-                END) AS TrueInvoiceTill2023'),
             DB::raw('
                 (SUM(CASE 
                     WHEN pa.Description LIKE \'%FT%\' AND pa.TxDate < \'2024-01-01\' THEN pa.Debit 
@@ -885,9 +876,6 @@ class StudentsController extends Controller
                 return $studentProgramme;
             });
         }
-        if ($studentsProgramme->isEmpty()) {
-            return redirect()->back()->with('warning', 'No courses found for the student.');
-        }
     
         $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder);
         $theNumberOfCourses = $this->getCoursesInASpecificProgrammeCode($programeCode)->count();
@@ -896,25 +884,8 @@ class StudentsController extends Controller
             return [trim($item['InvoiceDescription']) => $item];
         })->toArray();
     
-        // $processCourse = function ($course) use ($allInvoicesArray) {
-        //     $courseArray = $course->toArray();
-        //     $key = trim($course->CodeRegisteredUnder);
-        //     $matchedKey = array_key_exists($key, $allInvoicesArray) ? $key : null;
-            
-        //     if ($matchedKey) {
-        //         $courseArray = array_merge($courseArray, $allInvoicesArray[$matchedKey]);
-        //     } else {
-        //         Log::info('No match found for course: ' . $key);
-        //     }
-    
-        //     $courseArray['numberOfCourses'] = $this->getCoursesInASpecificProgrammeCode($course->CodeRegisteredUnder)->count();
-            
-        //     return (object) $courseArray;
-        // };
-    
         $currentStudentsCourses = $studentsProgramme;
         $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
-
         
     
         return view('allStudents.studentSelfRegistration', compact('actualBalance','studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
@@ -1059,7 +1030,7 @@ class StudentsController extends Controller
     
         // Check if the student has registered courses for the specified year and semester
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-            ->where('Year', 2024)
+            ->where('Year', 2025)
             ->where('Semester', 1)
             ->exists();
     
@@ -1085,10 +1056,34 @@ class StudentsController extends Controller
     
         $actualBalance = $studentsPayments->TotalBalance ?? 0;
     
-        // Handle registration process
-        $registrationResults = $this->setAndSaveCoursesForCurrentYearRegistration($studentId);
-        $courses = $registrationResults['dataArray'];
-        $failed = $registrationResults['failed'];
+        // Get carry-over/repeat courses
+        $carryOverCourses = $this->getCoursesForFailedStudents($studentId);
+        $carryOverCoursesCount = count($carryOverCourses);
+        
+        // Get current year courses if needed
+        $currentYearCourses = [];
+        if ($carryOverCoursesCount <= 2) {
+            $currentYearCourses = $this->findUnregisteredStudentCourses($studentId);
+        }
+        
+        // Set the failed flag based on whether we have carry-over courses
+        $failed = !empty($carryOverCourses) ? 1 : 2;
+        
+        // Combine courses based on the carry-over count
+        if ($carryOverCoursesCount <= 2 && !empty($currentYearCourses)) {
+            // Combine carry-over and current year courses
+            $combinedCourses = array_merge($carryOverCourses, $currentYearCourses);
+            $courses = collect($combinedCourses)->map(function ($item) {
+                return (object)$item;
+            });
+        } else {
+            // Only use carry-over courses
+            $courses = collect($carryOverCourses)->map(function ($item) {
+                return (object)$item;
+            });
+        }
+
+        // return $combinedCourses;
     
         if ($checkRegistration) {
             $checkRegistration = collect($this->getStudentRegistration($studentId));
@@ -1097,8 +1092,8 @@ class StudentsController extends Controller
             $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
     
             // Cache appeal student details to avoid redundant calls
-            $studentInformation = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
-                return $this->getAppealStudentDetails(2024, [$studentId])->first();
+            $studentInformation = Cache::remember("appeal_student_details_{$studentId}_2025", 60, function () use ($studentId) {
+                return $this->getAppealStudentDetails(2025, [$studentId])->first();
             });
     
             return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation', 'failed'));
@@ -1148,14 +1143,15 @@ class StudentsController extends Controller
         }
     
         // Cache appeal student details to avoid redundant calls
-        $studentDetails = Cache::remember("appeal_student_details_{$studentId}_2024", 60, function () use ($studentId) {
-            return $this->getAppealStudentDetails(2024, [$studentId])->first();
+        $studentDetails = Cache::remember("appeal_student_details_{$studentId}_2025", 60, function () use ($studentId) {
+            return $this->getAppealStudentDetails(2025, [$studentId])->first();
         });
-    
-        return view('allStudents.adminRegisterStudent', compact(
+        
+        // Add carry-over courses count to the view data
+        return view('allStudents.adminRegisterStudentWithCarryOver', compact(
             'actualBalance', 'studentStatus', 'studentDetails', 'courses',
             'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
-            'studentId', 'theNumberOfCourses'
+            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
         ));
     }
     

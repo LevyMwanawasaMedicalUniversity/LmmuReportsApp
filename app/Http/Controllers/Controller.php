@@ -707,7 +707,7 @@ class Controller extends BaseController
     
         // Retrieve failed students' grades
         $failedStudents = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
-            ->whereNotIn('AcademicYear', ['2024'])
+            ->whereNotIn('AcademicYear', ['2025'])
             ->whereIn('StudentNo', function ($query) {
                 $query->select('StudentNo')
                     ->from('grades-published')
@@ -727,7 +727,7 @@ class Controller extends BaseController
             // Count the number of repeated instances of the course for the student in previous years
             $repeatedCourses = Grade::where('CourseNo', $course)
                 ->where('StudentNo', $student)
-                ->where('AcademicYear', '<', '2024') // Consider only previous academic years
+                ->where('AcademicYear', '<', '2025') // Consider only previous academic years
                 ->get();
     
             $duplicateCount = count($repeatedCourses);
@@ -1343,7 +1343,7 @@ class Controller extends BaseController
         // Perform the query to get grades
         $gradesCheck = Grades::query()
             ->where('grades-published.StudentNo', $studentId)
-            ->whereIn('AcademicYear', ['2023'])
+            ->whereIn('AcademicYear', ['2024'])
             ->get();
 
         // Extract course numbers from the results
