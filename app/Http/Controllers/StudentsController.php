@@ -891,125 +891,6 @@ class StudentsController extends Controller
         return view('allStudents.studentSelfRegistration', compact('actualBalance','studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
     }
 
-    public function studentRegisterForCoursesWithCarryOver($studentId) {
-        set_time_limit(100000000);
-        
-        // Fetch student status with select to reduce data load
-        $getStudentStaus = Student::query()->where('student_number', $studentId)->first();
-        $studentStatus = $getStudentStaus->status;
-
-        if ($studentStatus == 5) {
-            return redirect()->route('nmcz.registration', $studentId);
-        }
-        
-        $todaysDate = date('Y-m-d');
-        $deadLine = '2024-12-20';       
-        
-        $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
-        // if ($isStudentRegistered) {
-        //     return redirect()->back()->with('error', 'Student already registered On Edurole.');
-        // }
-        
-        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-            ->where('Year', 2025)
-            ->where('Semester', 1)
-            ->exists();
-
-        $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
-            DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
-            DB::raw('SUM(pa.Credit) as TotalCredit'),
-            DB::raw('SUM(pa.Debit) as TotalDebit'),
-            DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
-            DB::raw('SUM(CASE 
-                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
-                WHEN pa.Description LIKE \'%FT%\' THEN 0
-                WHEN pa.Description LIKE \'%DE%\' THEN 0  
-                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
-                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
-                ELSE pa.Credit 
-                END) AS TotalPayment2024')            
-        )
-        ->where('Account', $studentId)
-        ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
-        ->groupBy('DCLink', 'Account', 'Name')
-        ->first();
-    
-        $actualBalance = $studentsPayments->TotalBalance ?? 0;
-        
-        // Get carry-over/repeat courses
-        $carryOverCourses = $this->getCoursesForFailedStudents($studentId);
-        $carryOverCoursesCount = count($carryOverCourses);
-        
-        // Get current year courses if needed
-        $currentYearCourses = [];
-        if ($carryOverCoursesCount <= 2) {
-            $currentYearCourses = $this->findUnregisteredStudentCourses($studentId);
-        }
-        
-        // Set the failed flag based on whether we have carry-over courses
-        $failed = !empty($carryOverCourses) ? 1 : 2;
-        
-        // Combine courses based on the carry-over count
-        if ($carryOverCoursesCount <= 2 && !empty($currentYearCourses)) {
-            // Combine carry-over and current year courses
-            $combinedCourses = array_merge($carryOverCourses, $currentYearCourses);
-            $courses = collect($combinedCourses)->map(function ($item) {
-                return (object)$item;
-            });
-        } else {
-            // Only use carry-over courses
-            $courses = collect($carryOverCourses)->map(function ($item) {
-                return (object)$item;
-            });
-        }
-    
-        if ($checkRegistration) {
-            $checkRegistration = collect($this->getStudentRegistration($studentId));
-            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
-            
-            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
-            
-            $studentInformation = $this->getAppealStudentDetails(2025, [$studentId])->first();
-            
-            return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation','failed'));
-        }
-        
-        // if($todaysDate > $deadLine){
-        //     return redirect()->back()->with('error', 'Registration on Sis Reports is Closed.');
-        // }       
-        
-        $coursesArray = $courses->pluck('Course')->toArray();
-        $coursesNamesArray = $courses->pluck('Program')->toArray();
-        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        if($studentsProgramme->isEmpty()){
-            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
-        }
-    
-        if (str_starts_with($studentId, '190')) {
-            $studentsProgramme->transform(function ($studentProgramme) {
-                $studentProgramme->CodeRegisteredUnder = str_replace('-2023-', '-2019-', $studentProgramme->CodeRegisteredUnder);
-                return $studentProgramme;
-            });
-        }
-    
-        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder ?? 'N/A');
-        $theNumberOfCourses = $programeCode !== 'N/A' ? $this->getCoursesInASpecificProgrammeCode($programeCode)->count() : 0;
-    
-        $allInvoicesArray = SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
-            return [trim($item['InvoiceDescription']) => $item];
-        })->toArray();
-    
-        $currentStudentsCourses = $studentsProgramme;
-        $studentDetails = $this->getAppealStudentDetails(2025, [$studentId])->first();
-        
-        // Add carry-over courses count to the view data
-        return view('allStudents.studentSelfRegistrationWithCarryOver', compact(
-            'actualBalance', 'studentStatus', 'studentDetails', 'courses',
-            'currentStudentsCourses', 'studentsPayments', 'failed',
-            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
-        ));
-    }
-
     public function registerStudent($studentId) {
         set_time_limit(100000000);
     
@@ -1130,31 +1011,127 @@ class StudentsController extends Controller
         ));
     }
 
+    public function studentRegisterForCoursesWithCarryOver($studentId) {
+        set_time_limit(100000000);
+        
+        // Process common registration logic
+        $data = $this->processCarryOverRegistration($studentId);
+        
+        // If result is a redirect response, return it
+        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+            return $data;
+        }
+        
+        // Return student self-registration view
+        return view('allStudents.studentSelfRegistrationWithCarryOver', $data);
+    }    
+
     public function registerStudentWithCarryOver($studentId) {
         set_time_limit(100000000);
-    
-        // Fetch student status with select to reduce data load
-        $getStudentStatus = Student::query()->select('status')->where('student_number', $studentId)->first();
-        $studentStatus = $getStudentStatus->status ?? null;
-    
-        if ($studentStatus === 5) {
+
+        // Process common registration logic with admin flag set to true
+        $data = $this->processCarryOverRegistration($studentId, true);
+        
+        // If result is a redirect response, return it
+        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+            return $data;
+        }
+        
+        // Return admin registration view
+        return view('allStudents.adminRegisterStudentWithCarryOver', $data);
+    }
+
+    /**
+     * Process carry-over registration logic common to both student and admin registration
+     *
+     * @param string $studentId The student ID
+     * @param bool $isAdmin Whether this is being called from an admin context
+     * @return array|\Illuminate\Http\RedirectResponse Data for the view or a redirect response
+     */
+    private function processCarryOverRegistration($studentId, $isAdmin = false) 
+    {
+        // Get student status
+        $studentStatus = $this->getStudentStatus($studentId);
+        
+        // Redirect to NMCZ registration if student status is 5
+        if ($studentStatus == 5) {
             return redirect()->route('nmcz.registration', $studentId);
         }
-    
+        
         $todaysDate = date('Y-m-d');
         $deadLine = '2024-12-20';
+        
+        // Check if student is already registered (only for student self-registration)
+        if (!$isAdmin) {
+            $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
+            // If needed, uncomment to redirect if already registered
+            // if ($isStudentRegistered) {
+            //     return redirect()->back()->with('error', 'Student already registered On Edurole.');
+            // }
+        }
+        
+        // Check for existing course registration
+        $checkRegistration = $this->hasExistingRegistration($studentId);
+        
+        // Get student payment information
+        $studentsPayments = $this->getStudentPayments($studentId);
+        $actualBalance = $studentsPayments->TotalBalance ?? 0;
+        
+        // Process student courses
+        $courseData = $this->processStudentCourses($studentId);
+        extract($courseData);
+        
+        // Handle existing registration
+        if ($checkRegistration) {
+            return $this->handleExistingRegistration($studentId, $failed, $studentStatus);
+        }
+        
+        // Get program data
+        $programData = $this->getStudentProgramData($studentId, $courses);
+        $studentsProgramme = $programData['studentsProgramme'];
+        $programeCode = $programData['programeCode'];
+        $theNumberOfCourses = $programData['theNumberOfCourses'];
+        
+        // Get cached invoices
+        $allInvoicesArray = $this->getCachedInvoices();
+        
+        // Set current student courses
+        $currentStudentsCourses = $studentsProgramme;
+        
+        // Get student details
+        $studentDetails = $this->getCachedStudentDetails($studentId);
+        
+        // Get all courses for admin view if needed
+        $allCourses = $isAdmin ? $this->getAllCoursesForAdmin($studentId) : null;
+        
+        // Return all data needed for the views
+        return compact(
+            'actualBalance', 'studentStatus', 'studentDetails', 'courses',
+            'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
+            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
+        );
+    }
     
-        // Check if the student has status 4 instead of fetching the whole registration data if not necessary
-        $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
-    
-        // Check if the student has registered courses for the specified year and semester
-        $checkRegistration = CourseRegistration::where('StudentID', $studentId)
+    private function getStudentStatus($studentId) 
+    {
+        return Student::query()
+            ->select('status')
+            ->where('student_number', $studentId)
+            ->first()
+            ->status ?? null;
+    }
+
+    private function hasExistingRegistration($studentId)
+    {
+        return CourseRegistration::where('StudentID', $studentId)
             ->where('Year', 2025)
             ->where('Semester', 1)
             ->exists();
-    
-        // Optimize student payment query
-        $studentsPayments = SageClient::select('DCLink', 'Account', 'Name',
+    }
+
+    private function getStudentPayments($studentId)
+    {
+        return SageClient::select('DCLink', 'Account', 'Name',
             DB::raw('SUM(CASE WHEN pa.Description LIKE \'%reversal%\' THEN 0 WHEN pa.Description LIKE \'%FT%\' THEN 0 WHEN pa.Description LIKE \'%DE%\' THEN 0 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0 ELSE pa.Credit END) AS TotalPayments'),
             DB::raw('SUM(pa.Credit) as TotalCredit'),
             DB::raw('SUM(pa.Debit) as TotalDebit'),
@@ -1166,15 +1143,16 @@ class StudentsController extends Controller
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024')
+                END) AS TotalPayment2024')            
         )
         ->where('Account', $studentId)
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
         ->groupBy('DCLink', 'Account', 'Name')
         ->first();
-    
-        $actualBalance = $studentsPayments->TotalBalance ?? 0;
-    
+    }
+
+    private function processStudentCourses($studentId)
+    {
         // Get carry-over/repeat courses
         $carryOverCourses = $this->getCoursesForFailedStudents($studentId);
         $carryOverCoursesCount = count($carryOverCourses);
@@ -1201,35 +1179,39 @@ class StudentsController extends Controller
                 return (object)$item;
             });
         }
+        
+        return [
+            'carryOverCourses' => $carryOverCourses,
+            'carryOverCoursesCount' => $carryOverCoursesCount,
+            'courses' => $courses,
+            'failed' => $failed
+        ];
+    }
 
-        // return $combinedCourses;
-    
-        if ($checkRegistration) {
-            $checkRegistration = collect($this->getStudentRegistration($studentId));
-            $courseIds = $checkRegistration->pluck('CourseID')->toArray();
-    
-            $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
-    
-            // Cache appeal student details to avoid redundant calls
-            $studentInformation = Cache::remember("appeal_student_details_{$studentId}_2025", 60, function () use ($studentId) {
-                return $this->getAppealStudentDetails(2025, [$studentId])->first();
-            });
-    
-            return view('allStudents.registrationPage', compact('actualBalance', 'studentStatus', 'studentId', 'checkRegistration', 'studentInformation', 'failed'));
-        }    
-        // if ($todaysDate > $deadLine) {
-        //     return redirect()->back()->with('error', 'Registration on Sis Reports is closed.');
-        // }
-    
+    private function handleExistingRegistration($studentId, $failed, $studentStatus)
+    {
+        $checkRegistration = collect($this->getStudentRegistration($studentId));
+        $courseIds = $checkRegistration->pluck('CourseID')->toArray();
+        
+        $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
+        
+        // Get cached student details
+        $studentInformation = $this->getCachedStudentDetails($studentId);
+        
+        return view('allStudents.registrationPage', compact('studentStatus', 'studentId', 'checkRegistration', 'studentInformation', 'failed'));
+    }
+
+    private function getStudentProgramData($studentId, $courses)
+    {
         $coursesArray = $courses->pluck('Course')->toArray();
         $coursesNamesArray = $courses->pluck('Program')->toArray();
-    
+        
         // Fetch program courses, with fallback if empty
         $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
         if ($studentsProgramme->isEmpty()) {
             $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
         }
-    
+        
         // Update CodeRegisteredUnder for students with IDs starting with 190
         if (str_starts_with($studentId, '190')) {
             $studentsProgramme->transform(function ($studentProgramme) {
@@ -1237,22 +1219,27 @@ class StudentsController extends Controller
                 return $studentProgramme;
             });
         }
-    
-        // Default handling if no program is found
-        $firstProgramme = $studentsProgramme->first();
-        $programeCode = $firstProgramme ? trim($firstProgramme->CodeRegisteredUnder) : 'N/A';
+        
+        // Get program code and course count
+        $programeCode = trim($studentsProgramme->first()->CodeRegisteredUnder ?? 'N/A');
         $theNumberOfCourses = $programeCode !== 'N/A' ? $this->getCoursesInASpecificProgrammeCode($programeCode)->count() : 0;
-    
-        // Cache all invoices to avoid loading from the database multiple times
-        $allInvoicesArray = Cache::remember('sis_reports_sage_invoices', 60, function () {
-            return SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
-                return [trim($item['InvoiceDescription']) => $item];
-            })->toArray();
+        
+        return [
+            'studentsProgramme' => $studentsProgramme,
+            'programeCode' => $programeCode,
+            'theNumberOfCourses' => $theNumberOfCourses
+        ];
+    }
+
+    private function getCachedStudentDetails($studentId)
+    {
+        return Cache::remember("appeal_student_details_{$studentId}_2025", 60, function () use ($studentId) {
+            return $this->getAppealStudentDetails(2025, [$studentId])->first();
         });
-    
-        $currentStudentsCourses = $studentsProgramme;
-    
-        // Fetch all courses and update CodeRegisteredUnder if student ID starts with 190
+    }
+
+    private function getAllCoursesForAdmin($studentId)
+    {
         $allCourses = $this->getAllCoursesAttachedToProgrammeForAStudent($studentId)->get();
         if (str_starts_with($studentId, '190')) {
             $allCourses->transform(function ($allCourse) {
@@ -1260,21 +1247,17 @@ class StudentsController extends Controller
                 return $allCourse;
             });
         }
-    
-        // Cache appeal student details to avoid redundant calls
-        $studentDetails = Cache::remember("appeal_student_details_{$studentId}_2025", 60, function () use ($studentId) {
-            return $this->getAppealStudentDetails(2025, [$studentId])->first();
-        });
-        
-        // Add carry-over courses count to the view data
-        return view('allStudents.adminRegisterStudentWithCarryOver', compact(
-            'actualBalance', 'studentStatus', 'studentDetails', 'courses',
-            'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
-            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
-        ));
+        return $allCourses;
     }
-    
-    
+
+    private function getCachedInvoices()
+    {
+        return Cache::remember('sis_reports_sage_invoices', 60, function () {
+            return SisReportsSageInvoices::all()->mapWithKeys(function ($item) {
+                return [trim($item['InvoiceDescription']) => $item];
+            })->toArray();
+        });
+    }
 
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
