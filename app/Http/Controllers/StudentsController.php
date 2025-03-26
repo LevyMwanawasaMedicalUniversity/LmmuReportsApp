@@ -1156,6 +1156,7 @@ class StudentsController extends Controller
         // Get carry-over/repeat courses
         $carryOverCourses = $this->getCoursesForFailedStudents($studentId);
         $carryOverCoursesCount = count($carryOverCourses);
+        Log::info('Carry-over Courses Count: ' . $carryOverCoursesCount);   
         
         // Get current year courses if needed
         $currentYearCourses = [];

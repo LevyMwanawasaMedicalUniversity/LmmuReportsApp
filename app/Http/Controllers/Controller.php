@@ -25,6 +25,7 @@ use App\Models\ProgramCourseLink;
 use App\Models\SageClient;
 use App\Models\SageInvoice;
 use App\Models\SagePostAR;
+use Illuminate\Support\Facades\Cache;
 use App\Models\Schools;
 use App\Models\SchoolsSR;
 use App\Models\SisCourses;
@@ -703,90 +704,88 @@ class Controller extends BaseController
     }
 
     public function getCoursesForFailedStudents($studentId) {
-        $failedCourses = [];
-    
-        // Retrieve failed students' grades
-        $failedStudents = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade')
-            ->whereNotIn('AcademicYear', ['2025'])
-            ->whereIn('StudentNo', function ($query) {
-                $query->select('StudentNo')
-                    ->from('grades-published')
-                    ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX']);
-            })
-            ->where('StudentNo', $studentId)
-            ->orderBy('StudentNo')
-            ->get();
-    
-        // Loop through failed students' grades
-        foreach ($failedStudents as $row) {
-            $student = $row->StudentNo;
-            $program = $row->ProgramNo;
-            $course = $row->CourseNo;
-            $grade = $row->Grade;
-    
-            // Count the number of repeated instances of the course for the student in previous years
-            $repeatedCourses = Grade::where('CourseNo', $course)
-                ->where('StudentNo', $student)
-                ->where('AcademicYear', '<', '2025') // Consider only previous academic years
-                ->get();
-    
-            $duplicateCount = count($repeatedCourses);
-    
-            // If the course is repeated
-            if ($duplicateCount > 1) {
-                // Check if the course has been cleared in previous years
-                $cleared = Grade::where('StudentNo', $student)
-                    ->where('CourseNo', $course)
-                    ->where('AcademicYear', '<', '2024') // Consider only previous academic years
-                    ->whereIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'])
-                    ->orderBy('Grade')
-                    ->get();
-    
-                $ifCleared = count($cleared);
-    
-                if ($ifCleared === 0) {
-                    // If the course hasn't been cleared, add it to the failed courses list
-                    $failedCourses[] = [
-                        'Student' => $student,
-                        'Program' => $program, // Use program from original failed instance
-                        'Course' => $course,
-                        'Grade' => $grade,
-                    ];
-                }
-            } else {
-                // If the course is not repeated, check if the grade is failing and add it to the failed courses list
-                if (!in_array($grade, ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'])) {
-                    $failedCourses[] = [
-                        'Student' => $student,
-                        'Program' => $program, // Use program from original failed instance
-                        'Course' => $course,
-                        'Grade' => $grade,
-                    ];
-                }
-            }
+        // Get study ID with null check
+        $studyLink = StudentStudyLink::where('StudentID', $studentId)->first();
+        if (!$studyLink) {
+            return [];
         }
-        $coursesArray = [];
-        if (!empty($failedCourses)) {
-            foreach ($failedCourses as $failedCourse) {
-                $coursesArray[] = $failedCourse['Course'];
-            }
-        }
-        $coursesNamesArray = [];
-        if (!empty($failedCourses)) {
-            foreach ($failedCourses as $failedCourse) {
-                $coursesNamesArray[] = $failedCourse['Program'];
-            }
-        }
+        $studyId = $studyLink->StudyID;
+        
+        Log::info("Study ID: {$studyId}");  
 
-        $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
-        if($studentsProgramme->isEmpty()){
-            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $coursesNamesArray)->get();
+        $programCourses = EduroleCourses::select('courses.Name as CourseNo')
+            ->join('program-course-link', 'program-course-link.CourseID', '=', 'courses.ID')
+            ->join('programmes', 'programmes.ID', '=', 'program-course-link.ProgramID')
+            ->join('study-program-link', 'study-program-link.ProgramID', '=', 'programmes.ID')
+            ->where('study-program-link.StudyID', $studyId)
+            ->pluck('CourseNo')
+            ->toArray();
+        
+        // Get all grades for this student in one query to avoid N+1 problems
+        $allGrades = Cache::remember("student_grades_{$studentId}", 60, function() use ($studentId, $programCourses) {
+            return Grade::where('StudentNo', $studentId)
+                ->whereIn('CourseNo', $programCourses)
+                ->where('AcademicYear', '<', '2025')
+                ->get()
+                ->groupBy('CourseNo');
+        });
+
+        Log::info("All Grades: " . json_encode($allGrades));    
+        
+        // Get all failed courses
+        $failedCourses = Grade::select('StudentNo', 'ProgramNo', 'CourseNo', 'Grade', 'AcademicYear')
+            ->where('StudentNo', $studentId)
+            ->whereIn('CourseNo', $programCourses)
+            ->whereNotIn('AcademicYear', ['2025'])
+            ->whereNotIn('Grade', ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'])
+            ->orderBy('AcademicYear', 'desc')
+            ->get();
+
+        Log::info("Failed Courses: " . json_encode($failedCourses));    
+        
+        // Process failed courses
+        $result = [];
+        $passingGrades = ['A+', 'A', 'B+', 'B', 'C+', 'C', 'P', 'EX'];
+        
+        foreach ($failedCourses as $failedCourse) {
+            $courseNo = $failedCourse->CourseNo;
+            
+            // Skip if we've already processed this course
+            if (collect($result)->where('Course', $courseNo)->isNotEmpty()) {
+                continue;
+            }
+            
+            // Check if the student has passed this course in any year
+            $courseGrades = $allGrades->get($courseNo, collect());
+            $hasPassed = $courseGrades->whereIn('Grade', $passingGrades)->isNotEmpty();
+            
+            // Only add to failed courses if never passed
+            if (!$hasPassed) {
+                $result[] = [
+                    'Student' => $failedCourse->StudentNo,
+                    'Program' => $failedCourse->ProgramNo,
+                    'Course' => $courseNo,
+                    'Grade' => $failedCourse->Grade,
+                ];
+            }
         }
-        if($studentsProgramme->isEmpty()){
-            $failedCourses = [];
+        
+        // Check if courses exist in the student's program
+        if (!empty($result)) {
+            $coursesArray = collect($result)->pluck('Course')->toArray();
+            $programsArray = collect($result)->pluck('Program')->toArray();
+            
+            $studentsProgramme = $this->getAllCoursesAttachedToProgrammeForAStudentBasedOnCourses($studentId, $coursesArray)->get();
+            if ($studentsProgramme->isEmpty()) {
+                $studentsProgramme = $this->getAllCoursesAttachedToProgrammeNamesForAStudentBasedOnCourses($studentId, $programsArray)->get();
+            }
+            
+            if ($studentsProgramme->isEmpty()) {
+                return [];
+            }
         }
-    
-        return $failedCourses;
+        
+        return $result;
     }
 
     public function getDefferedOrSuplementaryCourses(){
