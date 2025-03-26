@@ -1,3 +1,4 @@
+// Individual courses registration function
 $(document).ready(function() {
     $('.registerButton').click(function(e) {
         $.ajaxSetup({ cache: false });
@@ -43,6 +44,7 @@ $(document).ready(function() {
     });
 });
 
+// Individual repeat courses registration function
 $(document).ready(function() {
     $('.registerButtonRepeat').click(function(e) {
         $.ajaxSetup({ cache: false });
@@ -100,24 +102,46 @@ $(document).ready(function() {
         // Get the registration fee and total fee from the accordion header
         var registrationFee = parseFloat($('#registrationFeeRepeatCombined' + studentId).text().replace('Registration Fee = K', '').replace(/,/g, ''));
         var totalFee = parseFloat($('#totalFeeRepeatCombined' + studentId).text().replace('Total Invoice = K', '').replace(/,/g, ''));
-        var payments2024 = parseFloat($('#payments2024').val().replace('K', '').replace(/,/g, ''));
+        
+        // Get payment values from hidden inputs - only care about actualBalance
         var actualBalance = parseFloat($('#actualBalance').val().replace('K', '').replace(/,/g, ''));
+        
+        // Calculate separate fees for carry-over and current courses
+        var carryOverFees = 0;
+        var currentCourseFees = 0;
+        var carryOverCourses = [];
+        var currentCourses = [];
+        
+        // Store the courses in a variable and calculate fees
+        var combinedCourses = [];
+        $('input.courseRepeat:checked').each(function() {
+            var courseCode = $(this).val();
+            combinedCourses.push(courseCode);
+            
+            // Check if this is a carry-over course
+            var courseRow = $(this).closest('tr');
+            var courseType = courseRow.find('td:nth-child(5) span').text();
+            
+            if (courseType === 'Repeat') {
+                carryOverCourses.push(courseCode);
+            } else {
+                currentCourses.push(courseCode);
+            }
+        });
         
         console.log("Registration Fee:", registrationFee);
         console.log("Total Fee:", totalFee);
-        console.log("Payments:", payments2024);
-        console.log("Balance:", actualBalance);
-        
-        // Store the courses in a variable
-        var combinedCourses = [];
-        $('input.courseRepeat:checked').each(function() {
-            combinedCourses.push($(this).val());
-        });
-        
+        console.log("Actual Balance:", actualBalance);
         console.log("Selected courses:", combinedCourses);
+        console.log("Carry-over courses:", carryOverCourses);
+        console.log("Current courses:", currentCourses);
 
-        // Show the modal based on eligibility
-        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
+        // Eligibility is determined solely by the actualBalance value:
+        // - Negative balance means payment for this year (potentially eligible)
+        // - Zero or positive balance means no payment for this year (ineligible)
+        
+        if (actualBalance < 0 && Math.abs(actualBalance) >= registrationFee) {
+            // Student is eligible - negative balance of sufficient amount
             // Populate the modal with the courses
             var courseListHtml = '';
             $('input.courseRepeat:checked').each(function() {
@@ -139,13 +163,21 @@ $(document).ready(function() {
             
             // Show the modal
             $('#eligibleModalRepeatCombined').modal('show');
-        } else if (registrationFee > payments2024) {
-            var shortfall = registrationFee - payments2024;
+        } else if (actualBalance < 0 && Math.abs(actualBalance) < registrationFee) {
+            // Student has a negative balance (has paid) but not enough for registration
+            var shortfall = registrationFee - Math.abs(actualBalance);
             $('#ineligibleModalRepeatCombined .modal-body p:first').html('You are short of registration by: K ' + shortfall.toFixed(2));
             $('#ineligibleModalRepeatCombined').modal('show');
-        } else if (actualBalance > 0) {
-            $('#balanceModalRepeatCombined .modal-body p:first').html('You currently have a balance on your account of: K ' + actualBalance.toFixed(2));
-            $('#balanceModalRepeatCombined').modal('show');
+        } else if (actualBalance >= 0) {
+            // Student has a zero or positive balance (no payment or outstanding balance)
+            var message = '';
+            if (actualBalance > 0) {
+                message = 'You currently have an outstanding balance of: K ' + actualBalance.toFixed(2) + '. Please clear your balance and make payment for this year.';
+            } else {
+                message = 'You have cleared your balance but have not made payment for this year. Please pay at least K ' + registrationFee.toFixed(2) + ' to register.';
+            }
+            $('#ineligibleModalRepeatCombined .modal-body p:first').html(message);
+            $('#ineligibleModalRepeatCombined').modal('show');
         }
     });
 });

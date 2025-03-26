@@ -35,21 +35,67 @@
             // Calculate total fees
             $totalAmount = 0;
             $totalRegistrationFee = 0;
+            $carryOverAmount = 0;
+            $currentYearAmount = 0;
             
+            // First, identify which courses are carry-over courses
+            $carryOverCourseCodes = collect();
+            if (isset($carryOverCourses)) {
+                foreach ($carryOverCourses as $carryOverCourse) {
+                    if (isset($carryOverCourse['Course'])) {
+                        $carryOverCourseCodes->push($carryOverCourse['Course']);
+                    }
+                }
+            }
+            
+            // Group courses by program for fee calculation
             foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $courses) {
                 $sisInvoices = \App\Models\SageInvoice::where('Description','=',$programme)->first();
                 $amount = $sisInvoices ? $sisInvoices->InvTotExclDEx : 0;
-                $otherFee = 2625;
-
-                if($failed == 1){
-                    $tuitionFee = ($amount - $otherFee) / $theNumberOfCourses;
-                    $numberOfRepeatCourses = $courses->count();
-                    $amount = ($tuitionFee * $numberOfRepeatCourses) + $otherFee;
+                $otherFee = 2625; // Fixed fee component
+                
+                // Filter courses to separate carry-over from current year
+                $programCarryOverCourses = $courses->filter(function($course) use ($carryOverCourseCodes) {
+                    return $carryOverCourseCodes->contains($course->CourseCode);
+                });
+                
+                $programCurrentCourses = $courses->filter(function($course) use ($carryOverCourseCodes) {
+                    return !$carryOverCourseCodes->contains($course->CourseCode);
+                });
+                
+                // Calculate tuition fee per course
+                $tuitionFeePerCourse = ($amount - $otherFee) / $theNumberOfCourses;
+                
+                // Calculate carry-over course fees (only add other fee once)
+                if ($programCarryOverCourses->count() > 0) {
+                    $carryOverAmount += ($tuitionFeePerCourse * $programCarryOverCourses->count());
+                    if ($totalAmount == 0) { // Only add other fee once
+                        $carryOverAmount += $otherFee;
+                    }
                 }
                 
-                $totalAmount += $amount;
-                $totalRegistrationFee += round($amount * 0.25, 2);
+                // Calculate current year course fees
+                if ($programCurrentCourses->count() > 0 && $carryOverCourseCodes->count() <= 2) {
+                    // Only include current year courses if <= 2 carry-over courses
+                    $currentYearAmount += ($tuitionFeePerCourse * $programCurrentCourses->count());
+                    if ($carryOverAmount == 0) { // Only add other fee if not already added
+                        $currentYearAmount += $otherFee;
+                    }
+                }
             }
+            
+            // Combine fees
+            $totalAmount = $carryOverAmount + $currentYearAmount;
+            $totalRegistrationFee = round($totalAmount * 0.25, 2);
+            
+            // Debug info
+            $debug = [
+                'carryOverCourses' => $carryOverCourseCodes->toArray(),
+                'carryOverAmount' => $carryOverAmount,
+                'currentYearAmount' => $currentYearAmount,
+                'totalAmount' => $totalAmount,
+                'totalRegistrationFee' => $totalRegistrationFee
+            ];
         @endphp
         
         <div class="accordion" id="coursesAccordionCombined{{ $studentId }}">

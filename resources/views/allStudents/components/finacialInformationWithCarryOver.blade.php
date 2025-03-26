@@ -8,7 +8,7 @@
         @endif
     </div>
     <script>
-        var payments2024 = {{ isset($studentsPayments->TotalPayment2024) ? $studentsPayments->TotalPayment2024 : '0' }};
+        var payments2024 = {{ isset($studentsPayments->TotalPayment) ? $studentsPayments->TotalPayment : '0' }};
         
         var balance = {{ isset($amountAfterInvoicing) ? $amountAfterInvoicing : $studentDetails->Amount }};
 
@@ -20,7 +20,7 @@
                 <thead class="text-primary">
                     <tr>
                         <th>Student Number</th>                        
-                        <th>Total Payments made in 2024</th>
+                        <th>Total Payments</th>
                         @if($studentStatus == 5)
                         <th>
                             {{ $amountAfterInvoicing < 0 ? 'Current Balance' : 'Balance Due September' }}

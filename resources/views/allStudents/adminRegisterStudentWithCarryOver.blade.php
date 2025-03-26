@@ -73,110 +73,36 @@
                                                             <tr>
                                                                 <th>Select</th>
                                                                 <th>Course Code</th>
-                                                                <th class="text-end">Course Name</th>
-                                                                <th class="text-end">Program</th>
+                                                                <th>Course Name</th>
+                                                                <th>Semester</th>
+                                                                <th>Course Type</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                        @foreach($courses as $course)
+                                                            @foreach($courses->where('CodeRegisteredUnder', $programme)->where('CourseModeID','!=', 6) as $course)
                                                             <tr>
                                                                 <td>
-                                                                    <input type="checkbox" name="courses[]" value="{{$course->CourseCode}}" class="course" id="course{{$loop->parent->index}}{{$loop->index}}" checked>
+                                                                    <div class="form-check">
+                                                                        <input class="form-check-input courseRepeat" type="checkbox" name="courses[]" value="{{ $course->CourseID }}" id="course{{$loop->parent->index}}{{$loop->index}}">
+                                                                    </div>
+                                                                </td>                                    
+                                                                <td>{{ $course->CourseID }}</td>
+                                                                <td>{{ $course->Title }}</td>
+                                                                <td>{{ $course->Semester }}</td>
+                                                                <td>
+                                                                    <span class="badge {{ $course->isCarryOver ? 'bg-warning' : 'bg-primary' }}">{{ $course->isCarryOver ? 'Repeat' : 'Current' }}</span>
                                                                 </td>
-                                                                <td>{{$course->CourseCode}}</td>
-                                                                <td class="text-end">{{$course->CourseName}}</td>
-                                                                <td class="text-end">{{$course->Programme}}</td>
                                                             </tr>
-                                                        @endforeach
+                                                            @endforeach
                                                         </tbody>
                                                     </table>
                                                 </div>
-                                                <input type="hidden" name="studentNumber" value="{{ $studentId }}">
-                                                
-                                                {{-- Blade Conditional Logic to show modals based on balance and payments --}}
+                                                <input type="hidden" name="studentId" value="{{ $studentId }}">
                                                 @php
-                                                    $isEligible = ($registrationFees[$index] <= $studentsPayments->TotalPayment2024) && ($actualBalance <= 0);
-                                                    $shortfall = $registrationFees[$index] - $studentsPayments->TotalPayment2024;
+                                                    // For registration, student balance information will be checked via JavaScript
+                                                    $registrationFee = $registrationFees[$index] ?? 0;
                                                 @endphp
-
-                                                {{-- Show eligibility modal --}}
-                                                @if($isEligible || ($failed == 1) || (auth()->user()->hasAnyRole(['Administrator', 'Developer'])) )
-                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeat{{$loop->index}}">Register</button>
-                                                    <!-- Eligible Modal -->
-                                                    <div class="modal fade" id="eligibleModalRepeat{{$loop->index}}" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Eligible To Register</h5>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p>You are submitting the following @if($failed == 1)repeat @endif courses for registration:</p>
-                                                                    <ul>
-                                                                        @foreach($courses as $course)
-                                                                            <li>{{ $course->CourseCode }} - {{ $course->CourseName }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                    <p>Total Invoice: K {{ number_format($totalFees[$index], 2) }}</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <!-- Form for submitting courses -->
-                                                                    <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
-                                                                        @csrf
-                                                                        <input type="hidden" name="studentNumber" value="{{ $studentId }}">
-                                                                        
-                                                                        <!-- Pass the selected courses as a hidden input -->
-                                                                        @foreach($courses as $course)
-                                                                            <input type="hidden" name="courses[]" value="{{ $course->CourseCode }}">
-                                                                        @endforeach
-                                                                        
-                                                                        <button type="submit" class="btn btn-success">Yes</button>
-                                                                    </form>
-                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">No</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @elseif($registrationFees[$index] > $studentsPayments->TotalPayment2024)
-                                                    {{-- Show ineligible modal for insufficient registration fee --}}
-                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModal{{$loop->index}}">Register</button>
-                                                    <!-- Ineligible Modal for Shortfall -->
-                                                    <div class="modal fade" id="ineligibleModal{{$loop->index}}" tabindex="-1" aria-labelledby="ineligibleModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Not Eligible for Registration</h5>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p style="color:red;">You are short of the registration fee by: K {{ number_format($shortfall, 2) }}</p>
-                                                                    <p>Kindly make a payment to proceed with the registration.</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @elseif($actualBalance > 0)
-                                                    {{-- Show ineligible modal for outstanding balance --}}
-                                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#balanceModal{{$loop->index}}">Register</button>
-                                                    <!-- Ineligible Modal for Outstanding Balance -->
-                                                    <div class="modal fade" id="balanceModal{{$loop->index}}" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
-                                                        <div class="modal-dialog">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header">
-                                                                    <h5 class="modal-title">Outstanding Balance</h5>
-                                                                </div>
-                                                                <div class="modal-body">
-                                                                    <p style="color:red;">You currently have a balance on your account of: K {{ number_format($actualBalance, 2) }}</p>
-                                                                    <p>Please clear your balance to proceed with registration.</p>
-                                                                </div>
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                @endif
+                                                <button type="submit" class="btn btn-primary registerButton" id="registerButton{{$loop->index}}">Register</button>
                                             </form>
                                         </div>
                                     </div>
