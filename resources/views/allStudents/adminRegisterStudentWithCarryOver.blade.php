@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @include('allStudents.components.finacialInformation')
+                    @include('allStudents.components.finacialInformationWithCarryOver')
                     @include('allStudents.components.studentCoursesForRegistrationCarryOver')                                                                    
                     <div class="card">
                         <div class="card-header">
