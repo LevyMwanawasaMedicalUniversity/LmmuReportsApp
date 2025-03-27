@@ -126,8 +126,8 @@
                 if ($programCarryOverCourses->count() > 0 || $programCurrentCourses->count() > 0) {
                     // If we have current year courses and <= 2 carry-over courses, use current year invoice
                     if ($programCurrentCourses->count() > 0 && $carryOverCourseCodes->count() <= 2) {
-                        // Verify this is a Y2 program (for current courses)
-                        if (strpos($currentYearProgramme, '-Y2') !== false) {
+                        // Check if this is a year-specific program (like Y1, Y2, Y3, etc.)
+                        if (preg_match('/-Y\d+$/', $currentYearProgramme)) {
                             // Only use this as current year amount if it matches our target year
                             if (strpos($currentYearProgramme, $useYear) !== false) {
                                 $currentYearAmount = $amount;
