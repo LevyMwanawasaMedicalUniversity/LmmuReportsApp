@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-header">
-        <h4 class="card-title">PAYMENTDSD INFORMATION</h4>
+        <h4 class="card-title">PAYMENT INFORMATION</h4>
         <h5 style="font-weight:bold; color :{{ $studentDetails->Amount >= 0 ? 'red' : 'green' }};">{{$studentDetails->FirstName}}  {{$studentDetails->Surname}}</h5>
         <p><strong>Note that your Registration is based on your payments made in 2024</strong></p>
         @if ($studentDetails->Amount > 0)
