@@ -46,6 +46,8 @@
             if (substr($studentId, 0, 3) === '190') {
                 $useYear = '2019';
             }
+            $debugValues['target_year'] = $useYear;
+            $debugValues['student_id_prefix'] = substr($studentId, 0, 3);
             
             // First, identify which courses are carry-over courses
             $carryOverCourseCodes = collect();
@@ -61,34 +63,37 @@
             foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $courses) {
                 // Get the program code which might contain a year
                 $programParts = explode('-', $programme);
+                $currentYearProgramme = $programme; // Default to current program
                 
-                // Determine if we need to check for an alternative year version
-                $shouldCheckAlternative = false;
-                $alternativeProgramme = '';
-                
+                // Ensure we're using the correct year version based on student ID
                 if (count($programParts) >= 3) {
-                    // If the program contains a year that doesn't match our target year
-                    if (strpos($programParts[2], $useYear) === false) {
-                        $shouldCheckAlternative = true;
+                    // Check if the program year matches what we want based on student ID
+                    $hasCorrectYear = (strpos($programParts[2], $useYear) !== false);
+                    
+                    // If it doesn't match, create the correct version
+                    if (!$hasCorrectYear) {
+                        // Store the original for debugging
+                        $originalProgramme = $programme;
                         
-                        // Create alternative program name with our target year
+                        // Create the correct program name with our target year
                         $programParts[2] = $useYear;
-                        $alternativeProgramme = implode('-', $programParts);
+                        $currentYearProgramme = implode('-', $programParts);
+                        
+                        $debugValues['program_replaced'][$programme] = $currentYearProgramme;
                     }
                 }
                 
-                // First try to get the invoice for the original program
-                $sisInvoices = \App\Models\SageInvoice::where('Description', '=', $programme)->first();
+                // STRICTLY use the program version that matches the student ID year
+                $sisInvoices = \App\Models\SageInvoice::where('Description', '=', $currentYearProgramme)->first();
                 
-                // If we should check for alternative and didn't find original
-                if ($shouldCheckAlternative && (!$sisInvoices || !$sisInvoices->InvTotExclDEx)) {
-                    // Try to find the alternative year version
-                    $alternativeInvoice = \App\Models\SageInvoice::where('Description', '=', $alternativeProgramme)->first();
-                    if ($alternativeInvoice) {
-                        $sisInvoices = $alternativeInvoice;
-                        $debugValues['program_switched'] = true;
-                        $debugValues['from_program'] = $programme;
-                        $debugValues['to_program'] = $alternativeProgramme;
+                // Log if we couldn't find the correct version
+                if (!$sisInvoices && $currentYearProgramme !== $programme) {
+                    $debugValues['missing_invoice'][] = $currentYearProgramme;
+                    
+                    // Fall back to original only if we absolutely have to
+                    $sisInvoices = \App\Models\SageInvoice::where('Description', '=', $programme)->first();
+                    if ($sisInvoices) {
+                        $debugValues['fallback_to_original'][] = $programme;
                     }
                 }
                 
@@ -121,8 +126,16 @@
                 if ($programCarryOverCourses->count() > 0 || $programCurrentCourses->count() > 0) {
                     // If we have current year courses and <= 2 carry-over courses, use current year invoice
                     if ($programCurrentCourses->count() > 0 && $carryOverCourseCodes->count() <= 2) {
-                        $currentYearAmount = $amount;
-                        $debugValues[$programme]['current_year_fee'] = $currentYearAmount;
+                        // Verify this is a Y2 program (for current courses)
+                        if (strpos($currentYearProgramme, '-Y2') !== false) {
+                            // Only use this as current year amount if it matches our target year
+                            if (strpos($currentYearProgramme, $useYear) !== false) {
+                                $currentYearAmount = $amount;
+                                $debugValues[$programme]['current_year_fee'] = $currentYearAmount;
+                                $debugValues[$programme]['using_program'] = $currentYearProgramme;
+                                $debugValues['current_year_program'] = $currentYearProgramme;
+                            }
+                        }
                     }
                     
                     // For repeating courses, calculate per-course fee
@@ -141,7 +154,7 @@
             }
             
             // Combine fees - current year amount already includes other fees
-            // We're using $currentYearAmount here instead of $amount to ensure we're using the correct value
+            // Make sure we're using the correct current year amount based on student ID
             $totalAmount = $currentYearAmount + $carryOverAmount;
             $totalRegistrationFee = round($totalAmount * 0.25, 2);
             

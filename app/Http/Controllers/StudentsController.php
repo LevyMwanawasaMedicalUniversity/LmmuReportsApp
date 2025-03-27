@@ -1079,6 +1079,63 @@ class StudentsController extends Controller
         $programeCode = $programData['programeCode'];
         $theNumberOfCourses = $programData['theNumberOfCourses'];
         
+        // Determine the correct year to use based on student ID
+        $useYear = '2023';
+        if (substr($studentId, 0, 3) === '190') {
+            $useYear = '2019';
+        }
+        
+        // Determine eligibility based on balance
+        $registrationFee = 0;
+        $isEligible = false;
+        $useCorrectYearProgram = true;
+        
+        // Calculate registration fee from programs - ensuring we use the correct year version
+        if (isset($studentsProgramme) && !empty($studentsProgramme)) {
+            $firstProgram = $studentsProgramme->first();
+            $programName = $firstProgram->CodeRegisteredUnder ?? '';
+            
+            // Check if we need to adjust the program year
+            $programParts = explode('-', $programName);
+            $alternativeProgramName = '';
+            
+            if (count($programParts) >= 3) {
+                // If program contains a year that doesn't match our target year
+                if (strpos($programParts[2], $useYear) === false) {
+                    // Create alternative program name with the target year
+                    $programParts[2] = $useYear;
+                    $alternativeProgramName = implode('-', $programParts);
+                    
+                    // First try the original program
+                    $sisInvoice = \App\Models\SageInvoice::where('Description', '=', $programName)->first();
+                    
+                    // If not found or we explicitly want to use the correct year version, try the alternative
+                    if ($useCorrectYearProgram || !$sisInvoice) {
+                        $alternativeInvoice = \App\Models\SageInvoice::where('Description', '=', $alternativeProgramName)->first();
+                        if ($alternativeInvoice) {
+                            $sisInvoice = $alternativeInvoice;
+                            \Log::info("Using alternative program invoice: $alternativeProgramName instead of $programName for student $studentId");
+                        }
+                    }
+                } else {
+                    // The program already has the correct year
+                    $sisInvoice = \App\Models\SageInvoice::where('Description', '=', $programName)->first();
+                }
+            } else {
+                // If the program doesn't follow the expected format, use it as-is
+                $sisInvoice = \App\Models\SageInvoice::where('Description', '=', $programName)->first();
+            }
+            
+            if ($sisInvoice) {
+                $registrationFee = round($sisInvoice->InvTotExclDEx * 0.25, 2);
+            }
+        }
+        
+        // Now determine eligibility based on actual balance and registration fee
+        if ($actualBalance < 0 && abs($actualBalance) >= $registrationFee) {
+            $isEligible = true;
+        }
+        
         // Get cached invoices
         $allInvoicesArray = $this->getCachedInvoices();
         
@@ -1095,7 +1152,8 @@ class StudentsController extends Controller
         return compact(
             'actualBalance', 'studentStatus', 'studentDetails', 'courses',
             'allCourses', 'currentStudentsCourses', 'studentsPayments', 'failed',
-            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
+            'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses',
+            'isEligible', 'registrationFee'
         );
     }
 
