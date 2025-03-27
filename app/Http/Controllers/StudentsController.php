@@ -1308,7 +1308,7 @@ class StudentsController extends Controller
     public function adminSubmitCourses(Request $request){
         $studentId = $request->input('studentNumber');
         $courses = $request->input('courses'); // Directly retrieve courses as an array
-        $academicYear = 2024;
+        $academicYear = 2025;
 
         $moodleController = new MoodleController();
 
