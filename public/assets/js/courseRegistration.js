@@ -19,28 +19,17 @@ $(document).ready(function() {
         // console.log(totalFee);
         // console.log("Actual" + actualBalance);
 
-        // Show the modal
-        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
-            $('#eligibleModal').modal('show');
-
-            // Populate the modal with the courses
-            var courseList = '';
-            for (var i = 0; i < courses.length; i++) {
-                courseList += '<p>' + courses[i] + '</p>';
-            }
-            var courseListText = '<p>You are submitting the following course for registration. Click "Yes" to proceed and "No" to cancel</p><br>' + courseList + '<br><p>Your Total Invoice is: K ' + totalFee + '</p>';
-            $('#eligibleModal .modal-body').html(courseListText);
-
-            // Update the hidden input field with the selected courses
-            $('#coursesInput').val(courses.join(','));
-        } else if (registrationFee > payments2024) {
-            var shortfall = registrationFee - payments2024;
-            $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
-            $('#ineligibleModal').modal('show');
-        } else if (actualBalance > 0) {
-            $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
-            $('#ineligibleModal').modal('show');
+        // The eligibility check and modal handling has been moved to Blade template
+        // We're keeping this code for reference but it's disabled now
+        
+        // Just collect the courses for potential manual processing
+        var courseList = '';
+        for (var i = 0; i < courses.length; i++) {
+            courseList += '<p>' + courses[i] + '</p>';
         }
+        
+        // Still update the hidden input field with selected courses for JS-enabled forms
+        $('#coursesInput').val(courses.join(','));
     });
 });
 
@@ -66,28 +55,17 @@ $(document).ready(function() {
         // console.log(payments2024);
         // console.log("Actual" + actualBalance);
 
-        // Show the modal
-        if ((registrationFee <= payments2024) && (actualBalance <= 0)) {
-            $('#eligibleModal').modal('show');
-
-            // Populate the modal with the courses
-            var courseList = '';
-            for (var i = 0; i < coursesRepeat.length; i++) {
-                courseList += '<p>' + coursesRepeat[i] + '</p>';
-            }
-            var courseListText = '<p>You are submitting the following course for registration. Click "Yes" to proceed and "No" to cancel</p><br>' + courseList + '<br><p>Your Total Invoice is: K ' + totalFee + '</p>';
-            $('#eligibleModal .modal-body').html(courseListText);
-
-            // Update the hidden input field with the selected courses
-            $('#coursesInput').val(coursesRepeat.join(','));
-        } else if (registrationFee > payments2024) {
-            var shortfall = registrationFee - payments2024;
-            $('#ineligibleModal .modal-body').html('<p style="color:red;">You are short of registration by: K ' + shortfall + '</p><br><p>Kindly make a payment to proceed with the registration</p>');
-            $('#ineligibleModal').modal('show');
-        } else if (actualBalance > 0) {
-            $('#ineligibleModal .modal-body').html('<p style="color:red;">You currently have a balance on your account of : K ' + actualBalance + '</p><br><p>Kindly clear your balance to proceed with registration</p>');
-            $('#ineligibleModal').modal('show');
+        // The eligibility check and modal handling has been moved to Blade template
+        // We're keeping this code for reference but it's disabled now
+        
+        // Just collect the courses for potential manual processing
+        var courseList = '';
+        for (var i = 0; i < coursesRepeat.length; i++) {
+            courseList += '<p>' + coursesRepeat[i] + '</p>';
         }
+        
+        // Still update the hidden input field with selected courses for JS-enabled forms
+        $('#coursesInput').val(coursesRepeat.join(','));
     });
 });
 
@@ -136,48 +114,26 @@ $(document).ready(function() {
         console.log("Carry-over courses:", carryOverCourses);
         console.log("Current courses:", currentCourses);
 
-        // Eligibility is determined solely by the actualBalance value:
-        // - Negative balance means payment for this year (potentially eligible)
-        // - Zero or positive balance means no payment for this year (ineligible)
+        // The eligibility check and modal handling has been moved to Blade template
+        // We're keeping this code for reference but it's disabled now
         
-        if (actualBalance < 0 && Math.abs(actualBalance) >= registrationFee) {
-            // Student is eligible - negative balance of sufficient amount
-            // Populate the modal with the courses
-            var courseListHtml = '';
-            $('input.courseRepeat:checked').each(function() {
-                var courseCode = $(this).val();
-                var courseRow = $(this).closest('tr');
-                var courseName = courseRow.find('td:nth-child(3)').text();
-                var courseType = courseRow.find('td:nth-child(5) span').text();
-                var badgeClass = courseType === 'Repeat' ? 'bg-warning' : 'bg-primary';
-                
-                courseListHtml += '<li>' + courseCode + ' - ' + courseName + ' <span class="badge ' + badgeClass + '">' + courseType + '</span></li>';
-            });
+        // Just collect the courses for potential manual processing
+        var courseListHtml = '';
+        $('input.courseRepeat:checked').each(function() {
+            var courseCode = $(this).val();
+            var courseRow = $(this).closest('tr');
+            var courseName = courseRow.find('td:nth-child(3)').text();
+            var courseType = courseRow.find('td:nth-child(5) span').text();
+            var badgeClass = courseType === 'Repeat' ? 'bg-warning' : 'bg-primary';
             
-            $('#combinedCoursesList').html(courseListHtml);
-            $('#combinedTotalFee').text(totalFee.toFixed(2));
-            
-            // Update the hidden input field with the selected courses
-            $('#combinedCoursesInput').val(combinedCourses.join(','));
-            $('#combinedCoursesFormInput').val(JSON.stringify(combinedCourses));
-            
-            // Show the modal
-            $('#eligibleModalRepeatCombined').modal('show');
-        } else if (actualBalance < 0 && Math.abs(actualBalance) < registrationFee) {
-            // Student has a negative balance (has paid) but not enough for registration
-            var shortfall = registrationFee - Math.abs(actualBalance);
-            $('#ineligibleModalRepeatCombined .modal-body p:first').html('You are short of registration by: K ' + shortfall.toFixed(2));
-            $('#ineligibleModalRepeatCombined').modal('show');
-        } else if (actualBalance >= 0) {
-            // Student has a zero or positive balance (no payment or outstanding balance)
-            var message = '';
-            if (actualBalance > 0) {
-                message = 'You currently have an outstanding balance of: K ' + actualBalance.toFixed(2) + '. Please clear your balance and make payment for this year.';
-            } else {
-                message = 'You have cleared your balance but have not made payment for this year. Please pay at least K ' + registrationFee.toFixed(2) + ' to register.';
-            }
-            $('#ineligibleModalRepeatCombined .modal-body p:first').html(message);
-            $('#ineligibleModalRepeatCombined').modal('show');
-        }
+            courseListHtml += '<li>' + courseCode + ' - ' + courseName + ' <span class="badge ' + badgeClass + '">' + courseType + '</span></li>';
+        });
+        
+        $('#combinedCoursesList').html(courseListHtml);
+        $('#combinedTotalFee').text(totalFee.toFixed(2));
+        
+        // Still update the hidden input field with selected courses for JS-enabled forms
+        $('#combinedCoursesInput').val(combinedCourses.join(','));
+        $('#combinedCoursesFormInput').val(JSON.stringify(combinedCourses));
     });
 });

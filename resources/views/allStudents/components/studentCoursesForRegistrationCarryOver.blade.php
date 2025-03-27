@@ -175,6 +175,10 @@
                 'totalRegistrationFee' => $totalRegistrationFee,
                 'debugValues' => $debugValues
             ];
+
+
+            $studentsBalance = -1 * $actualBalance;
+            $isStudentsEligibleToRegister = $studentsBalance - $totalRegistrationFee;
             
             // Display debug values in console
             echo '<script>';
@@ -244,14 +248,23 @@
                             </div>
                             <input type="hidden" name="studentNumber" value="{{ $studentId }}">
                             
-                            {{-- Blade Conditional Logic to show modals based on balance and payments --}}
+                            {{-- Use the new $isStudentsEligibleToRegister variable for conditional logic --}}
+                            {{-- For debugging purposes --}}
                             @php
-                                $isEligible = ($totalRegistrationFee <= $studentsPayments->TotalPayment2024) && ($actualBalance <= 0);
-                                $shortfall = $totalRegistrationFee - $studentsPayments->TotalPayment2024;
+                                // We already have $isStudentsEligibleToRegister calculated earlier
+                                // Shortfall calculation for display purposes
+                                $shortfall = $isStudentsEligibleToRegister;
+                                
+                                // Debug info
+                                echo '<script>';
+                                echo 'console.log("Student Balance: " + ' . json_encode($studentsBalance) . ');';
+                                echo 'console.log("Registration Fee: " + ' . json_encode($totalRegistrationFee) . ');';
+                                echo 'console.log("Eligibility Value: " + ' . json_encode($isStudentsEligibleToRegister) . ');';
+                                echo '</script>';
                             @endphp
 
-                            {{-- Show eligibility modal --}}
-                            @if($isEligible || ($failed == 1) || (auth()->user()->hasAnyRole(['Administrator', 'Developer'])) )
+                            {{-- Show eligibility modal if $isStudentsEligibleToRegister is >= 0 or for administrators --}}
+                            @if($isStudentsEligibleToRegister >= 0  )
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeatCombined">Register</button>
                                 <!-- Eligible Modal -->
                                 <div class="modal fade" id="eligibleModalRepeatCombined" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
@@ -307,10 +320,10 @@
                                         </div>
                                     </div>
                                 </div>
-                            @elseif($totalRegistrationFee > $studentsPayments->TotalPayment2024)
-                                {{-- Show ineligible modal for insufficient registration fee --}}
+                            @elseif($isStudentsEligibleToRegister < 0)
+                                {{-- Show ineligible modal --}}
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModalRepeatCombined">Register</button>
-                                <!-- Ineligible Modal for Shortfall -->
+                                <!-- Ineligible Modal -->
                                 <div class="modal fade" id="ineligibleModalRepeatCombined" tabindex="-1" aria-labelledby="ineligibleModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
@@ -318,28 +331,15 @@
                                                 <h5 class="modal-title">Not Eligible for Registration</h5>
                                             </div>
                                             <div class="modal-body">
-                                                <p style="color:red;">You are short of the registration fee by: K {{ number_format($shortfall, 2) }}</p>
-                                                <p>Kindly make a payment to proceed with the registration.</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @elseif($actualBalance > 0)
-                                {{-- Show ineligible modal for outstanding balance --}}
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#balanceModalRepeatCombined">Register</button>
-                                <!-- Ineligible Modal for Outstanding Balance -->
-                                <div class="modal fade" id="balanceModalRepeatCombined" tabindex="-1" aria-labelledby="balanceModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Outstanding Balance</h5>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p style="color:red;">You currently have a balance on your account of: K {{ number_format($actualBalance, 2) }}</p>
-                                                <p>Please clear your balance to proceed with registration.</p>
+                                                @if($studentsBalance < $totalRegistrationFee)
+                                                    {{-- Insufficient funds for registration --}}
+                                                    <p style="color:red;">You are short of the registration fee by: K {{ number_format(abs($isStudentsEligibleToRegister), 2) }}</p>
+                                                    <p>Kindly make a payment to proceed with the registration.</p>
+                                                @else
+                                                    {{-- Other reason for ineligibility --}}
+                                                    <p style="color:red;">You are not eligible for registration.</p>
+                                                    <p>Please contact the accounts office for more information.</p>
+                                                @endif
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
