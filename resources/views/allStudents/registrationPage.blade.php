@@ -44,30 +44,33 @@
                         @method('DELETE')
                         
                         <input type="hidden" name="studentId" value="{{ $studentId }}">
-                        <input type="hidden" name="year" value="2024">
+                        <input type="hidden" name="year" value="2025">
                         <button type="submit" class="btn btn-danger">Delete Registration</button>
                     </form>  
                     @endif            
                 </div>   
                 <div class="col-md-6 text-right">
                     @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')))
-                        @if($studentStatus != 7)
-                            @if(($actualBalance <= 0) || ($failed == 1))
+                        <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
+                            <button class="btn btn-info">PRINT ID CARD</button>
+                        </a>
+                        {{-- @if($studentStatus != 7) --}}
+                            {{-- @if(($actualBalance <= 0) || ($failed == 1))
                                 <a href="{{ route('printIDCard.student', ['studentId' => $studentId]) }}" class="mr-3">
                                     <button class="btn btn-info">PRINT ID CARD</button>
                                 </a>
                             @else
                                 <p>Student has a balance of K{{ $actualBalance }}</p>
-                            @endif
-                        @else
-                            @if(($actualBalance <= 0) || ($failed == 1))
-                                <a href="{{ route('printIDCard.studentNurandMid', ['studentId' => $studentId]) }}" class="mr-3">
+                            @endif --}}
+                        {{-- @else --}}
+                            {{-- @if(($actualBalance <= 0) || ($failed == 1)) --}}
+                                {{-- <a href="{{ route('printIDCard.studentNurandMid', ['studentId' => $studentId]) }}" class="mr-3">
                                     <button class="btn btn-info">PRINT ID CARD</button>
-                                </a>
-                            @else
-                                <p>Student has a balance of K{{ $actualBalance }}</p>
-                            @endif
-                        @endif
+                                </a> --}}
+                            {{-- @else --}}
+                                {{-- <p>Student has a balance of K{{ $actualBalance }}</p> --}}
+                            {{-- @endif --}}
+                        {{-- @endif --}}
                     @endif            
                 </div>              
             </div>       

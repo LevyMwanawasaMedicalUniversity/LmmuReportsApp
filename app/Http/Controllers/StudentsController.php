@@ -23,6 +23,7 @@ use App\Models\SisReportsSageInvoices;
 use App\Models\Student;
 use App\Models\Study;
 use App\Models\StudyProgramLink;
+use App\Models\StudentStudyLink;
 use App\Models\User;
 use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use Exception;
@@ -440,7 +441,7 @@ class StudentsController extends Controller
 
         
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-        ->where('Year', 2024)
+        ->where('Year', 2025)
         ->where('Semester', 1)
         ->exists();
 
@@ -448,7 +449,7 @@ class StudentsController extends Controller
             return redirect()->back()->with('error', 'UNREGISTERED STUDENT');
         }
 
-        $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+        $studentInformation = $this->getAppealStudentDetails(2025, [$studentId])->first();
         // return $studentInformation;
 
         return view('allStudents.printIdCard',compact('studentInformation'));
@@ -645,7 +646,7 @@ class StudentsController extends Controller
     public function deleteEntireRegistration(Request $request){
         set_time_limit(12000000);
         $studentId = $request->input('studentId');
-        $year = $request->input('year');
+        $year = 2025;
         $courses = CourseRegistration::where('StudentID', $studentId)
             ->where('Year', $year)
             ->get();
@@ -1017,8 +1018,8 @@ class StudentsController extends Controller
         // Process common registration logic with admin flag set to true
         $data = $this->processCarryOverRegistration($studentId, true);
         
-        // If result is a redirect response, return it
-        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+        // If result is a redirect response or a view, return it directly
+        if ($data instanceof \Illuminate\Http\RedirectResponse || $data instanceof \Illuminate\View\View) {
             return $data;
         }
 
@@ -1039,6 +1040,12 @@ class StudentsController extends Controller
     {
         // Get student status
         $studentStatus = $this->getStudentStatus($studentId);
+
+        $getStudentStudyId = StudentStudyLink::where('StudentID', $studentId)->first()->StudyID;
+
+        if($getStudentStudyId != 55 ){
+            return redirect()->back()->with('error', 'Student is not eligible for this registration');  
+        }
         
         // Redirect to NMCZ registration if student status is 5
         if ($studentStatus == 5) {

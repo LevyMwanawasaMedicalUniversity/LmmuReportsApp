@@ -4,7 +4,7 @@
 				<div style=" height: 280px; break-inside: avoid; text-align:center; width: 395pt;">
 			
 				<!-- TOP BAR -->
-				<div class="university" style="font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #ffc600;"> 
+				<div class="university" style="font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
 					Levy Mwanawasa Medical University
 				</div>
 				
@@ -52,8 +52,8 @@
 				</div>
 				
 				<!-- BOTTOM BAR -->
-				<div class="university" style="position: relative; margin-top: 5px; font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #ffc600;"> 
-					2024
+				<div class="university" style="position: relative; margin-top: 5px; font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
+					2025
 				</div>
 				
 			</div>
