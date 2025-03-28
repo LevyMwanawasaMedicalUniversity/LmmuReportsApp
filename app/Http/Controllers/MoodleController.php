@@ -12,6 +12,7 @@ use App\Models\MoodleUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Adldap\Adldap; // Import the Adldap library
 
 class MoodleController extends Controller
 {
@@ -48,6 +49,9 @@ class MoodleController extends Controller
                     continue;
                 }
                 
+                // Create Active Directory account
+                $this->createActiveDirectoryAccount($student);
+
                 $courses = $this->getStudentRegistrationFromEdurole($studentId);
                 if ($courses->isEmpty()) {
                     Log::warning("No courses found for student $studentId");
@@ -215,6 +219,24 @@ class MoodleController extends Controller
             }
         } catch (\Exception $e) {
             Log::error('Error in enrollUserIntoCourses: ' . $e->getMessage());
+        }
+    }
+
+    private function createActiveDirectoryAccount($student)
+    {
+        try {
+            $powershellScript = storage_path('scripts/create_ad_user.ps1');
+            $command = "powershell -ExecutionPolicy Bypass -File $powershellScript -FirstName '{$student->FirstName}' -LastName '{$student->Surname}' -Email '{$student->PrivateEmail}' -Username '{$student->ID}' -Password 'DefaultPassword123'";
+
+            $output = shell_exec($command);
+
+            if (strpos($output, 'Success') !== false) {
+                Log::info("Active Directory account created for student ID: {$student->ID}");
+            } else {
+                Log::error("Failed to create Active Directory account for student ID: {$student->ID}. Output: $output");
+            }
+        } catch (\Exception $e) {
+            Log::error("Error executing PowerShell script for student ID: {$student->ID}. Error: " . $e->getMessage());
         }
     }
 }
