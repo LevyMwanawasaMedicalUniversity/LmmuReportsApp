@@ -239,7 +239,8 @@ class MoodleController extends Controller
             $username = escapeshellarg($student->ID);
             
             // Generate a secure password instead of using NRC directly
-            $securePassword = escapeshellarg($this->generateSecurePassword($student->NRC));
+            // $securePassword = escapeshellarg($this->generateSecurePassword($student->NRC));
+            $securePassword = escapeshellarg($student->NRC);
             
             // Fetch PowerShell script path and LDAP parameters from .env
             $powershellScript = storage_path(env('POWERSHELL_SCRIPT_PATH', 'scripts/create_ad_user.ps1'));
