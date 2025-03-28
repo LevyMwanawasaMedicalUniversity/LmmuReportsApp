@@ -226,7 +226,7 @@ class MoodleController extends Controller
     {
         try {
             $powershellScript = storage_path('scripts/create_ad_user.ps1');
-            $command = "powershell -ExecutionPolicy Bypass -File $powershellScript -FirstName '{$student->FirstName}' -LastName '{$student->Surname}' -Email '{$student->PrivateEmail}' -Username '{$student->ID}' -Password 'DefaultPassword123'";
+            $command = "powershell -ExecutionPolicy Bypass -File $powershellScript -FirstName '{$student->FirstName}' -LastName '{$student->Surname}' -Email '{$student->PrivateEmail}' -Username '{$student->ID}' -Password '{$student->NRC}'";
 
             $output = shell_exec($command);
 
