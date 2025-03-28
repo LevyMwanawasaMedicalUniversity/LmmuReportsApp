@@ -225,18 +225,77 @@ class MoodleController extends Controller
     private function createActiveDirectoryAccount($student)
     {
         try {
+            // Validate required student data
+            if (empty($student->FirstName) || empty($student->Surname) || 
+                empty($student->PrivateEmail) || empty($student->ID) || empty($student->NRC)) {
+                Log::error("Missing required student data for AD account creation: {$student->ID}");
+                return false;
+            }
+
+            // Escape parameters to prevent command injection
+            $firstName = escapeshellarg($student->FirstName);
+            $lastName = escapeshellarg($student->Surname);
+            $email = escapeshellarg($student->PrivateEmail);
+            $username = escapeshellarg($student->ID);
+            
+            // Generate a secure password instead of using NRC directly
+            // This is a more secure approach than using the NRC directly
+            $securePassword = escapeshellarg($this->generateSecurePassword($student->NRC));
+            
             $powershellScript = storage_path('scripts/create_ad_user.ps1');
-            $command = "powershell -ExecutionPolicy Bypass -File $powershellScript -FirstName '{$student->FirstName}' -LastName '{$student->Surname}' -Email '{$student->PrivateEmail}' -Username '{$student->ID}' -Password '{$student->NRC}'";
+            
+            // Ensure the script exists
+            if (!file_exists($powershellScript)) {
+                Log::error("PowerShell script not found at: $powershellScript");
+                return false;
+            }
+            
+            // Build command with properly escaped arguments
+            $command = "powershell -ExecutionPolicy Bypass -File \"$powershellScript\" -FirstName $firstName -LastName $lastName -Email $email -Username $username -Password $securePassword";
 
-            $output = shell_exec($command);
-
-            if (strpos($output, 'Success') !== false) {
+            // Execute with proper output capture
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+            
+            // Convert output array to string for logging
+            $outputString = implode("\n", $output);
+            
+            // Check both return code and output for better error detection
+            if ($returnCode === 0 && strpos($outputString, 'Success') !== false) {
                 Log::info("Active Directory account created for student ID: {$student->ID}");
+                return true;
             } else {
-                Log::error("Failed to create Active Directory account for student ID: {$student->ID}. Output: $output");
+                Log::error("Failed to create Active Directory account for student ID: {$student->ID}. Return code: $returnCode, Output: $outputString");
+                return false;
             }
         } catch (\Exception $e) {
             Log::error("Error executing PowerShell script for student ID: {$student->ID}. Error: " . $e->getMessage());
+            return false;
         }
+    }
+    
+    /**
+     * Generate a secure password based on a seed value
+     * 
+     * @param string $seed A seed value (like NRC)
+     * @return string A secure password
+     */
+    private function generateSecurePassword($seed)
+    {
+        // Create a hash based on the seed and a random salt
+        $base = hash('sha256', $seed . uniqid(mt_rand(), true));
+        
+        // Ensure password has uppercase, lowercase, number and special char
+        $uppercase = chr(rand(65, 90)); // A-Z
+        $lowercase = chr(rand(97, 122)); // a-z
+        $number = chr(rand(48, 57)); // 0-9
+        $special = chr(rand(33, 47)); // special character
+        
+        // Take first 8 chars from hash and add required character types
+        $password = substr($base, 0, 8) . $uppercase . $lowercase . $number . $special;
+        
+        // Shuffle the password
+        return str_shuffle($password);
     }
 }
