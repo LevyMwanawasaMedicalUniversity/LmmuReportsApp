@@ -4,13 +4,12 @@ param (
     [string]$Email,
     [string]$Username,
     [string]$Password,
-    # Add LDAP connection parameters
-    [string]$LdapServer = "ldap.example.com",
-    [int]$LdapPort = 389,
-    [string]$LdapBaseDN = "ou=Users,dc=example,dc=com",
-    [string]$Domain = "example.com",
-    [string]$AdminUsername = "admin",
-    [string]$AdminPassword = "YourAdminPassword"
+    [string]$LdapServer,
+    [int]$LdapPort,
+    [string]$LdapBaseDN,
+    [string]$Domain,
+    [string]$AdminUsername,
+    [string]$AdminPassword
 )
 
 # Determine which method to use (Active Directory module or generic LDAP)

@@ -239,10 +239,16 @@ class MoodleController extends Controller
             $username = escapeshellarg($student->ID);
             
             // Generate a secure password instead of using NRC directly
-            // This is a more secure approach than using the NRC directly
             $securePassword = escapeshellarg($this->generateSecurePassword($student->NRC));
             
-            $powershellScript = storage_path('scripts/create_ad_user.ps1');
+            // Fetch PowerShell script path and LDAP parameters from .env
+            $powershellScript = storage_path(env('POWERSHELL_SCRIPT_PATH', 'scripts/create_ad_user.ps1'));
+            $ldapServer = escapeshellarg(env('LDAP_SERVER', 'ldap.example.com'));
+            $ldapPort = escapeshellarg(env('LDAP_PORT', 389));
+            $ldapBaseDN = escapeshellarg(env('LDAP_BASE_DN', 'ou=Users,dc=example,dc=com'));
+            $domain = escapeshellarg(env('LDAP_DOMAIN', 'example.com'));
+            $adminUsername = escapeshellarg(env('LDAP_ADMIN_USERNAME', 'admin'));
+            $adminPassword = escapeshellarg(env('LDAP_ADMIN_PASSWORD', 'YourAdminPassword'));
             
             // Ensure the script exists
             if (!file_exists($powershellScript)) {
@@ -251,7 +257,7 @@ class MoodleController extends Controller
             }
             
             // Build command with properly escaped arguments
-            $command = "powershell -ExecutionPolicy Bypass -File \"$powershellScript\" -FirstName $firstName -LastName $lastName -Email $email -Username $username -Password $securePassword";
+            $command = "powershell -ExecutionPolicy Bypass -File \"$powershellScript\" -FirstName $firstName -LastName $lastName -Email $email -Username $username -Password $securePassword -LdapServer $ldapServer -LdapPort $ldapPort -LdapBaseDN $ldapBaseDN -Domain $domain -AdminUsername $adminUsername -AdminPassword $adminPassword";
 
             // Execute with proper output capture
             $output = [];
