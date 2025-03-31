@@ -28,12 +28,12 @@
             <p>{{ __('Course Registration') }}</p>
           </a>
         </li> --}}
-        <li class = "@if ($activePage == 'studentCourseRegistrationWithCarryOver') active @endif">
+        {{-- <li class = "@if ($activePage == 'studentCourseRegistrationWithCarryOver') active @endif">
           <a href="{{ route('student.coursesRegistrationWithCarryOver', auth()->user()->name) }}">
             <i class="now-ui-icons gestures_tap-01"></i>
             <p>{{ __('Course Registration') }}</p>
           </a>
-        </li>
+        </li> --}}
         {{-- <li class = "@if ($activePage == 'studentExaminationDocket') active @endif">
           <a href="{{route('student.viewDocket')}}">
             <i class="now-ui-icons education_paper"></i>
