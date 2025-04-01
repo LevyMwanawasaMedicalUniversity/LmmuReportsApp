@@ -102,18 +102,22 @@
                                     Examination Docket
                                 </p>
                             </a>
-                        @else                       
-                            {{-- <a href="{{route('students.showStudent',$user->name)}}">
-                                <p>
-                                    Course Registration LMMU
-                                </p>  
-                            </a>  --}}
+                        @else   
+                            @if($studentStatus ==  9)   
+                                <a href="{{route('students.showStudentWithCarryOver',$user->name)}}">
+                                    <p>
+                                        Course Registration LMMU (Carry Over)
+                                    </p>  
+                                </a>  
+                            @else                 
+                                <a href="{{route('students.showStudent',$user->name)}}">
+                                    <p>
+                                        Course Registration LMMU
+                                    </p>  
+                                </a> 
+                            @endif
 
-                            <a href="{{route('students.showStudentWithCarryOver',$user->name)}}">
-                                <p>
-                                    Course Registration LMMU
-                                </p>  
-                            </a>  
+                            
 
                             <a href="{{url('/student/viewSupplementaryDocket/' .$user->name)}}"> 
                             {{-- <a href="{{route('docket.showStudent',$user->name)}}"> --}}

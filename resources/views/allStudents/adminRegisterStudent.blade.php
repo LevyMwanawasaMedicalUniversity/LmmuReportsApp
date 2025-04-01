@@ -33,7 +33,7 @@
                 </div>
                 <div class="card-body">
                     @include('allStudents.components.finacialInformation')
-                    @include('allStudents.components.studentCoursesForRegistrationCarryOver')                                                                    
+                    @include('allStudents.components.studentCoursesForRegistration')                                                                    
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">ALL COURSES</h4>
@@ -95,8 +95,8 @@
                                                 
                                                 {{-- Blade Conditional Logic to show modals based on balance and payments --}}
                                                 @php
-                                                    $isEligible = ($registrationFees[$index] <= $studentsPayments->TotalPayment2024) && ($actualBalance <= 0);
-                                                    $shortfall = $registrationFees[$index] - $studentsPayments->TotalPayment2024;
+                                                    $isEligible = ($registrationFees[$index] <= $studentsPayments->TotalPayment2025) && ($actualBalance <= 0);
+                                                    $shortfall = $registrationFees[$index] - $studentsPayments->TotalPayment2025;
                                                 @endphp
 
                                                 {{-- Show eligibility modal --}}
@@ -136,7 +136,7 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                @elseif($registrationFees[$index] > $studentsPayments->TotalPayment2024)
+                                                @elseif($registrationFees[$index] > $studentsPayments->TotalPayment2025)
                                                     {{-- Show ineligible modal for insufficient registration fee --}}
                                                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModal{{$loop->index}}">Register</button>
                                                     <!-- Ineligible Modal for Shortfall -->

@@ -904,14 +904,14 @@ class StudentsController extends Controller
         }
     
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-12-20';
+        $deadLine = '2025-05-01';
     
         // Check if the student has status 4 instead of fetching the whole registration data if not necessary
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
     
         // Check if the student has registered courses for the specified year and semester
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-            ->where('Year', 2024)
+            ->where('Year', 2025)
             ->where('Semester', 1)
             ->exists();
     
@@ -928,7 +928,15 @@ class StudentsController extends Controller
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024')
+                END) AS TotalPayment2024'),
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
+                WHEN pa.TxDate < \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025') 
         )
         ->where('Account', $studentId)
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
@@ -1193,9 +1201,17 @@ class StudentsController extends Controller
                 WHEN pa.Description LIKE \'%FT%\' THEN 0
                 WHEN pa.Description LIKE \'%DE%\' THEN 0  
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
-                WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                WHEN pa.TxDate > \'2024-01-01\' THEN 0 
                 ELSE pa.Credit 
-                END) AS TotalPayment2024')            
+                END) AS TotalPayment2024'), 
+            DB::raw('SUM(CASE 
+                WHEN pa.Description LIKE \'%reversal%\' THEN 0  
+                WHEN pa.Description LIKE \'%FT%\' THEN 0
+                WHEN pa.Description LIKE \'%DE%\' THEN 0  
+                WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
+                WHEN pa.TxDate > \'2025-01-01\' THEN 0 
+                ELSE pa.Credit 
+                END) AS TotalPayment2025')            
         )
         ->where('Account', $studentId)
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
@@ -1337,7 +1353,7 @@ class StudentsController extends Controller
     public function studentSubmitCourseRegistration(Request $request){
         $studentId = $request->input('studentNumber');
         $courses = $request->input('courses'); // Directly retrieve courses as an array
-        $academicYear = 2024;
+        $academicYear = 2025;
 
         $moodleController = new MoodleController();
 
@@ -1381,7 +1397,7 @@ class StudentsController extends Controller
     }    
 
     public function viewAllStudents(Request $request){
-        $academicYear= 2024;
+        $academicYear= 2025;
         $courseName = null;
         $courseId = null;
         if($request->input('student-number')){

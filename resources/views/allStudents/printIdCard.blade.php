@@ -53,7 +53,7 @@
 				
 				<!-- BOTTOM BAR -->
 				<div class="university" style="position: relative; margin-top: 5px; font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
-					2025
+					2025 (Temporary Registration)
 				</div>
 				
 			</div>
