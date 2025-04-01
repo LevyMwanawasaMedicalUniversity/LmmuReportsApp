@@ -807,7 +807,7 @@ class StudentsController extends Controller
             return redirect()->route('nmcz.registration', $studentId);
         }
         $todaysDate = date('Y-m-d');
-        $deadLine = '2024-12-20';       
+        $deadLine = '2025-04-30';       
         
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         // $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
