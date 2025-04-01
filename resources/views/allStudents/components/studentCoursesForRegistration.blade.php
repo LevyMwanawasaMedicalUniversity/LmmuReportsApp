@@ -10,15 +10,72 @@
         @php
             $registrationFeesRepeat = [];
             $totalFeesRepeat = [];
+            
+            // Determine which year to use based on student ID
+            $useYear = '2023';
+            if (substr($studentId, 0, 3) === '190') {
+                $useYear = '2019';
+            }
+            
+            // First, filter to keep only programs that match the target year
+            $filteredPrograms = collect();
+            
+            // Pre-process the program codes to match target year
+            foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $courses) {
+                $programParts = explode('-', $programme);
+                $yearMatch = false;
+                
+                // Check if this program already has the correct year
+                if (count($programParts) >= 3 && strpos($programParts[2], $useYear) !== false) {
+                    $yearMatch = true;
+                }
+                
+                // If it's already the right year, use it as is
+                if ($yearMatch) {
+                    $filteredPrograms[$programme] = $courses;
+                } else {
+                    // Try to convert the program to the target year
+                    $modifiedProgramme = $programme;
+                    
+                    if (count($programParts) >= 3) {
+                        // Try to replace year in the program name
+                        if (strpos($programParts[2], '2019') !== false) {
+                            $programParts[2] = str_replace('2019', $useYear, $programParts[2]);
+                            $modifiedProgramme = implode('-', $programParts);
+                        } else if (strpos($programParts[2], '2023') !== false) {
+                            $programParts[2] = str_replace('2023', $useYear, $programParts[2]);
+                            $modifiedProgramme = implode('-', $programParts);
+                        }
+                    }
+                    
+                    // Only add if it's different and we can find an invoice for it
+                    if ($modifiedProgramme !== $programme) {
+                        $invoice = \App\Models\SageInvoice::where('Description', '=', $modifiedProgramme)->first();
+                        if ($invoice) {
+                            // Use the modified program name but same courses
+                            $filteredPrograms[$modifiedProgramme] = $courses;
+                        } else {
+                            // No match with modified program, keep original as fallback
+                            $filteredPrograms[$programme] = $courses;
+                        }
+                    } else {
+                        // No year detected, keep original
+                        $filteredPrograms[$programme] = $courses;
+                    }
+                }
+            }
         @endphp
-        @foreach($currentStudentsCourses->groupBy('CodeRegisteredUnder') as $programme => $courses)
+        
+        @foreach($filteredPrograms as $programme => $courses)
         <div class="accordion" id="coursesAccordion{{$loop->index}}{{ $studentId }}">
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading{{$loop->index}}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{$loop->index}}{{ $studentId }}" aria-expanded="false" aria-controls="collapse{{$loop->index}}{{ $studentId }}">
                         <span class="ms-auto">{{ $programme }}</span>
                         @php
-                            $sisInvoices = \App\Models\SageInvoice::where('Description','=',$programme)->first();
+                            // Get invoice for this program
+                            $sisInvoices = \App\Models\SageInvoice::where('Description', '=', $programme)->first();
+                            
                             $course = $courses->first();
                             $amount = $sisInvoices ? $sisInvoices->InvTotExclDEx : 0;
                             $otherFee = 2625;
@@ -68,8 +125,8 @@
                             
                             {{-- Blade Conditional Logic to show modals based on balance and payments --}}
                             @php
-                                $isEligible = ($registrationFeesRepeat[$index] <= $studentsPayments->TotalPayment2024) && ($actualBalance <= 0);
-                                $shortfall = $registrationFeesRepeat[$index] - $studentsPayments->TotalPayment2024;
+                                $isEligible = ($registrationFeesRepeat[$index] <= $studentsPayments->TotalPayment2025) && ($actualBalance <= 0);
+                                $shortfall = $registrationFeesRepeat[$index] - $studentsPayments->TotalPayment2025;
                             @endphp
 
                             {{-- Show eligibility modal --}}
@@ -109,7 +166,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            @elseif($registrationFeesRepeat[$index] > $studentsPayments->TotalPayment2024)
+                            @elseif($registrationFeesRepeat[$index] > $studentsPayments->TotalPayment2025)
                                 {{-- Show ineligible modal for insufficient registration fee --}}
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ineligibleModalRepeat{{$loop->index}}">Register</button>
                                 <!-- Ineligible Modal for Shortfall -->
