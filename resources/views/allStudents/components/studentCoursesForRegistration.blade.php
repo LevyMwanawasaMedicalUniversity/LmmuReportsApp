@@ -73,7 +73,7 @@
                             @endphp
 
                             {{-- Show eligibility modal --}}
-                            @if($isEligible || ($failed == 1) || (auth()->user()->hasAnyRole(['Administrator', 'Developer'])) )
+                            @if($isEligible  )
                                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#eligibleModalRepeat{{$loop->index}}">Register</button>
                                 <!-- Eligible Modal -->
                                 <div class="modal fade" id="eligibleModalRepeat{{$loop->index}}" tabindex="-1" aria-labelledby="eligibleModalLabel" aria-hidden="true">
