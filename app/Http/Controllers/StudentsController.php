@@ -818,7 +818,7 @@ class StudentsController extends Controller
             return redirect()->back()->with('error', 'Student already registered On Edurole.');
         }
         $checkRegistration = CourseRegistration::where('StudentID', $studentId)
-            ->where('Year', 2024)
+            ->where('Year', 2025)
             ->where('Semester', 1)
             ->exists();
 
@@ -864,7 +864,7 @@ class StudentsController extends Controller
             
             $checkRegistration = EduroleCourses::query()->whereIn('Name', $courseIds)->get();
             
-            $studentInformation = $this->getAppealStudentDetails(2024, [$studentId])->first();
+            $studentInformation = $this->getAppealStudentDetails(2025, [$studentId])->first();
             
             return view('allStudents.registrationPage', compact('studentStatus','studentId','checkRegistration','studentInformation','failed'));
         }
@@ -894,7 +894,7 @@ class StudentsController extends Controller
         })->toArray();
     
         $currentStudentsCourses = $studentsProgramme;
-        $studentDetails = $this->getAppealStudentDetails(2024, [$studentId])->first();
+        $studentDetails = $this->getAppealStudentDetails(2025, [$studentId])->first();
         
     
         return view('allStudents.studentSelfRegistration', compact('actualBalance','studentStatus','studentDetails','courses', 'currentStudentsCourses', 'studentsPayments', 'failed', 'studentId', 'theNumberOfCourses'));
