@@ -134,7 +134,7 @@
 @push('js')
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const academicYear = 2024;
+    const academicYear = 2025;
     
     const loadingElements = [
       'loadingTable',
