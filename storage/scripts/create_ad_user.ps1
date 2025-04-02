@@ -15,6 +15,9 @@ param (
 # Determine which method to use (Active Directory module or generic LDAP)
 $useActiveDirectory = $true  # Set to $false to use generic LDAP instead
 
+# This script is for Windows environments only and serves as a reference.
+# For Linux deployment, the application uses PHP's native LDAP extension instead.
+
 try {
     if ($useActiveDirectory) {
         # Method 1: Using Active Directory PowerShell Module

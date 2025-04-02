@@ -232,52 +232,86 @@ class MoodleController extends Controller
                 return false;
             }
 
-            // Escape parameters to prevent command injection
-            $firstName = escapeshellarg($student->FirstName);
-            $lastName = escapeshellarg($student->Surname);
-            $email = escapeshellarg($student->PrivateEmail);
-            $username = escapeshellarg($student->ID);
+            // Get LDAP configuration from .env
+            $ldapServer = env('LDAP_SERVER', 'ldap.example.com');
+            $ldapPort = intval(env('LDAP_PORT', 389));
+            $ldapBaseDN = env('LDAP_BASE_DN', 'ou=Users,dc=example,dc=com');
+            $domain = env('LDAP_DOMAIN', 'example.com');
+            $adminUsername = env('LDAP_ADMIN_USERNAME', 'admin');
+            $adminPassword = env('LDAP_ADMIN_PASSWORD', 'YourAdminPassword');
             
-            // Generate a secure password instead of using NRC directly
-            // $securePassword = escapeshellarg($this->generateSecurePassword($student->NRC));
-            $securePassword = escapeshellarg($student->NRC);
-            
-            // Fetch PowerShell script path and LDAP parameters from .env
-            $powershellScript = storage_path(env('POWERSHELL_SCRIPT_PATH', 'scripts/create_ad_user.ps1'));
-            $ldapServer = escapeshellarg(env('LDAP_SERVER', 'ldap.example.com'));
-            $ldapPort = escapeshellarg(env('LDAP_PORT', 389));
-            $ldapBaseDN = escapeshellarg(env('LDAP_BASE_DN', 'ou=Users,dc=example,dc=com'));
-            $domain = escapeshellarg(env('LDAP_DOMAIN', 'example.com'));
-            $adminUsername = escapeshellarg(env('LDAP_ADMIN_USERNAME', 'admin'));
-            $adminPassword = escapeshellarg(env('LDAP_ADMIN_PASSWORD', 'YourAdminPassword'));
-            
-            // Ensure the script exists
-            if (!file_exists($powershellScript)) {
-                Log::error("PowerShell script not found at: $powershellScript");
+            // Initialize LDAP connection
+            $ldapConn = ldap_connect($ldapServer, $ldapPort);
+            if (!$ldapConn) {
+                Log::error("Failed to connect to LDAP server for student ID: {$student->ID}");
                 return false;
             }
             
-            // Build command with properly escaped arguments
-            $command = "powershell -ExecutionPolicy Bypass -File \"$powershellScript\" -FirstName $firstName -LastName $lastName -Email $email -Username $username -Password $securePassword -LdapServer $ldapServer -LdapPort $ldapPort -LdapBaseDN $ldapBaseDN -Domain $domain -AdminUsername $adminUsername -AdminPassword $adminPassword";
-
-            // Execute with proper output capture
-            $output = [];
-            $returnCode = 0;
-            exec($command, $output, $returnCode);
+            // Set LDAP options
+            ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
+            ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
             
-            // Convert output array to string for logging
-            $outputString = implode("\n", $output);
-            
-            // Check both return code and output for better error detection
-            if ($returnCode === 0 && strpos($outputString, 'Success') !== false) {
-                Log::info("Active Directory account created for student ID: {$student->ID}");
-                return true;
-            } else {
-                Log::error("Failed to create Active Directory account for student ID: {$student->ID}. Return code: $returnCode, Output: $outputString");
+            // Bind with admin credentials
+            $ldapBindDN = $adminUsername . '@' . $domain;
+            $ldapBind = @ldap_bind($ldapConn, $ldapBindDN, $adminPassword);
+            if (!$ldapBind) {
+                Log::error("Failed to bind to LDAP server for student ID: {$student->ID}. Error: " . ldap_error($ldapConn));
+                ldap_close($ldapConn);
                 return false;
             }
+            
+            // Prepare user attributes
+            $userDN = "CN={$student->FirstName} {$student->Surname}," . $ldapBaseDN;
+            $samAccountName = $student->ID;
+            $userPrincipalName = $student->ID . '@' . $domain;
+            $displayName = $student->FirstName . ' ' . $student->Surname;
+            
+            // Setup user entry attributes
+            $userInfo = [
+                'cn' => $displayName,
+                'sAMAccountName' => $samAccountName,
+                'userPrincipalName' => $userPrincipalName,
+                'givenName' => $student->FirstName,
+                'sn' => $student->Surname,
+                'displayName' => $displayName,
+                'mail' => $student->PrivateEmail,
+                'objectClass' => [
+                    'top',
+                    'person', 
+                    'organizationalPerson', 
+                    'user'
+                ],
+                'userAccountControl' => '512', // Normal account, enabled
+            ];
+            
+            // Add the user entry
+            $result = @ldap_add($ldapConn, $userDN, $userInfo);
+            
+            if (!$result) {
+                Log::error("Failed to add user to Active Directory for student ID: {$student->ID}. Error: " . ldap_error($ldapConn));
+                ldap_close($ldapConn);
+                return false;
+            }
+            
+            // Set user password
+            $userPassword = $student->NRC; // Consider using a more secure password
+            $encodedPassword = '"{SHA}"' . base64_encode(pack('H*', sha1($userPassword)));
+            $passwordData = ['unicodePwd' => $encodedPassword];
+            
+            $pwdResult = @ldap_modify($ldapConn, $userDN, $passwordData);
+            if (!$pwdResult) {
+                Log::error("Failed to set password for Active Directory account: {$student->ID}. Error: " . ldap_error($ldapConn));
+                // Note: User is created but without password set
+            }
+            
+            // Close LDAP connection
+            ldap_close($ldapConn);
+            
+            Log::info("Active Directory account created for student ID: {$student->ID}");
+            return true;
+            
         } catch (\Exception $e) {
-            Log::error("Error executing PowerShell script for student ID: {$student->ID}. Error: " . $e->getMessage());
+            Log::error("Error creating Active Directory account for student ID: {$student->ID}. Error: " . $e->getMessage());
             return false;
         }
     }

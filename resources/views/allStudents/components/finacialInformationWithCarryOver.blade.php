@@ -28,7 +28,7 @@
 
                         @else
                         <th>
-                            {{ $studentDetails->Amount < 0 ? 'Current Balance' : 'Balance Due September' }}
+                            {{ $studentDetails->Amount < 0 ? 'Current Balance' : 'Balance Due ' }}
                         </th>
                         @endif
                         {{-- <th>Latest Invoice</th> --}}
