@@ -125,7 +125,8 @@
                             
                             {{-- Blade Conditional Logic to show modals based on balance and payments --}}
                             @php
-                                $isEligible = ($registrationFeesRepeat[$index] <= $studentsPayments->TotalPayment2025) && ($actualBalance <= 0);
+                                $isEligible = ($registrationFeesRepeat[$index] <= $studentsPayments->TotalPayment2025);
+                                //$isEligible = ($registrationFeesRepeat[$index] <= $studentsPayments->TotalPayment2025) && ($actualBalance <= 0); --}}
                                 $shortfall = $registrationFeesRepeat[$index] - $studentsPayments->TotalPayment2025;
                             @endphp
 
