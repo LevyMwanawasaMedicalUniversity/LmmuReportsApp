@@ -108,7 +108,7 @@ class FinanceQueriesController extends Controller
             'School',
             'Study Type',
             'Registration Status',
-            '2024 Invoice',
+            // '2024 Invoice',
             'Year Of Study',
             'Total Payments',
             'Total Payments Before 2023',
@@ -118,11 +118,14 @@ class FinanceQueriesController extends Controller
             'Total Payments 2025',
             '2023 Invoice Status',
             '2024 Invoice Status',
+            '2025 Invoice Status',
+            '2023 Invoice Date',
+            '2024 Invoice Date',
+            '2025 Invoice Date',
             'Latest Invoice Date',
             'Total Credit',
             'Total Debit',
             'Total Balance'
-            
         ];
         
         $rowData = [
@@ -139,7 +142,7 @@ class FinanceQueriesController extends Controller
             'School',
             'StudyType',
             'RegistrationStatus',
-            'InvoiceAmount',
+            // 'InvoiceAmount',
             'YearOfStudy',
             'TotalPayments',
             'TotalPaymentBefore2023',
@@ -149,6 +152,10 @@ class FinanceQueriesController extends Controller
             'TotalPayment2025',
             '2023InvoiceStatus',
             '2024InvoiceStatus',
+            '2025InvoiceStatus',
+            'Invoice2023Date',
+            'Invoice2024Date',
+            'Invoice2025Date',
             'LatestInvoiceDate',
             'TotalCredit',
             'TotalDebit',

@@ -11,6 +11,7 @@
       <div class="card-body">
         <div class="table-responsive">
           <style>
+            /* Original table styles */
             .table thead th {
                 font-weight: bold;
                 text-transform: uppercase;
@@ -27,6 +28,28 @@
                 text-align: center;
                 font-size: 1.5em;
                 color: #f96332;
+            }
+            
+            /* Enhanced chart styles */
+            .chart-area {
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                background-color: #fff;
+            }
+            .card-chart {
+                border-radius: 5px;
+                box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+                overflow: hidden;
+            }
+            .card-title {
+                font-weight: 600;
+                margin-bottom: 0;
+            }
+            canvas {
+                max-width: 100%;
+                height: auto !important;
             }
           </style>
           <div id="loadingTable" class="loading">Loading...</div>
@@ -119,10 +142,12 @@
           <div class="card-header ">
             <h4 class="card-title">Programmes</h4>
           </div>
-          <div class="card-body" style="height: 600px;">
+          <div class="card-body" style="height: 500px;">
             <div class="chart-area" style="height: 100%; width: 100%; position: relative;">
+              <div style="height: 100%;">
                 <canvas id="barChartSimpleGradientsNumbersProgrammes" style="width: 100%; height: 100%;"></canvas>
                 <div class="loading" id="loadingBarChartSimpleGradientsNumbersProgrammes">Loading...</div>
+              </div>
             </div>
           </div>
         </div>
@@ -203,6 +228,7 @@
       });
 
     function updatePieChartExample(edurole, sisReports) {
+      // Set better chart options for improved visualization
       const ctx = document.getElementById('pieChartExample').getContext('2d');
       const chart = new Chart(ctx, {
         type: 'pie',
@@ -216,29 +242,40 @@
               sisReports.filter(student => student.StudentType === 'NEWLY ADMITTED').length
             ],
             backgroundColor: [
+              'rgba(255, 99, 132, 0.8)',
+              'rgba(54, 162, 235, 0.8)',
+              'rgba(255, 206, 86, 0.8)',
+              'rgba(75, 192, 192, 0.8)'
+            ],
+            borderColor: [
               'rgba(255, 99, 132, 1)',
               'rgba(54, 162, 235, 1)',
               'rgba(255, 206, 86, 1)',
               'rgba(75, 192, 192, 1)'
             ],
-            borderColor: [
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)'
-            ],
-            borderWidth: 1
+            borderWidth: 2,
+            hoverOffset: 10
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: {
-              position: 'top',
+              position: 'right',
+              labels: {
+                padding: 10,
+                font: {
+                  size: 12
+                },
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
             },
-            title: {
-              display: false,
-              text: ''
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 10,
+              displayColors: true
             }
           }
         }
@@ -249,7 +286,7 @@
     function updateLineChartExampleWithNumbersAndGrid(edurole, sisReports) {
       const ctx = document.getElementById('lineChartExampleWithNumbersAndGrid').getContext('2d');
       const chart = new Chart(ctx, {
-        type: 'pie',
+        type: 'doughnut',
         data: {
           labels: ['Fulltime', 'Distance'],
           datasets: [{
@@ -258,25 +295,46 @@
               edurole.filter(student => student.StudyType === 'Distance').length + sisReports.filter(student => student.StudyType === 'Distance').length
             ],
             backgroundColor: [
+              'rgba(75, 192, 192, 0.8)',
+              'rgba(153, 102, 255, 0.8)'
+            ],
+            borderColor: [
               'rgba(75, 192, 192, 1)',
               'rgba(153, 102, 255, 1)'
             ],
-            borderColor: [
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)'
-            ],
-            borderWidth: 1
+            borderWidth: 2,
+            borderRadius: 5,
+            hoverOffset: 15
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          cutout: '60%',
           plugins: {
             legend: {
-              position: 'top',
+              position: 'bottom',
+              labels: {
+                padding: 15,
+                usePointStyle: true,
+                pointStyle: 'rectRounded',
+                font: {
+                  size: 13,
+                  weight: 'bold'
+                }
+              }
             },
-            title: {
-              display: false,
-              text: ''
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
             }
           }
         }
@@ -294,7 +352,7 @@
       const totalSchoolsSOHS = edurole.filter(student => student.School === 'SOHS').length + sisReports.filter(student => student.School === 'SOHS').length;
 
       const chart = new Chart(ctx, {
-        type: 'pie',
+        type: 'polarArea',
         data: {
           labels: ['SOMCS', 'SON', 'SOPHES', 'DRGS', 'IBBS', 'SOHS'],
           datasets: [{
@@ -307,6 +365,14 @@
               totalSchoolsSOHS
             ],
             backgroundColor: [
+              'rgba(255, 99, 132, 0.7)',
+              'rgba(255, 159, 64, 0.7)',
+              'rgba(255, 205, 86, 0.7)',
+              'rgba(75, 192, 192, 0.7)',
+              'rgba(54, 162, 235, 0.7)',
+              'rgba(153, 102, 255, 0.7)'
+            ],
+            borderColor: [
               'rgba(255, 99, 132, 1)',
               'rgba(255, 159, 64, 1)',
               'rgba(255, 205, 86, 1)',
@@ -314,26 +380,44 @@
               'rgba(54, 162, 235, 1)',
               'rgba(153, 102, 255, 1)'
             ],
-            borderColor: [
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)'
-            ],
-            borderWidth: 1
+            borderWidth: 2,
+            borderAlign: 'inner'
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              ticks: {
+                display: false
+              },
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            }
+          },
           plugins: {
             legend: {
-              position: 'top',
+              position: 'right',
+              labels: {
+                font: {
+                  size: 11
+                },
+                usePointStyle: true,
+                padding: 10
+              }
             },
-            title: {
-              display: false,
-              text: ''
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `${label}: ${value} (${percentage}%)`;
+                }
+              }
             }
           }
         }
@@ -351,10 +435,11 @@
       const totalEduroleYear6 = edurole.filter(student => student.YearOfStudy === 'YEAR 6').length + sisReports.filter(student => student.YearOfStudy === 'YEAR 6').length;
 
       const chart = new Chart(ctx, {
-        type: 'pie',
+        type: 'bar',
         data: {
           labels: ['YEAR 1', 'YEAR 2', 'YEAR 3', 'YEAR 4', 'YEAR 5', 'YEAR 6'],
           datasets: [{
+            label: 'Students',
             data: [
               totalEduroleYear1,
               totalEduroleYear2,
@@ -364,6 +449,14 @@
               totalEduroleYear6
             ],
             backgroundColor: [
+              'rgba(255, 99, 132, 0.8)',
+              'rgba(255, 159, 64, 0.8)',
+              'rgba(255, 205, 86, 0.8)',
+              'rgba(75, 192, 192, 0.8)',
+              'rgba(54, 162, 235, 0.8)',
+              'rgba(153, 102, 255, 0.8)'
+            ],
+            borderColor: [
               'rgba(255, 99, 132, 1)',
               'rgba(255, 159, 64, 1)',
               'rgba(255, 205, 86, 1)',
@@ -371,26 +464,44 @@
               'rgba(54, 162, 235, 1)',
               'rgba(153, 102, 255, 1)'
             ],
-            borderColor: [
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)',
-              'rgba(255, 255, 255, 1)'
-            ],
-            borderWidth: 1
+            borderWidth: 2,
+            borderRadius: 6,
+            maxBarThickness: 40
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
+              ticks: {
+                precision: 0
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          },
           plugins: {
             legend: {
-              position: 'top',
+              display: false
             },
-            title: {
-              display: false,
-              text: ''
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              callbacks: {
+                label: function(context) {
+                  const value = context.raw;
+                  const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                  const percentage = Math.round((value / total) * 100);
+                  return `Students: ${value} (${percentage}%)`;
+                }
+              }
             }
           }
         }
@@ -400,17 +511,37 @@
 
     function updateBarChartSimpleGradientsNumbersProgrammes(edurole, sisReports) {
       const ctx = document.getElementById('barChartSimpleGradientsNumbersProgrammes').getContext('2d');
+      // Use shorter identifiers - program codes only
       const eduroleProgrammeCounts = edurole.reduce((acc, student) => {
-        acc[student.ProgrammeCode] = (acc[student.ProgrammeCode] || 0) + 1;
+        // Use StudyID (short code) instead of full names
+        const programmeKey = student.StudyID || student.ProgrammeCode || 'Unknown';
+        acc[programmeKey] = (acc[programmeKey] || 0) + 1;
         return acc;
       }, {});
       const sisReportsProgrammeCounts = sisReports.reduce((acc, student) => {
-        acc[student.ProgrammeCode] = (acc[student.ProgrammeCode] || 0) + 1;
+        const programmeKey = student.StudyID || student.ProgrammeCode || 'Unknown';
+        acc[programmeKey] = (acc[programmeKey] || 0) + 1;
         return acc;
       }, {});
 
       const allProgrammeCodes = new Set([...Object.keys(eduroleProgrammeCounts), ...Object.keys(sisReportsProgrammeCounts)]);
-      const labels = Array.from(allProgrammeCodes).sort();
+      // Sort alphabetically first to group related programmes
+      const sortedAlphabetically = Array.from(allProgrammeCodes).sort();
+
+      // Then sort by total count descending within each letter group
+      // This creates a more structured, grouped layout
+      const sortedProgrammes = sortedAlphabetically.sort((a, b) => {
+        // First character should match to keep programs with same prefix together
+        if (a.charAt(0) === b.charAt(0)) {
+          const totalA = (eduroleProgrammeCounts[a] || 0) + (sisReportsProgrammeCounts[a] || 0);
+          const totalB = (eduroleProgrammeCounts[b] || 0) + (sisReportsProgrammeCounts[b] || 0);
+          return totalB - totalA;
+        }
+        return a.localeCompare(b);
+      });
+      
+      // Show all programmes - no limit
+      const labels = sortedProgrammes;
       const eduroleData = labels.map(label => eduroleProgrammeCounts[label] || 0);
       const sisReportsData = labels.map(label => sisReportsProgrammeCounts[label] || 0);
 
@@ -421,41 +552,76 @@
           datasets: [{
             label: 'Edurole',
             data: eduroleData,
-            backgroundColor: 'rgba(75, 192, 192, 1)',
-            borderColor: 'rgba(255, 255, 255, 1)',
-            borderWidth: 1
+            backgroundColor: 'rgba(75, 192, 192, 0.8)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1,
+            // Remove radius for tighter display
+            borderRadius: 0,
+            barPercentage: 0.3,
+            categoryPercentage: 0.5
           }, {
             label: 'SIS Reports',
             data: sisReportsData,
-            backgroundColor: 'rgba(153, 102, 255, 1)',
-            borderColor: 'rgba(255, 255, 255, 1)',
-            borderWidth: 1
+            backgroundColor: 'rgba(153, 102, 255, 0.8)',
+            borderColor: 'rgba(153, 102, 255, 1)',
+            borderWidth: 1,
+            // Remove radius for tighter display
+            borderRadius: 0,
+            barPercentage: 0.3,
+            categoryPercentage: 0.5
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'x',
+          // Make the chart more compact
+          barThickness: 'flex',
+          maxBarThickness: 15,
           plugins: {
             legend: {
               position: 'top',
+              labels: {
+                usePointStyle: true,
+                padding: 10,
+                font: {
+                  size: 11
+                }
+              }
             },
-            title: {
-              display: false,
-              text: ''
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              titleFont: {
+                size: 13
+              },
+              bodyFont: {
+                size: 12
+              },
+              padding: 10
             }
           },
           scales: {
             y: {
-              beginAtZero: true
+              grid: {
+                display: false
+              },
+              ticks: {
+                font: {
+                  size: 8
+                },
+                autoSkip: false,
+                maxRotation: 90,
+                minRotation: 90,
+                padding: 0
+              }
             },
             x: {
+              beginAtZero: true,
+              grid: {
+                color: 'rgba(0, 0, 0, 0.05)'
+              },
               ticks: {
-                fontSize: 6,
-                maxRotation: 90,
-                minRotation: 80,
-                callback: function(value) {
-                  const label = this.getLabelForValue(value);
-                  return label.length > 10 ? label.substring(0, 10) + '...' : label;
-                }
+                precision: 0
               }
             }
           }

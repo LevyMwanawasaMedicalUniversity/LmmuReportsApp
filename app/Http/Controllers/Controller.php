@@ -1906,6 +1906,48 @@ class Controller extends BaseController
 
     private function queryStudentsPayments($studentId){
         $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
+        
+        // Get latest invoice date for each year separately with explicit date ranges
+        $invoice2023 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2023'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2023')
+                      ->orWhereBetween('TxDate', ['2023-01-01 00:00:00.000', '2023-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        $invoice2024 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2024'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2024')
+                      ->orWhereBetween('TxDate', ['2024-01-01 00:00:00.000', '2024-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        $invoice2025 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2025'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2025')
+                      ->orWhereBetween('TxDate', ['2025-01-01 00:00:00.000', '2025-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        // Also keep the latest invoice date across all years for compatibility
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
             ->where(function($query) {
                 $query->where('Description', 'like', '%-%-%')
@@ -1913,7 +1955,7 @@ class Controller extends BaseController
             })
             ->where('Debit', '>', 0)
             ->groupBy('AccountLink');
-        $results = SageClient::select    (
+        $results = SageClient::select(
             'DCLink',
             'Account',
             'Name',
@@ -1966,20 +2008,92 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0             
                 ELSE pa.Credit 
                 END) AS TotalPayments'),
-            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
-            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2024 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
+            
+            // Specific invoice statuses for each year
+            DB::raw('CASE WHEN inv2023.InvoiceDate2023 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
+            DB::raw('CASE WHEN inv2024.InvoiceDate2024 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
+            DB::raw('CASE WHEN inv2025.InvoiceDate2025 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2025InvoiceStatus"'),
+            
+            // Actual dates for each year's invoice
+            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\') AS Invoice2023Date'),
+            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\') AS Invoice2024Date'),
+            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\') AS Invoice2025Date'),
+            
+            // Also keep the latest invoice date for backwards compatibility
             DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate')
         )
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
+        // Join with each year's invoice dates
+        ->leftJoinSub($invoice2023, 'inv2023', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2023.AccountLink');
+        })
+        ->leftJoinSub($invoice2024, 'inv2024', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2024.AccountLink');
+        })
+        ->leftJoinSub($invoice2025, 'inv2025', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2025.AccountLink');
+        })
+        // Also keep the latest invoice date join for compatibility
         ->leftJoinSub($latestInvoiceDates, 'lid', function ($join) {
             $join->on('pa.AccountLink', '=', 'lid.AccountLink');
         })
         ->where('Account', $studentId)
-        ->groupBy('DCLink', 'Account', 'Name', 'lid.LatestTxDate', DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'), DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END'));
+        ->groupBy(
+            'DCLink', 'Account', 'Name', 
+            'lid.LatestTxDate', 
+            'inv2023.InvoiceDate2023',
+            'inv2024.InvoiceDate2024',
+            'inv2025.InvoiceDate2025',
+            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\')')
+        );
         return $results;
     }
 
     private function querySumOfAllTransactionsOfEachStudent(){
+        // Create separate queries for invoice dates by year
+        $invoice2023 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2023'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2023')
+                      ->orWhereBetween('TxDate', ['2023-01-01 00:00:00.000', '2023-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        $invoice2024 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2024'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2024')
+                      ->orWhereBetween('TxDate', ['2024-01-01 00:00:00.000', '2024-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        $invoice2025 = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS InvoiceDate2025'))
+            ->where(function($query) {
+                $query->where('Description', 'like', '%-%-%')
+                    ->orWhere('Reference', 'like', 'INV%');
+            })
+            ->where('Debit', '>', 0)
+            ->where(function($query) {
+                // Use either year function or explicit date range as a contingency
+                $query->whereRaw('YEAR(TxDate) = 2025')
+                      ->orWhereBetween('TxDate', ['2025-01-01 00:00:00.000', '2025-12-31 23:59:59.999']);
+            })
+            ->groupBy('AccountLink');
+            
+        // Also keep the latest invoice date across all years for compatibility
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
             ->where(function($query) {
                 $query->where('Description', 'like', '%-%-%')
@@ -2031,7 +2145,7 @@ class Controller extends BaseController
         ->groupBy('student-study-link.StudentID')
         ->get();
 
-        $studentPaymentInformation = SageClient::select    (
+        $studentPaymentInformation = SageClient::select(
             'DCLink',
             'Account',
             'Name',
@@ -2087,15 +2201,40 @@ class Controller extends BaseController
             DB::raw('SUM(pa.Credit) as TotalCredit'),
             DB::raw('SUM(pa.Debit) as TotalDebit'),
             DB::raw('SUM(pa.Debit) - SUM(pa.Credit) as TotalBalance'),
-            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
-            DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2024 THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
-            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate')
+            DB::raw('CASE WHEN inv2023.InvoiceDate2023 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2023InvoiceStatus"'),
+            DB::raw('CASE WHEN inv2024.InvoiceDate2024 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2024InvoiceStatus"'),
+            DB::raw('CASE WHEN inv2025.InvoiceDate2025 IS NOT NULL THEN \'Invoiced\' ELSE \'Not Invoiced\' END AS "2025InvoiceStatus"'),
+            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\') AS LatestInvoiceDate'),
+            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\') AS Invoice2023Date'),
+            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\') AS Invoice2024Date'),
+            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\') AS Invoice2025Date')
         )
         ->join('LMMU_Live.dbo.PostAR as pa', 'pa.AccountLink', '=', 'DCLink')
         ->leftJoinSub($latestInvoiceDates, 'lid', function ($join) {
             $join->on('pa.AccountLink', '=', 'lid.AccountLink');
         })
-        ->groupBy('DCLink', 'Account', 'Name', 'lid.LatestTxDate', DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'), DB::raw('CASE WHEN YEAR(lid.LatestTxDate) = 2023 THEN \'Invoiced\' ELSE \'Not Invoiced\' END'))
+        ->leftJoinSub($invoice2023, 'inv2023', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2023.AccountLink');
+        })
+        ->leftJoinSub($invoice2024, 'inv2024', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2024.AccountLink');
+        })
+        ->leftJoinSub($invoice2025, 'inv2025', function ($join) {
+            $join->on('pa.AccountLink', '=', 'inv2025.AccountLink');
+        })
+        ->groupBy(
+            'DCLink', 
+            'Account', 
+            'Name', 
+            'lid.LatestTxDate', 
+            'inv2023.InvoiceDate2023',
+            'inv2024.InvoiceDate2024',
+            'inv2025.InvoiceDate2025',
+            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\')'),
+            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\')')
+        )
         ->get();
 
         $studentInvoices = SisReportsSageInvoices::all();
@@ -2261,7 +2400,7 @@ class Controller extends BaseController
             'basic-information.StudyType',
             DB::raw("
                 CASE 
-                    WHEN `basic-information`.ID LIKE '240%' THEN 'NEWLY ADMITTED'
+                    WHEN `basic-information`.ID LIKE '250%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
                 END AS 'StudentType'
             "),
@@ -2385,7 +2524,7 @@ class Controller extends BaseController
             
             DB::raw("
                 CASE 
-                    WHEN `basic_information_s_r_s`.StudentID LIKE '240%' THEN 'NEWLY ADMITTED'
+                    WHEN `basic_information_s_r_s`.StudentID LIKE '250%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
                 END AS 'StudentType'
             "), 
