@@ -23,7 +23,7 @@ class EnrollStudentsCommand extends Command
     {
         Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
         // Use a more reasonable timeout - 30 minutes instead of ~139 days
-        set_time_limit(1800);
+        set_time_limit(18000000);
         $studentIds = CourseElectives::pluck('StudentID')
                         ->where('course-electives.Year', 2025)
                         ->unique()
