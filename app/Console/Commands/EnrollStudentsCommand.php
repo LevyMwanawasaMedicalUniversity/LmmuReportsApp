@@ -24,8 +24,10 @@ class EnrollStudentsCommand extends Command
         // Use a more reasonable timeout - 30 minutes instead of ~139 days
         set_time_limit(1800);
         $studentIds = CourseElectives::pluck('StudentID')
+                        ->where('course-electives.Year', 2025)
                         ->unique()
                         ->toArray();
+        
         // Process in smaller batches of 50 students
         $batchSize = 50;
         $studentBatches = array_chunk($studentIds, $batchSize);
