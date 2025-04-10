@@ -119,21 +119,26 @@ class MoodleController extends Controller
     
     private function enrollUserIntoCourses($courses, $userId){
         set_time_limit(12000000);  
+        // First extend all enrollment end dates to 2025-12-31
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);
+            
         $date = '2025-12-31';
         $timeend = strtotime($date);     
         try {
             $enrolIds = [];
-
+    
             foreach($courses as $course){
                 $course = MoodleCourses::where('idnumber', $course)->first();
+                if (!$course) {
+                    continue; // Skip if course doesn't exist
+                }
                 $courseId = $course->id;
-
+    
                 $enrolId = MoodleEnroll::where('courseid', $courseId)->first();
-                // Log::info($enrolId);
-                // $checkIfUserIsEnrolled = MoodleUserEnrolments::where('userid', $userId)->where('enrolid', $enrolId->id)->first();
-
+                if (!$enrolId) {
+                    continue; // Skip if no enrollment record exists
+                }
                 
                 MoodleUserEnrolments::updateOrCreate(
                     [
@@ -141,7 +146,7 @@ class MoodleController extends Controller
                         'userid' => $userId,
                     ],
                     [
-                        'status' => 0, // Assuming status 0 is 'active
+                        'status' => 0, // Assuming status 0 is 'active'
                         'timestart' => time(),
                         'timeend' => $timeend,
                         'modifierid' => time(),
@@ -149,13 +154,20 @@ class MoodleController extends Controller
                         'timemodified' => time(),
                     ]
                 );                
-
+    
                 $enrolIds[] = $enrolId->id;
             }
-            // Delete all enrollments where enrolid is not in $enrolIds
-            // MoodleUserEnrolments::where('userid', $userId)->whereNotIn('enrolid', $enrolIds)->delete();
+            
+            // For courses not in the current $courses list, set timeend to 2024-12-31
+            // This affects only this user's enrollments
+            if (!empty($enrolIds)) {
+                MoodleUserEnrolments::where('userid', $userId)
+                    ->whereNotIn('enrolid', $enrolIds)
+                    ->where('timeend', '>', 0)
+                    ->update(['timeend' => strtotime('2024-12-31')]);
+            }
         } catch (\Exception $e) {
             // Log::error('Error enrolling user into courses: ' . $e->getMessage());
         }
-    }    
+    }   
 }
