@@ -7,6 +7,7 @@ use App\Http\Controllers\MoodleController;
 use App\Http\Controllers\StudentsController;
 use App\Mail\CronJobEmail;
 use App\Models\CourseElectives;
+use App\Models\CourseRegistration;
 // use App\Models\CourseRegistration;  // Not enrolling from SIS Reports
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -27,6 +28,14 @@ class EnrollStudentsCommand extends Command
                         ->where('course-electives.Year', 2025)
                         ->unique()
                         ->toArray();
+        // $studentIdsFromSisReports = CourseRegistration::pluck('StudentID')
+        //                 ->where('course-registration.Year', 2025)
+        //                 ->unique()
+        //                 ->toArray();
+        // $studentIds = array_merge($studentIds, $studentIdsFromSisReports);
+        // $studentIds = array_unique($studentIds);
+        // $studentIds = array_values($studentIds); // Re-index the array
+        // $this->info('Total students to enroll: ' . count($studentIds));
         
         // Process in smaller batches of 50 students
         $batchSize = 50;
