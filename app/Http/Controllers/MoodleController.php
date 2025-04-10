@@ -37,7 +37,7 @@ class MoodleController extends Controller
     public function addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds){   
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2024-12-31')]);    
+            ->update(['timeend' => strtotime('2025-12-31')]);    
         foreach($studentIds as $studentId){            
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
@@ -88,7 +88,7 @@ class MoodleController extends Controller
     private function assignUserToRoleIfNotAssigned($courseIds, $userId){
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2024-12-31')]);
+            ->update(['timeend' => strtotime('2025-12-31')]);
         try {
             $roleId = 5; // Assuming role ID 5 is the default role
             
@@ -118,8 +118,8 @@ class MoodleController extends Controller
     private function enrollUserIntoCourses($courses, $userId){
         set_time_limit(12000000);  
         MoodleUserEnrolments::where('timeend', '>', 0)        
-            ->update(['timeend' => strtotime('2024-12-31')]);
-        $date = '2024-12-31';
+            ->update(['timeend' => strtotime('2025-12-31')]);
+        $date = '2025-12-31';
         $timeend = strtotime($date);     
         try {
             $enrolIds = [];
