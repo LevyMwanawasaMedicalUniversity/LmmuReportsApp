@@ -56,6 +56,7 @@ class MoodleController extends Controller
             $existingUser = MoodleUsers::where('username', $student->ID)->first();
             
             if ($existingUser) {
+                $existingUser->country = 'ZM';
                 return $existingUser;
             } else {
                 return MoodleUsers::create([
@@ -72,6 +73,7 @@ class MoodleController extends Controller
                     'emailstop' => 0,
                     'calenderType' => 'gregorian',
                     'auth' => 'db',
+                    'country' => 'ZM',
                     'lang' => 'en',
                     'timemodified' => time(),
                     'timecreated' => time(),
