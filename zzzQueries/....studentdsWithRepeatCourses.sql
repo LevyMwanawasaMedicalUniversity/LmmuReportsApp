@@ -9,6 +9,7 @@ SELECT
     bi.Nationality,
     s.Name AS "Programme",
     s2.Name AS "School",
+    max(c.`Year`) as "Year Of Study",
     CASE 
         WHEN EXISTS (
             SELECT 1 
@@ -29,5 +30,7 @@ FROM `basic-information` bi
 INNER JOIN `student-study-link` ssl2 ON bi.ID = ssl2.StudentID 
 INNER JOIN study s ON ssl2.StudyID = s.ID
 INNER JOIN `grades-published` gp on gp.StudentNo = bi.ID and gp.AcademicYear = 2024
+inner join courses c on c.Name = gp.CourseNo 
 INNER JOIN schools s2 ON s2.ID = s.ParentID 
+-- where s.ShortName = "MBCHB"
 GROUP BY bi.ID;
