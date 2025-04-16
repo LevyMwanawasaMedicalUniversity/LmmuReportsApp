@@ -30,7 +30,9 @@ Route::get('/', function () {
         return view('welcome');
     }
 });
-
+Route::get('/id-card-manual', function () {
+    return response()->file(public_path('pdfs/LMMU 2025 Student ID Card Request Form Manual.pdf'));
+})->name('id.card.manual');
 Route::get('/testsAssess', [DocketController::class, 'testAssess']);
 Auth::routes(['register' => false]);
 Route::get('/verify/{studentNumber}', [DocketController::class, 'verifyStudent'])->name('docket.verify');
