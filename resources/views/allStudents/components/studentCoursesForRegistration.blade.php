@@ -20,12 +20,12 @@
                 $bridgingCourses = collect();
                 
                 // Manually create the course objects with the required structure
-                $courseNames = ['BST001', 'INR301', 'ZMI3001', 'EPC301'];
+                $courseNames = ['BST201', 'EPC301', 'INR301', 'ZMI301'];
                 $courseDescriptions = [
-                    'BST001' => 'Basic Science and Technology',
-                    'INR301' => 'Introduction to Research',
-                    'ZMI3001' => 'Zambian Medical Issues',
-                    'EPC301' => 'Ethics and Professional Conduct'
+                    'BST201' => 'Building Science & Technology',
+                    'EPC301' => 'Environmental Pollution Control',
+                    'INR301' => 'Inspections and Reports',
+                    'ZMI301' => 'Zoonoses and Meat Inspection'
                 ];
                 
                 foreach ($courseNames as $courseName) {
@@ -141,7 +141,12 @@
                 </h2>
                 <div id="collapse{{$loop->index}}{{ $studentId }}" class="accordion-collapse collapse" aria-labelledby="heading{{$loop->index}}" data-bs-parent="#coursesAccordion{{$loop->index}}{{ $studentId }}">
                     <div class="accordion-body">
-                        <form method="POST" action="{{ auth()->user()->hasAnyRole(['Administrator', 'Developer']) ? route('sumbitRegistration.student') : route('student.submitCourseRegistration') }}">
+                        <form method="POST" action="{{ (isset($studentDetails->ShortName) && trim($studentDetails->ShortName) === 'DipEHBridging') 
+                                ? route('student.submitCourseRegistrationDipEHBridging') 
+                                : (auth()->user()->hasAnyRole(['Administrator', 'Developer']) 
+                                    ? route('sumbitRegistration.student') 
+                                    : route('student.submitCourseRegistration')) 
+                            }}">
                             @csrf
                             <div class="table-responsive">
                                 <table class="table">
