@@ -121,6 +121,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/coursesRegistrationWithCarryOver/{studentId}', [StudentsController::class, 'studentRegisterForCoursesWithCarryOver'])->name('student.coursesRegistrationWithCarryOver');
                 Route::get('/nmczRegistration/{id?}', [StudentsController::class, 'studentNMCZRegisterForRepeatCourses'])->name('nmcz.registration');
                 Route::post('/submitCourseRegistration', [StudentsController::class, 'studentSubmitCourseRegistration'])->name('student.submitCourseRegistration');
+                Route::post('/submitCourseRegistrationDipEHBridging', [StudentsController::class, 'studentSubmitCourseRegistrationDipEHBridging'])->name('student.submitCourseRegistrationDipEHBridging');
             });
         });
 

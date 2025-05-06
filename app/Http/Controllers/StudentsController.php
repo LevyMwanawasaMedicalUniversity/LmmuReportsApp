@@ -1381,6 +1381,25 @@ class StudentsController extends Controller
         return redirect()->back()->with('success', 'Courses submitted successfully.');
     }
 
+    public function studentSubmitCourseRegistrationDipEHBridging(Request $request){
+        $studentId = $request->input('studentNumber');
+        $courses = $request->input('courses'); // Directly retrieve courses as an array
+        $academicYear = 2025;
+
+        // Insert into CourseRegistration table
+        foreach ($courses as $course) {
+            CourseRegistration::create([
+                'StudentID' => $studentId,
+                'CourseID' => $course,
+                'EnrolmentDate' => now(),
+                'Year' => $academicYear,
+                'Semester' => 1,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Courses submitted successfully.');
+    }
+
     public function bulkEnrollOnMooodle(Request $request){
         set_time_limit(12000000);
         $studentIds = CourseRegistration::pluck('StudentID')
