@@ -807,7 +807,7 @@ class StudentsController extends Controller
             return redirect()->route('nmcz.registration', $studentId);
         }
         $todaysDate = date('Y-m-d');
-        $deadLine = '2025-06-30';       
+        $deadLine = '2025-05-09';       
         
         $isStudentRegistered = $this->checkIfStudentIsRegistered($studentId)->exists();
         // $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
@@ -912,7 +912,7 @@ class StudentsController extends Controller
         }
     
         $todaysDate = date('Y-m-d');
-        $deadLine = '2025-06-30';
+        $deadLine = '2025-05-09';
     
         // Check if the student has status 4 instead of fetching the whole registration data if not necessary
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
@@ -1377,6 +1377,25 @@ class StudentsController extends Controller
         }
 
         $moodleController->addStudentsToMoodleAndEnrollInCourses([$studentId]);
+
+        return redirect()->back()->with('success', 'Courses submitted successfully.');
+    }
+
+    public function studentSubmitCourseRegistrationDipEHBridging(Request $request){
+        $studentId = $request->input('studentNumber');
+        $courses = $request->input('courses'); // Directly retrieve courses as an array
+        $academicYear = 2025;
+
+        // Insert into CourseRegistration table
+        foreach ($courses as $course) {
+            CourseRegistration::create([
+                'StudentID' => $studentId,
+                'CourseID' => $course,
+                'EnrolmentDate' => now(),
+                'Year' => $academicYear,
+                'Semester' => 1,
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Courses submitted successfully.');
     }
