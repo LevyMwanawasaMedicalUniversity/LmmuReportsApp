@@ -1602,7 +1602,7 @@ class StudentsController extends Controller
                     ], 404);
                 }
                 
-                Log::info("Processing single student: {$studentId}");
+                // Log::info("Processing single student: {$studentId}");
                 
                 $data = [
                     'student' => [
@@ -1620,7 +1620,7 @@ class StudentsController extends Controller
             }
             
             // Make API request
-            Log::info('Sending request to library API', ['endpoint' => $baseUrl . $endpoint]);
+            // Log::info('Sending request to library API', ['endpoint' => $baseUrl . $endpoint]);
             
             $response = Http::withHeaders([
                 'access-key' => $accessKey,
@@ -1630,26 +1630,26 @@ class StudentsController extends Controller
             
             // Log the response status and details for better debugging
             if (!$response->successful()) {
-                Log::error('Library API Error Response', [
-                    'status' => $response->status(),
-                    'error' => $response->json(),
-                    'data_sent' => $data
-                ]);
+                // Log::error('Library API Error Response', [
+                //     'status' => $response->status(),
+                //     'error' => $response->json(),
+                //     'data_sent' => $data
+                // ]);
             } else {
-                Log::info('Library API Response', [
-                    'status' => $response->status(),
-                    'successful' => true
-                ]);
+                // Log::info('Library API Response', [
+                //     'status' => $response->status(),
+                //     'successful' => true
+                // ]);
             }
             
             // Check if the request was successful or if it's just an 'already exists' error
             if ($response->successful() || $this->isAlreadyExistsError($response)) {
                 // If it was a student-already-exists error, log it but treat as success
                 if (!$response->successful()) {
-                    Log::info('Student already exists in library system - treating as success', [
-                        'student_id' => $isBulk ? 'bulk' : $studentId,
-                        'status' => $response->status()
-                    ]);
+                    // Log::info('Student already exists in library system - treating as success', [
+                    //     'student_id' => $isBulk ? 'bulk' : $studentId,
+                    //     'status' => $response->status()
+                    // ]);
                 }
                 
                 return response()->json([
@@ -1668,10 +1668,10 @@ class StudentsController extends Controller
                 ], $response->status());
             }
         } catch (\Exception $e) {
-            Log::error('Library API Sync Error', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            // Log::error('Library API Sync Error', [
+            //     'message' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
             
             return response()->json([
                 'success' => false,
