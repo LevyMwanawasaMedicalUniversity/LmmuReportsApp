@@ -1807,6 +1807,14 @@ class Controller extends BaseController
             Courses::insert($coursesToInsert);
         }
     }
+
+    public function getStudentNumbersForRegisteredStudents(){
+        $studentIds = CourseElectives::pluck('StudentID')
+                        ->where('course-electives.Year', 2025)
+                        ->unique()
+                        ->toArray();
+        return $studentIds;
+    }
  
     public function setAndUpdateRegisteredCourses($studentId){
         $registeredCourses = CourseElectives::where('course-electives.StudentID', $studentId)

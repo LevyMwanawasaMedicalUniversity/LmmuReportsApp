@@ -84,6 +84,10 @@ Route::group(['middleware' => 'auth'], function () {
                 // Student related routes
                 Route::post('/import/Students', [StudentsController::class, 'importStudentsFromBasicInformation'])->name('students.import');
                 Route::post('/import/importStudentsFromLMMAX', [StudentsController::class, 'importStudentsFromLMMAX'])->name('students.importStudentsFromLMMAX');
+                
+                // Library API integration routes
+                Route::post('/library/sync-student/{studentId?}', [StudentsController::class, 'syncSingleStudentWithLibrary'])->name('library.syncSingleStudent');
+                Route::post('/library/sync-students', [StudentsController::class, 'syncMultipleStudentsWithLibrary'])->name('library.syncMultipleStudents');
                 Route::get('/import/single/students', [StudentsController::class, 'importSingleStudent'])->name('students.importSingleStudent');
                 Route::post('/upload/single/students', [StudentsController::class, 'uploadSingleStudent'])->name('students.uploadSingleStudent');
                 Route::get('/index/viewStudents/{id?}', [StudentsController::class, 'viewAllStudents'])->name('students.index');

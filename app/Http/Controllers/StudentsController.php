@@ -1412,7 +1412,7 @@ class StudentsController extends Controller
 
     public function bulkEnrollFromEduroleOnMooodle(Request $request){
         set_time_limit(12000000);
-        $studentIds = CourseElectives::where('Year', 2024)
+        $studentIds = CourseElectives::where('Year', 2025)
                             ->pluck('StudentID')
                             ->unique()
                             ->toArray();
@@ -1504,7 +1504,221 @@ class StudentsController extends Controller
         
         // Return student self-registration view
         return view('allStudents.studentSelfRegistrationWithCarryOver', $data);
-    }    
+    }
+    
+    /**
+     * Sync student data with the LMMU library API
+     *
+     * @param Request $request
+     * @param bool $isBulk Whether to sync multiple students or a single student
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncStudentsWithLibrary(Request $request, $studentId = null, $isBulk = false)
+    {
+        set_time_limit(12000000); // Set a long timeout for bulk operations
+        
+        try {
+            // API configuration
+            $baseUrl = env('ASTRIA_BASE_URL');
+            $accessKey = env('ASTRIA_API_KEY'); 
+            $endpoint = $isBulk ? 'students' : 'student';
+            $academicYear = 2025; // Current academic year
+            
+            // Data preparation
+            if ($isBulk) {
+                // Get all registered students for the current academic year
+                $registeredStudents = $this->getStudentNumbersForRegisteredStudents();
+                
+                if (empty($registeredStudents)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No registered students found for the current academic year'
+                    ], 404);
+                }
+                
+                // Build the students array from database records
+                $students = [];
+                
+                // Log the total number of students to process
+                Log::info('Starting library sync for ' . count($registeredStudents) . ' students');
+                
+                foreach ($registeredStudents as $studentId) {
+                    // Get student details from the database
+                    $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                    
+                    if (!$studentDetails) {
+                        Log::warning("Student details not found for ID: {$studentId}");
+                        continue;
+                    }
+                    
+                    // Extract required fields and format them for the API
+                    $student = [
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
+                    ];
+                    
+                    // Add optional fields if available
+                    if ($studentDetails->Sex) {
+                        $student['gender'] = strtolower(substr($studentDetails->Sex, 0, 1)); // Convert to 'm' or 'f'
+                    }
+                    
+                    $students[] = $student;
+                    
+                    // Log progress for every 50 students
+                    if (count($students) % 50 === 0) {
+                        Log::info("Processed {$studentDetails->StudentID}, total so far: " . count($students));
+                    }
+                }
+                
+                if (empty($students)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No valid student data found to sync'
+                    ], 404);
+                }
+                
+                $data = [
+                    'students' => $students
+                ];
+                
+                Log::info('Prepared data for ' . count($students) . ' students');
+            } else {
+                // For single student, get data from database using the studentId
+                if (!$studentId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Student ID is required for single student sync'
+                    ], 400);
+                }
+                
+                $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                
+                if (!$studentDetails) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Student details not found for ID: {$studentId}"
+                    ], 404);
+                }
+                
+                Log::info("Processing single student: {$studentId}");
+                
+                $data = [
+                    'student' => [
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
+                    ]
+                ];
+                
+                // Add optional fields if available
+                if ($studentDetails->Sex) {
+                    $data['student']['gender'] = strtolower(substr($studentDetails->Sex, 0, 1)); // Convert to 'm' or 'f'
+                }
+            }
+            
+            // Make API request
+            Log::info('Sending request to library API', ['endpoint' => $baseUrl . $endpoint]);
+            
+            $response = Http::withHeaders([
+                'access-key' => $accessKey,
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+            ])->post($baseUrl . $endpoint, $data);
+            
+            // Log the response status and details for better debugging
+            if (!$response->successful()) {
+                Log::error('Library API Error Response', [
+                    'status' => $response->status(),
+                    'error' => $response->json(),
+                    'data_sent' => $data
+                ]);
+            } else {
+                Log::info('Library API Response', [
+                    'status' => $response->status(),
+                    'successful' => true
+                ]);
+            }
+            
+            // Check if the request was successful or if it's just an 'already exists' error
+            if ($response->successful() || $this->isAlreadyExistsError($response)) {
+                // If it was a student-already-exists error, log it but treat as success
+                if (!$response->successful()) {
+                    Log::info('Student already exists in library system - treating as success', [
+                        'student_id' => $isBulk ? 'bulk' : $studentId,
+                        'status' => $response->status()
+                    ]);
+                }
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => $isBulk ? 'Students synced successfully' : 'Student synced successfully',
+                    'count' => $isBulk ? count($data['students']) : 1,
+                    'already_exists' => !$response->successful(),
+                    'data' => $response->json()
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to sync with library API',
+                    'error' => $response->json(),
+                    'status' => $response->status()
+                ], $response->status());
+            }
+        } catch (\Exception $e) {
+            Log::error('Library API Sync Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while syncing with the library API',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Sync a single student with the LMMU library API
+     *
+     * @param mixed $requestOrStudentId Request object or student ID string
+     * @param string|null $studentId Student ID to sync if first param is Request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncSingleStudentWithLibrary($requestOrStudentId, $studentId = null)
+    {
+        // Check if first parameter is a Request object or a student ID
+        if ($requestOrStudentId instanceof Request) {
+            $request = $requestOrStudentId;
+            
+            // If studentId is not provided as second param, check if it's in the request body
+            if (!$studentId && $request->has('student_id')) {
+                $studentId = $request->student_id;
+            }
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
+        } else {
+            // First parameter is the student ID
+            $studentId = $requestOrStudentId;
+            $request = new Request();
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
+        }
+    }
+    
+    /**
+     * Sync multiple students with the LMMU library API
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncMultipleStudentsWithLibrary(Request $request)
+    {
+        return $this->syncStudentsWithLibrary($request, null, true);
+    }
 
     /**
      * Process carry-over registration logic common to both student and admin registration
@@ -1576,4 +1790,35 @@ class StudentsController extends Controller
     //         'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
     //     );
     // }
+    
+    /**
+     * Helper method to check if the API error is just because student already exists
+     * 
+     * @param \Illuminate\Http\Client\Response $response
+     * @return bool
+     */
+    private function isAlreadyExistsError($response)
+    {
+        // Only consider 422 validation errors
+        if ($response->status() != 422) {
+            return false;
+        }
+        
+        $errorData = $response->json();
+        
+        // Check if the error contains 'already been taken' messages
+        if (isset($errorData['errors']) && is_array($errorData['errors'])) {
+            $alreadyExistsError = false;
+            
+            foreach ($errorData['errors'] as $error) {
+                if (strpos($error, 'already been taken') !== false) {
+                    $alreadyExistsError = true;
+                }
+            }
+            
+            return $alreadyExistsError;
+        }
+        
+        return false;
+    }
 }
