@@ -33,6 +33,10 @@ Route::get('/', function () {
 Route::get('/id-card-manual', function () {
     return response()->file(public_path('pdfs/LMMU 2025 Student ID Card Request Form Manual.pdf'));
 })->name('id.card.manual');
+
+Route::get('/registration-notice', function () {
+    return response()->file(public_path('pdfs/NOTICE TO STUDENTS 240425.pdf'));
+})->name('registration.notice');
 Route::get('/testsAssess', [DocketController::class, 'testAssess']);
 Auth::routes(['register' => false]);
 Route::get('/verify/{studentNumber}', [DocketController::class, 'verifyStudent'])->name('docket.verify');
