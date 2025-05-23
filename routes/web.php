@@ -19,6 +19,14 @@ use App\Http\Controllers\MoodleStatusController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/id-card-manual', function () {
+    return response()->file(public_path('pdfs/LMMU 2025 Student ID Card Request Form Manual.pdf'));
+})->name('id.card.manual');
+
+Route::get('/registration-notice', function () {
+    return response()->file(public_path('pdfs/NOTICE TO STUDENTS 240425.pdf'));
+})->name('registration.notice');
 Route::get('/', function () {
     if (Auth::check()) {
         if(Auth::user()->hasRole('Administrator') || Auth::user()->hasRole('Academics') || Auth::user()->hasRole('Finance') || Auth::user()->hasRole('Developer')) {
@@ -30,13 +38,7 @@ Route::get('/', function () {
         return view('welcome');
     }
 });
-Route::get('/id-card-manual', function () {
-    return response()->file(public_path('pdfs/LMMU 2025 Student ID Card Request Form Manual.pdf'));
-})->name('id.card.manual');
 
-Route::get('/registration-notice', function () {
-    return response()->file(public_path('pdfs/NOTICE TO STUDENTS 240425.pdf'));
-})->name('registration.notice');
 Route::get('/testsAssess', [DocketController::class, 'testAssess']);
 Auth::routes(['register' => false]);
 Route::get('/verify/{studentNumber}', [DocketController::class, 'verifyStudent'])->name('docket.verify');
