@@ -1412,7 +1412,7 @@ class StudentsController extends Controller
 
     public function bulkEnrollFromEduroleOnMooodle(Request $request){
         set_time_limit(12000000);
-        $studentIds = CourseElectives::where('Year', 2024)
+        $studentIds = CourseElectives::where('Year', 2025)
                             ->pluck('StudentID')
                             ->unique()
                             ->toArray();
@@ -1504,7 +1504,221 @@ class StudentsController extends Controller
         
         // Return student self-registration view
         return view('allStudents.studentSelfRegistrationWithCarryOver', $data);
-    }    
+    }
+    
+    /**
+     * Sync student data with the LMMU library API
+     *
+     * @param Request $request
+     * @param bool $isBulk Whether to sync multiple students or a single student
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncStudentsWithLibrary(Request $request, $studentId = null, $isBulk = false)
+    {
+        set_time_limit(12000000); // Set a long timeout for bulk operations
+        
+        try {
+            // API configuration
+            $baseUrl = env('ASTRIA_BASE_URL');
+            $accessKey = env('ASTRIA_API_KEY'); 
+            $endpoint = $isBulk ? 'students' : 'student';
+            $academicYear = 2025; // Current academic year
+            
+            // Data preparation
+            if ($isBulk) {
+                // Get all registered students for the current academic year
+                $registeredStudents = $this->getStudentNumbersForRegisteredStudents();
+                
+                if (empty($registeredStudents)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No registered students found for the current academic year'
+                    ], 404);
+                }
+                
+                // Build the students array from database records
+                $students = [];
+                
+                // Log the total number of students to process
+                Log::info('Starting library sync for ' . count($registeredStudents) . ' students');
+                
+                foreach ($registeredStudents as $studentId) {
+                    // Get student details from the database
+                    $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                    
+                    if (!$studentDetails) {
+                        Log::warning("Student details not found for ID: {$studentId}");
+                        continue;
+                    }
+                    
+                    // Extract required fields and format them for the API
+                    $student = [
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
+                    ];
+                    
+                    // Add optional fields if available
+                    if ($studentDetails->Sex) {
+                        $student['gender'] = strtolower(substr($studentDetails->Sex, 0, 1)); // Convert to 'm' or 'f'
+                    }
+                    
+                    $students[] = $student;
+                    
+                    // Log progress for every 50 students
+                    if (count($students) % 50 === 0) {
+                        Log::info("Processed {$studentDetails->StudentID}, total so far: " . count($students));
+                    }
+                }
+                
+                if (empty($students)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No valid student data found to sync'
+                    ], 404);
+                }
+                
+                $data = [
+                    'students' => $students
+                ];
+                
+                Log::info('Prepared data for ' . count($students) . ' students');
+            } else {
+                // For single student, get data from database using the studentId
+                if (!$studentId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Student ID is required for single student sync'
+                    ], 400);
+                }
+                
+                $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                
+                if (!$studentDetails) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Student details not found for ID: {$studentId}"
+                    ], 404);
+                }
+                
+                // Log::info("Processing single student: {$studentId}");
+                
+                $data = [
+                    'student' => [
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
+                    ]
+                ];
+                
+                // Add optional fields if available
+                if ($studentDetails->Sex) {
+                    $data['student']['gender'] = strtolower(substr($studentDetails->Sex, 0, 1)); // Convert to 'm' or 'f'
+                }
+            }
+            
+            // Make API request
+            // Log::info('Sending request to library API', ['endpoint' => $baseUrl . $endpoint]);
+            
+            $response = Http::withHeaders([
+                'access-key' => $accessKey,
+                'Accept' => 'application/json',
+                'Content-Type' => 'application/json'
+            ])->post($baseUrl . $endpoint, $data);
+            
+            // Log the response status and details for better debugging
+            if (!$response->successful()) {
+                // Log::error('Library API Error Response', [
+                //     'status' => $response->status(),
+                //     'error' => $response->json(),
+                //     'data_sent' => $data
+                // ]);
+            } else {
+                // Log::info('Library API Response', [
+                //     'status' => $response->status(),
+                //     'successful' => true
+                // ]);
+            }
+            
+            // Check if the request was successful or if it's just an 'already exists' error
+            if ($response->successful() || $this->isAlreadyExistsError($response)) {
+                // If it was a student-already-exists error, log it but treat as success
+                if (!$response->successful()) {
+                    // Log::info('Student already exists in library system - treating as success', [
+                    //     'student_id' => $isBulk ? 'bulk' : $studentId,
+                    //     'status' => $response->status()
+                    // ]);
+                }
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => $isBulk ? 'Students synced successfully' : 'Student synced successfully',
+                    'count' => $isBulk ? count($data['students']) : 1,
+                    'already_exists' => !$response->successful(),
+                    'data' => $response->json()
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to sync with library API',
+                    'error' => $response->json(),
+                    'status' => $response->status()
+                ], $response->status());
+            }
+        } catch (\Exception $e) {
+            // Log::error('Library API Sync Error', [
+            //     'message' => $e->getMessage(),
+            //     'trace' => $e->getTraceAsString()
+            // ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while syncing with the library API',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Sync a single student with the LMMU library API
+     *
+     * @param mixed $requestOrStudentId Request object or student ID string
+     * @param string|null $studentId Student ID to sync if first param is Request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncSingleStudentWithLibrary($requestOrStudentId, $studentId = null)
+    {
+        // Check if first parameter is a Request object or a student ID
+        if ($requestOrStudentId instanceof Request) {
+            $request = $requestOrStudentId;
+            
+            // If studentId is not provided as second param, check if it's in the request body
+            if (!$studentId && $request->has('student_id')) {
+                $studentId = $request->student_id;
+            }
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
+        } else {
+            // First parameter is the student ID
+            $studentId = $requestOrStudentId;
+            $request = new Request();
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
+        }
+    }
+    
+    /**
+     * Sync multiple students with the LMMU library API
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function syncMultipleStudentsWithLibrary(Request $request)
+    {
+        return $this->syncStudentsWithLibrary($request, null, true);
+    }
 
     /**
      * Process carry-over registration logic common to both student and admin registration
@@ -1576,4 +1790,506 @@ class StudentsController extends Controller
     //         'studentId', 'theNumberOfCourses', 'carryOverCoursesCount', 'carryOverCourses'
     //     );
     // }
+    
+    /**
+     * Helper method to check if the API error is just because student already exists
+     * 
+     * @param \Illuminate\Http\Client\Response $response
+     * @return bool
+     */
+    private function isAlreadyExistsError($response)
+    {
+        // Only consider 422 validation errors
+        if ($response->status() != 422) {
+            return false;
+        }
+        
+        $errorData = $response->json();
+        
+        // Check if the error contains 'already been taken' messages
+        if (isset($errorData['errors']) && is_array($errorData['errors'])) {
+            $alreadyExistsError = false;
+            
+            foreach ($errorData['errors'] as $error) {
+                if (strpos($error, 'already been taken') !== false) {
+                    $alreadyExistsError = true;
+                }
+            }
+            
+            return $alreadyExistsError;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Create Active Directory accounts for students
+     *
+     * @param Request $request
+     * @param string|null $studentId Optional student ID for single account creation
+     * @param bool $isBulk Whether to create accounts for multiple students or a single student
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createActiveDirectoryAccounts(Request $request, $studentId = null, $isBulk = false)
+    {
+        set_time_limit(12000000); // Set a long timeout for bulk operations
+        
+        try {
+            // AD configuration
+            $adServer = 'ldap://' . env('LDAP_SERVER'); // Add ldap:// prefix to the server IP/hostname
+            $adDomain = env('LDAP_DOMAIN'); // Example: lmmustudents.ac.zm
+            // Try using Administrator NETBIOS format (DOMAIN\username)
+            $domainNetbios = explode('.', $adDomain)[0]; // Get first part of domain (lmmustudents)
+            $adUsername = $domainNetbios . '\\' . env('LDAP_ADMIN_USERNAME');
+            $adPassword = env('LDAP_ADMIN_PASSWORD');
+            $adBaseDn = env('LDAP_BASE_DN'); // Example: OU=registeredStudents,DC=lmmustudents,DC=ac,DC=zm
+            $academicYear = 2025; // Current academic year
+            
+            // Check if we have the required AD configuration
+            if (!$adServer || !$adUsername || !$adPassword || !$adBaseDn) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Active Directory configuration is incomplete. Please check your environment variables.'
+                ], 500);
+            }
+            
+            // Data preparation
+            if ($isBulk) {
+                // Get all registered students for the current academic year
+                $registeredStudents = $this->getStudentNumbersForRegisteredStudents();
+                
+                if (empty($registeredStudents)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No registered students found for the current academic year'
+                    ], 404);
+                }
+                
+                // Log the total number of students to process
+                Log::info('Starting Active Directory account creation for ' . count($registeredStudents) . ' students');
+                
+                // Process results tracking
+                $results = [
+                    'created' => 0,
+                    'already_exists' => 0,
+                    'failed' => 0,
+                    'errors' => []
+                ];
+                
+                // Connect to AD
+                $ldapConn = ldap_connect($adServer);
+                
+                if (!$ldapConn) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to connect to Active Directory server'
+                    ], 500);
+                }
+                
+                ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
+                ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
+                
+                $bind = ldap_bind($ldapConn, $adUsername, $adPassword);
+                
+                if (!$bind) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to bind to Active Directory. Check your credentials.'
+                    ], 500);
+                }
+                
+                foreach ($registeredStudents as $studentId) {
+                    // Get student details from the database
+                    $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                    
+                    if (!$studentDetails) {
+                        Log::warning("Student details not found for ID: {$studentId}");
+                        $results['failed']++;
+                        $results['errors'][] = "Student details not found for ID: {$studentId}";
+                        continue;
+                    }
+                    
+                    // Check if user already exists
+                    $samAccountName = strtolower($studentDetails->StudentID);
+                    $filter = "(sAMAccountName={$samAccountName})";
+                    $search = ldap_search($ldapConn, $adBaseDn, $filter);
+                    $entries = ldap_get_entries($ldapConn, $search);
+                    
+                    if ($entries['count'] > 0) {
+                        // User already exists
+                        Log::info("User {$samAccountName} already exists in Active Directory.");
+                        $results['already_exists']++;
+                        continue;
+                    }
+                    
+                    // Clean name and prepare DN
+                    $cleanName = preg_replace('/[^a-zA-Z0-9 ]/', '', "{$studentDetails->FirstName} {$studentDetails->Surname}");
+                    // Create user directly in the OU specified in LDAP_BASE_DN
+                    $userDn = "CN={$cleanName},{$adBaseDn}";
+                    $userEmail = $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@{$adDomain}";
+                    
+                    // Log the DN we're trying to use
+                    Log::debug("Attempting to create user with DN: {$userDn}");
+                    
+                    // Generate a secure initial password (should be changed on first login)
+                    $initialPassword = $this->generateSecurePassword();
+                    
+                    // Prepare user attributes - use minimal set that works based on our tests
+                    $userAttrs = [
+                        'objectclass' => ['top', 'person', 'organizationalPerson', 'user'],
+                        'cn' => $cleanName,
+                        'sn' => $studentDetails->Surname,
+                        'givenname' => $studentDetails->FirstName,
+                        'displayname' => $cleanName,
+                        'sAMAccountName' => $samAccountName,
+                        'userPrincipalName' => "{$samAccountName}@{$adDomain}",
+                        'mail' => $userEmail,
+                        'description' => 'Student Account - LMMU',
+                        'employeeID' => $studentDetails->StudentID,
+                        'userAccountControl' => '514' // Disabled account for initial creation
+                    ];
+                    
+                    // Add user to AD
+                    $addUser = @ldap_add($ldapConn, $userDn, $userAttrs);
+                    
+                    if ($addUser) {
+                        // User created successfully, now set the password
+                        // Skip password setting for now, leave account created but disabled
+                        // This will create the accounts without setting passwords
+                        // We'll need to use a different approach for passwords
+                        
+                        // Log success even without password
+                        $modifyUser = true; // Consider account creation a success for now
+                        
+                        // Enable the account without setting a password
+                        $enableAccount = [
+                            'userAccountControl' => '514' // Disabled account
+                        ];
+                        $enableResult = @ldap_modify($ldapConn, $userDn, $enableAccount);
+                        
+                        if (!$enableResult) {
+                            Log::warning("Failed to set account properties for {$samAccountName}: " . ldap_error($ldapConn));
+                        }
+                        
+                        if ($modifyUser) {
+                            Log::info("Created Active Directory account for student {$samAccountName}");
+                            $results['created']++;
+                            
+                            // Add to appropriate student groups based on program, year, etc.
+                            $this->addUserToGroups($ldapConn, $userDn, $studentDetails);
+                            
+                            // Here you could send the password to the student via email or SMS
+                            // $this->notifyUserOfNewAccount($studentDetails, $initialPassword);
+                        } else {
+                            Log::error("Failed to set password for user {$samAccountName}: " . ldap_error($ldapConn));
+                            $results['failed']++;
+                            $results['errors'][] = "Created account for {$studentDetails->StudentID} but failed to set password";
+                        }
+                    } else {
+                        Log::error("Failed to create AD account for {$samAccountName}: " . ldap_error($ldapConn));
+                        $results['failed']++;
+                        $results['errors'][] = "Failed to create account for {$studentDetails->StudentID}: " . ldap_error($ldapConn);
+                    }
+                    
+                    // Log progress for every 10 students
+                    if (($results['created'] + $results['already_exists'] + $results['failed']) % 10 === 0) {
+                        Log::info("AD Account creation progress: Created {$results['created']}, Already Exists {$results['already_exists']}, Failed {$results['failed']}");
+                    }
+                }
+                
+                // Close the LDAP connection
+                ldap_unbind($ldapConn);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Active Directory account creation completed',
+                    'results' => $results
+                ]);
+                
+            } else {
+                // For single student, get data from database using the studentId
+                if (!$studentId) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Student ID is required for single student AD account creation'
+                    ], 400);
+                }
+                
+                $studentDetails = $this->getAppealStudentDetails($academicYear, [$studentId])->first();
+                
+                if (!$studentDetails) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Student details not found for ID: {$studentId}"
+                    ], 404);
+                }
+                
+                // Connect to AD
+                $ldapConn = ldap_connect($adServer);
+                
+                if (!$ldapConn) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to connect to Active Directory server'
+                    ], 500);
+                }
+                
+                ldap_set_option($ldapConn, LDAP_OPT_PROTOCOL_VERSION, 3);
+                ldap_set_option($ldapConn, LDAP_OPT_REFERRALS, 0);
+                
+                $bind = ldap_bind($ldapConn, $adUsername, $adPassword);
+                
+                if (!$bind) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Failed to bind to Active Directory. Check your credentials.'
+                    ], 500);
+                }
+                
+                // Check if user already exists
+                $samAccountName = strtolower($studentDetails->StudentID);
+                $filter = "(sAMAccountName={$samAccountName})";
+                $search = ldap_search($ldapConn, $adBaseDn, $filter);
+                $entries = ldap_get_entries($ldapConn, $search);
+                
+                if ($entries['count'] > 0) {
+                    // User already exists
+                    return response()->json([
+                        'success' => true,
+                        'message' => "User {$samAccountName} already exists in Active Directory.",
+                        'already_exists' => true
+                    ]);
+                }
+                
+    // Clean name and prepare DN
+    $cleanName = preg_replace('/[^a-zA-Z0-9 ]/', '', "{$studentDetails->FirstName} {$studentDetails->Surname}");
+    // Create user directly in the OU specified in LDAP_BASE_DN
+    $userDn = "CN={$cleanName},{$adBaseDn}";
+    $userEmail = $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@{$adDomain}";
+                
+    // Log the DN we're trying to use
+    Log::debug("Attempting to create user with DN: {$userDn}");
+                
+    // Generate a secure initial password (should be changed on first login)
+    $initialPassword = $this->generateSecurePassword();
+                
+    // Prepare user attributes - use minimal set that works based on our tests
+    $userAttrs = [
+        'objectclass' => ['top', 'person', 'organizationalPerson', 'user'],
+        'cn' => $cleanName,
+        'sn' => $studentDetails->Surname,
+        'givenname' => $studentDetails->FirstName,
+        'displayname' => $cleanName,
+        'sAMAccountName' => $samAccountName,
+        'userPrincipalName' => "{$samAccountName}@{$adDomain}",
+        'mail' => $userEmail,
+        'employeeID' => $studentDetails->StudentID,
+        'description' => 'Student Account - LMMU',
+        'userAccountControl' => '514' // Disabled account for initial creation
+    ];
+                // Add user to AD
+                $addUser = @ldap_add($ldapConn, $userDn, $userAttrs);
+                
+                if ($addUser) {
+                    // User created successfully, now set the password
+                    $encodedPassword = $this->encodePassword($initialPassword);
+                    $modAttrs = [
+                        'unicodePwd' => $encodedPassword
+                    ];
+                    
+                    $modifyUser = @ldap_modify($ldapConn, $userDn, $modAttrs);
+                    
+                    if ($modifyUser) {
+                        // Add to appropriate student groups based on program, year, etc.
+                        $this->addUserToGroups($ldapConn, $userDn, $studentDetails);
+                        
+                        // Close the LDAP connection
+                        ldap_unbind($ldapConn);
+                        
+                        return response()->json([
+                            'success' => true,
+                            'message' => "Created Active Directory account for student {$samAccountName}",
+                            'username' => $samAccountName,
+                            'password' => $initialPassword, // In production you might want to email this instead of returning it
+                            'email' => $userEmail
+                        ]);
+                        Log::info("Created Active Directory account for student {$samAccountName}");    
+                    } else {
+                        // Get the error message before closing the connection
+                        $errorMessage = ldap_error($ldapConn);
+                        
+                        // Close the LDAP connection
+                        ldap_unbind($ldapConn);
+                        
+                        Log::info("Failed to set password for student {$samAccountName}: {$errorMessage}");
+                        
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Created account but failed to set password for {$samAccountName}",
+                            'error' => $errorMessage
+                        ], 500);
+                    }
+                } else {
+                    // Get the error message before closing the connection
+                    $errorMessage = ldap_error($ldapConn);
+                    
+                    // Close the LDAP connection
+                    ldap_unbind($ldapConn);
+                    
+                    Log::info("Failed to create Active Directory account for {$samAccountName}: {$errorMessage}");
+                    
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Failed to create Active Directory account for {$samAccountName}",
+                        'error' => $errorMessage
+                    ], 500);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Active Directory Account Creation Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while creating Active Directory accounts',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
+    /**
+     * Create a single student Active Directory account
+     *
+     * @param mixed $requestOrStudentId Request object or student ID string
+     * @param string|null $studentId Student ID to use if first param is Request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createSingleActiveDirectoryAccount($requestOrStudentId, $studentId = null)
+    {
+        // Check if first parameter is a Request object or a student ID
+        if ($requestOrStudentId instanceof Request) {
+            $request = $requestOrStudentId;
+            
+            // If studentId is not provided as second param, check if it's in the request body
+            if (!$studentId && $request->has('student_id')) {
+                $studentId = $request->student_id;
+            }
+            
+            return $this->createActiveDirectoryAccounts($request, $studentId, false);
+        } else {
+            // First parameter is the student ID
+            $studentId = $requestOrStudentId;
+            $request = new Request();
+            
+            return $this->createActiveDirectoryAccounts($request, $studentId, false);
+        }
+    }
+    
+    /**
+     * Create Active Directory accounts for multiple students
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createMultipleActiveDirectoryAccounts(Request $request)
+    {
+        return $this->createActiveDirectoryAccounts($request, null, true);
+    }
+    
+    /**
+     * Generate a secure random password
+     *
+     * @return string
+     */
+    private function generateSecurePassword()
+    {
+        $upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $lower = 'abcdefghjkmnpqrstuvwxyz';
+        $numbers = '23456789';
+        $special = '!@#$%^&*';
+        
+        // Ensure at least one character from each set
+        $password = [
+            $upper[random_int(0, strlen($upper) - 1)],
+            $lower[random_int(0, strlen($lower) - 1)],
+            $numbers[random_int(0, strlen($numbers) - 1)],
+            $special[random_int(0, strlen($special) - 1)],
+        ];
+        
+        // Add more random characters to reach desired length (8-12)
+        $allChars = $upper . $lower . $numbers . $special;
+        $length = random_int(8, 12) - count($password);
+        
+        for ($i = 0; $i < $length; $i++) {
+            $password[] = $allChars[random_int(0, strlen($allChars) - 1)];
+        }
+        
+        // Shuffle the password characters and convert to string
+        shuffle($password);
+        return implode('', $password);
+    }
+    
+    /**
+     * Encode password for Active Directory
+     *
+     * @param string $password
+     * @return string
+     */
+    private function encodePassword($password)
+    {
+        // AD requires password to be encoded as UTF-16LE and surrounded by quotes
+        return iconv('UTF-8', 'UTF-16LE', '"' . $password . '"');
+    }
+    
+    /**
+     * Add a user to appropriate Active Directory groups based on their details
+     *
+     * @param resource $ldapConn Active Directory connection
+     * @param string $userDn User's Distinguished Name
+     * @param object $studentDetails Student details object
+     * @return void
+     */
+    private function addUserToGroups($ldapConn, $userDn, $studentDetails)
+    {
+        try {
+            // Base groups to add student to
+            $groups = [
+                'CN=All Students,OU=Groups,DC=lmmu,DC=ac,DC=zm'
+            ];
+            
+            // Add program-specific group if available
+            if (!empty($studentDetails->ProgramCode)) {
+                $programGroup = "CN={$studentDetails->ProgramCode} Students,OU=Program Groups,OU=Groups,DC=lmmu,DC=ac,DC=zm";
+                $groups[] = $programGroup;
+            }
+            
+            // Add year-specific group if available
+            if (!empty($studentDetails->YearOfStudy)) {
+                $yearGroup = "CN=Year {$studentDetails->YearOfStudy} Students,OU=Year Groups,OU=Groups,DC=lmmu,DC=ac,DC=zm";
+                $groups[] = $yearGroup;
+            }
+            
+            // Add student to each group
+            foreach ($groups as $groupDn) {
+                // First check if the group exists
+                $filter = '(objectClass=group)';
+                $result = @ldap_read($ldapConn, $groupDn, $filter);
+                
+                if ($result) {
+                    // Add the user to the group
+                    $groupInfo = [
+                        'member' => [$userDn]
+                    ];
+                    
+                    @ldap_mod_add($ldapConn, $groupDn, $groupInfo);
+                } else {
+                    Log::warning("Could not add user to group {$groupDn} - group may not exist");
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error("Error adding user to groups: {$e->getMessage()}");
+        }
+    }
 }

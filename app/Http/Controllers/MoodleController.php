@@ -38,7 +38,10 @@ class MoodleController extends Controller
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]);    
-        foreach($studentIds as $studentId){            
+        foreach($studentIds as $studentId){
+            $studentsController = new StudentsController();
+            $studentsController->syncSingleStudentWithLibrary($studentId); 
+            $studentsController->createSingleActiveDirectoryAccount($studentId);       
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
             $courseIds = $courses->pluck('Name');
