@@ -41,7 +41,7 @@ class MoodleController extends Controller
         foreach($studentIds as $studentId){
             $studentsController = new StudentsController();
             $studentsController->syncSingleStudentWithLibrary($studentId); 
-            $studentsController->createSingleActiveDirectoryAccount($studentId);       
+            // $studentsController->createSingleActiveDirectoryAccount($studentId);       
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
             $courseIds = $courses->pluck('Name');
