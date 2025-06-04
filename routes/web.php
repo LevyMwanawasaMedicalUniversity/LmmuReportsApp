@@ -123,9 +123,10 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::middleware('can:Student')->group(function () {
             Route::prefix('student')->group(function () {
-                Route::get('/viewDocket', [StudentsController::class, 'viewDocket'])->name('student.viewDocket');
+                //commented out docket route
+                // Route::get('/viewDocket', [StudentsController::class, 'viewDocket'])->name('student.viewDocket');
                 
-                Route::get('/viewSupplementaryDocket/{studentId?}', [StudentsController::class, 'viewSupplementaryDocket'])->name('student.viewSupplementaryDocket');
+                // Route::get('/viewSupplementaryDocket/{studentId?}', [StudentsController::class, 'viewSupplementaryDocket'])->name('student.viewSupplementaryDocket');
                 Route::get('/viewResults', [StudentsController::class, 'viewResults'])->name('student.viewResults');
                 Route::get('/coursesRegistration/{studentId}', [StudentsController::class, 'studentRegisterForCourses'])->name('student.coursesRegistration');
                 Route::get('/coursesRegistrationWithCarryOver/{studentId}', [StudentsController::class, 'studentRegisterForCoursesWithCarryOver'])->name('student.coursesRegistrationWithCarryOver');
