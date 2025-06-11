@@ -28,10 +28,14 @@ class EnrollStudentsCommand extends Command
                         ->where('course-electives.Year', 2025)
                         ->unique()
                         ->toArray();
-        // $studentIdsFromSisReports = CourseRegistration::pluck('StudentID')
-        //                 ->where('course-registration.Year', 2025)
-        //                 ->unique()
-        //                 ->toArray();
+        $studentIdsFromSisReports = CourseRegistration::pluck('course_registration.StudentID')
+                        ->join('student_study_link_s_r_s' , 'course_registration.StudentID', '=', 'student_study_link_s_r_s.student_id')
+                        ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
+                        ->where('course_registration.Year', 2025)
+                        ->where('study_s_r_s.study_shortname', '=', 'DipEHBridging')
+                        ->unique()
+                        ->toArray();
+
         // $studentIds = array_merge($studentIds, $studentIdsFromSisReports);
         // $studentIds = array_unique($studentIds);
         // $studentIds = array_values($studentIds); // Re-index the array
@@ -43,6 +47,9 @@ class EnrollStudentsCommand extends Command
         
         $moodleController = new MoodleController();
         
+        
+        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
+        
         // Not enrolling from SIS Reports - comment out this code
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
@@ -50,6 +57,7 @@ class EnrollStudentsCommand extends Command
         foreach ($studentBatches as $index => $batch) {
             $this->info('Processing batch ' . ($index + 1) . ' of ' . count($studentBatches));
             $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($batch);
+
             // Add a short delay between batches to prevent overloading the server
             if ($index < count($studentBatches) - 1) {
                 sleep(2);
