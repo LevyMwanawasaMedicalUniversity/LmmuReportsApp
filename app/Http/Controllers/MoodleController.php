@@ -45,6 +45,9 @@ class MoodleController extends Controller
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
             $courseIds = $courses->pluck('Name');
+            if($student->StudyType == 'Distance'){
+                $courseIds->push('ODL_2025');
+            }
             $user = $this->createUserAccountIfDoesNotExist($student);
             if ($user) {
                 $this->assignUserToRoleIfNotAssigned($courseIds, $user->id);
