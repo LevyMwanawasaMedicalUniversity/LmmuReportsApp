@@ -47,8 +47,10 @@ class EnrollStudentsCommand extends Command
         
         $moodleController = new MoodleController();
         
-        
-        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
+        ////////////////////////////////////////////////////////////////////////////
+        //ADD BRIDGING STUDENTS COURSE UNCOMMENT THIS CODE IF YOU WANT TO ENROLL FROM SIS REPORTS
+        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
+        /////////////////////////////////////////////////////////////////////////////
         
         // Not enrolling from SIS Reports - comment out this code
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
