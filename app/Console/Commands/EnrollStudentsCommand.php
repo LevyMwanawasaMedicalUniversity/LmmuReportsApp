@@ -49,7 +49,7 @@ class EnrollStudentsCommand extends Command
         
         ////////////////////////////////////////////////////////////////////////////
         //ADD BRIDGING STUDENTS COURSE UNCOMMENT THIS CODE IF YOU WANT TO ENROLL FROM SIS REPORTS
-        // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
+        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
         /////////////////////////////////////////////////////////////////////////////
         
         // Not enrolling from SIS Reports - comment out this code

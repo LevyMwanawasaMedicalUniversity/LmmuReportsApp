@@ -22,6 +22,8 @@ class MoodleController extends Controller
 
     public function addStudentsToMoodleAndEnrollInCourses($studentIds){   
         set_time_limit(12000000);    
+        MoodleUserEnrolments::where('timeend', '>', 0)        
+            ->update(['timeend' => strtotime('2025-12-31')]); 
         foreach($studentIds as $studentId){            
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistration($studentId);
