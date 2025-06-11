@@ -45,6 +45,7 @@ class MoodleController extends Controller
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
             $courseIds = $courses->pluck('Name');
+            //Appending ODL_2025 for Distance students 
             if($student->StudyType == 'Distance'){
                 $courseIds->push('ODL_2025');
             }
