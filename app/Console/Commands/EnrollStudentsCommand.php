@@ -28,13 +28,14 @@ class EnrollStudentsCommand extends Command
                         ->where('course-electives.Year', 2025)
                         ->unique()
                         ->toArray();
-        $studentIdsFromSisReports = CourseRegistration::pluck('course_registration.StudentID')
-                        ->join('student_study_link_s_r_s' , 'course_registration.StudentID', '=', 'student_study_link_s_r_s.student_id')
-                        ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
-                        ->where('course_registration.Year', 2025)
-                        ->where('study_s_r_s.study_shortname', '=', 'DipEHBridging')
-                        ->unique()
-                        ->toArray();
+        $studentIdsFromSisReports = CourseRegistration::query()
+                    ->join('student_study_link_s_r_s', 'course_registration.StudentID', '=', 'student_study_link_s_r_s.student_id')
+                    ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
+                    ->where('course_registration.Year', 2025)
+                    ->where('study_s_r_s.study_shortname', '=', 'DipEHBridging')
+                    ->pluck('course_registration.StudentID')
+                    ->unique()
+                    ->toArray();
 
         // $studentIds = array_merge($studentIds, $studentIdsFromSisReports);
         // $studentIds = array_unique($studentIds);
