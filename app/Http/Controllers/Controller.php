@@ -2522,48 +2522,30 @@ class Controller extends BaseController
             'basic_information_s_r_s.GovernmentID',
             'basic_information_s_r_s.Sex',
             'basic_information_s_r_s.PrivateEmail',
-            // 'basic_information_s_r_s.MobilePhone',
             'basic_information_s_r_s.StudyType',
             DB::raw('study_s_r_s.study_name AS ProgrammeName'),
-            // DB::raw('study_s_r_s.study_shortname AS ProgrammeCode'),
             DB::raw('study_s_r_s.study_id AS StudyID'),
-            DB::raw('courses_s_r_s.course_name AS CourseName'),
             DB::raw('schools_s_r_s.school_name AS School'),
-            
+            // Remove course related fields
             DB::raw("
                 CASE 
                     WHEN `basic_information_s_r_s`.StudentID LIKE '250%' THEN 'NEWLY ADMITTED'
                     ELSE 'RETURNING STUDENT'
                 END AS 'StudentType'
-            "), 
-            DB::raw("
-                CASE 
-                    WHEN program_s_r_s.program_name LIKE '%y1' THEN 'YEAR 1'
-                    WHEN program_s_r_s.program_name LIKE '%y2' THEN 'YEAR 2'
-                    WHEN program_s_r_s.program_name LIKE '%y3' THEN 'YEAR 3'
-                    WHEN program_s_r_s.program_name LIKE '%y4' THEN 'YEAR 4'
-                    WHEN program_s_r_s.program_name LIKE '%y5' THEN 'YEAR 5'
-                    WHEN program_s_r_s.program_name LIKE '%y6' THEN 'YEAR 6'
-                    WHEN program_s_r_s.program_name LIKE '%y8' THEN 'YEAR 1'
-                    WHEN program_s_r_s.program_name LIKE '%y9' THEN 'YEAR 2'
-                    ELSE 'NO REGISTRATION'
-                END AS YearOfStudy
-            ")           
+            ")
         )
         ->join('student_study_link_s_r_s', 'student_study_link_s_r_s.student_id', '=', 'basic_information_s_r_s.StudentID')
         ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
-        ->join('schools_s_r_s', 'study_s_r_s.parent_id', '=', 'schools_s_r_s.school_id') 
-        ->join('course_registration', function ($join) use ($academicYear) {
-            $join->on('basic_information_s_r_s.StudentID', '=', 'course_registration.StudentID')
-                ->where('course_registration.Year', '=', $academicYear);
+        ->join('schools_s_r_s', 'study_s_r_s.parent_id', '=', 'schools_s_r_s.school_id')
+        ->whereExists(function ($query) use ($academicYear) {
+            $query->select(DB::raw(1))
+                ->from('course_registration')
+                ->whereRaw('course_registration.StudentID = basic_information_s_r_s.StudentID')
+                ->where('course_registration.Year', '=', $academicYear)
+                ->where('course_registration.created_at', '>', '2024-10-01');
         })
-        ->join('courses_s_r_s', 'course_registration.CourseID', '=', 'courses_s_r_s.course_name')
-        ->join('program_course_links_s_r_s', 'courses_s_r_s.course_id', '=', 'program_course_links_s_r_s.course_id')
-        ->join('program_s_r_s', 'program_course_links_s_r_s.program_id', '=', 'program_s_r_s.programme_id')
         ->whereRaw('LENGTH(`basic_information_s_r_s`.StudentID) > 7')
-        ->where('course_registration.created_at', '>', '2024-10-01')
-        // ->whereNotIn('basic_information_s_r_s.StudentID', $eduroleArray)
-        ->distinct('basic_information_s_r_s.StudentID');
+        ->groupBy('basic_information_s_r_s.StudentID');
         
         return $results;
     }
