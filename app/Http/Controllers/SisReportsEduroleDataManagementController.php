@@ -53,6 +53,15 @@ class SisReportsEduroleDataManagementController extends Controller
                         ->pluck('StudentID')
                         ->unique()
                         ->toArray();
+
+        $studentIdsFromSisReports = CourseRegistration::query()
+                    ->join('student_study_link_s_r_s', 'course_registration.StudentID', '=', 'student_study_link_s_r_s.student_id')
+                    ->join('study_s_r_s', 'student_study_link_s_r_s.study_id', '=', 'study_s_r_s.study_id')
+                    ->where('course_registration.Year', 2025)
+                    ->where('study_s_r_s.study_shortname', '=', 'DipEHBridging')
+                    ->pluck('course_registration.StudentID')
+                    ->unique()
+                    ->toArray();
         // $studentIdSisReports = CourseRegistration::pluck('StudentID')
         //                 ->unique()
         //                 ->toArray();
@@ -62,6 +71,7 @@ class SisReportsEduroleDataManagementController extends Controller
         
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
 
+        $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
         // $studentsController = new StudentsController();
         // $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
