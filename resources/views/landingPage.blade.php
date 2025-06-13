@@ -51,6 +51,27 @@
                 max-width: 100%;
                 height: auto !important;
             }
+            
+            /* Scrollable chart container */
+            .chart-area.scrollable {
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #f96332 #f1f1f1;
+            }
+            
+            .chart-area.scrollable::-webkit-scrollbar {
+                width: 8px;
+            }
+            
+            .chart-area.scrollable::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+            
+            .chart-area.scrollable::-webkit-scrollbar-thumb {
+                background: #f96332;
+                border-radius: 10px;
+            }
           </style>
           <div id="loadingTable" class="loading">Loading...</div>
           <table class="table table-striped table-hover" style="display: none;">
@@ -136,23 +157,7 @@
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <div class="card  card-tasks">
-          <div class="card-header ">
-            <h4 class="card-title">Programmes</h4>
-          </div>
-          <div class="card-body" style="height: 500px;">
-            <div class="chart-area" style="height: 100%; width: 100%; position: relative;">
-              <div style="height: 100%;">
-                <canvas id="barChartSimpleGradientsNumbersProgrammes" style="width: 100%; height: 100%;"></canvas>
-                <div class="loading" id="loadingBarChartSimpleGradientsNumbersProgrammes">Loading...</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    
   </div>
 @endsection
 
@@ -166,8 +171,7 @@
       'loadingPieChartExample',
       'loadingLineChartExampleWithNumbersAndGrid',
       'loadingBarChartSimpleGradientsNumbers',
-      'loadingBarChartSimpleGradientsNumbersYearOfStudy',
-      'loadingBarChartSimpleGradientsNumbersProgrammes'
+      'loadingBarChartSimpleGradientsNumbersYearOfStudy'
     ];
 
     function showLoading() {
@@ -222,7 +226,6 @@
         updateLineChartExampleWithNumbersAndGrid(eduroleRegisteredStudents, sisReportsRegisteredStudents);
         updateBarChartSimpleGradientsNumbers(eduroleRegisteredStudents, sisReportsRegisteredStudents);
         updateBarChartSimpleGradientsNumbersYearOfStudy(eduroleRegisteredStudents, sisReportsRegisteredStudents);
-        updateBarChartSimpleGradientsNumbersProgrammes(eduroleRegisteredStudents, sisReportsRegisteredStudents);
         
         hideLoading();
       });
@@ -509,110 +512,7 @@
       document.getElementById('loadingBarChartSimpleGradientsNumbersYearOfStudy').style.display = 'none';
     }
 
-    function updateBarChartSimpleGradientsNumbersProgrammes(edurole, sisReports) {
-      const ctx = document.getElementById('barChartSimpleGradientsNumbersProgrammes').getContext('2d');
-      
-      // Create a combined mapping of both programme names and codes
-      const programmeCounts = {};
-      
-      // Process Edurole data - use ProgrammeName first, then fall back to StudyID
-      edurole.forEach(student => {
-        const programmeKey = student.ProgrammeName || student.StudyID || 'Unknown';
-        programmeCounts[programmeKey] = (programmeCounts[programmeKey] || 0) + 1;
-      });
-      
-      // Process SIS Reports data
-      sisReports.forEach(student => {
-        const programmeKey = student.ProgrammeName || student.StudyID || 'Unknown';
-        programmeCounts[programmeKey] = (programmeCounts[programmeKey] || 0) + 1;
-      });
 
-      // Sort programs by count for better visualization
-      const sortedProgrammes = Object.keys(programmeCounts).sort((a, b) => 
-        programmeCounts[b] - programmeCounts[a]
-      );
-      
-      // Take top 15 programs for better readability
-      const topProgrammes = sortedProgrammes.slice(0, 15);
-      
-      // Prepare shortened labels for better display
-      const shortLabels = topProgrammes.map(label => 
-        label.length > 25 ? label.substring(0, 22) + '...' : label
-      );
-      
-      const programmeData = topProgrammes.map(label => programmeCounts[label] || 0);
-
-      const chart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: shortLabels,
-          datasets: [{
-            label: 'Student Count',
-            data: programmeData,
-            backgroundColor: 'rgba(54, 162, 235, 0.8)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-            borderRadius: 4,
-            barPercentage: 0.7,
-            categoryPercentage: 0.8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: 'y',  // Horizontal bar chart for better label display
-          barThickness: 'flex',
-          maxBarThickness: 25,
-          plugins: {
-            legend: {
-              display: false
-            },
-            tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              titleFont: {
-                size: 13
-              },
-              bodyFont: {
-                size: 12
-              },
-              callbacks: {
-                title: function(context) {
-                  // Show full program name in tooltip
-                  const index = context[0].dataIndex;
-                  return topProgrammes[index];
-                },
-                label: function(context) {
-                  return 'Students: ' + context.raw;
-                }
-              },
-              padding: 10
-            }
-          },
-          scales: {
-            y: {
-              grid: {
-                display: false
-              },
-              ticks: {
-                font: {
-                  size: 11
-                }
-              }
-            },
-            x: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(0, 0, 0, 0.05)'
-              },
-              ticks: {
-                precision: 0
-              }
-            }
-          }
-        }
-      });
-      document.getElementById('loadingBarChartSimpleGradientsNumbersProgrammes').style.display = 'none';
-    }
   });
 </script>
 @endpush
