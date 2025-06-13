@@ -60,12 +60,12 @@
         </li> --}}
       @endif
       @if ((auth()->user()->hasRole('Academics')) || (auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Dosa')) || (auth()->user()->hasRole('Developer')))
-      <li class = "@if ($activePage == 'registrationCheck') active @endif">
+      {{-- <li class = "@if ($activePage == 'registrationCheck') active @endif">
         <a href="{{ route('academics.registrationCheck') }}">
           <i class="now-ui-icons education_glasses"></i>
           <p>{{ __('Registration Check') }}</p>
         </a>
-      </li> 
+      </li>  --}}
       @endif
       @if ((auth()->user()->hasRole('Administrator')) || (auth()->user()->hasRole('Developer')) )
         <li>

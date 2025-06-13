@@ -255,8 +255,12 @@ class AcademicQueriesController extends Controller
     
     public function examMdificationAuditTrail(Request $request){
         $academicYear = $request->input('academicYear');
+        
+        // For large datasets, we might want to paginate or limit results
+        // But we'll still get all data for the Excel export functionality
         $results = $this->getExamModificationAuditTrail()->get();
-        return view('academics.reports.examModificationAuditTrail',compact('results'));
+        
+        return view('academics.reports.examModificationAuditTrail', compact('results'));
     }
 
     

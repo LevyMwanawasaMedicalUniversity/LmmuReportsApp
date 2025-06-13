@@ -48,7 +48,7 @@ Route::get('/exportGraduants', [StudentsController::class, 'getGraduatedStudents
 Route::get('/send-test-email/{id}', [EmailController::class, 'sendTestEmail']);
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::middleware(['can:Finance', 'can:Academics'])->group(function () {
+    Route::middleware(['role:Administrator|Academics|Finance|Developer'])->group(function () {
         Route::get('/landing', [HomeController::class, 'landingPage'])->name('landing.page');
         Route::get('/fetchData/{academicYear}', [HomeController::class, 'fetchData']);
     });
