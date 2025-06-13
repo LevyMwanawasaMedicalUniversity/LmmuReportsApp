@@ -2513,6 +2513,7 @@ class Controller extends BaseController
         return $results;
     }
 
+   
     private function queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear) {
         $results = BasicInformationSR::select(
             'basic_information_s_r_s.FirstName',
@@ -2526,7 +2527,6 @@ class Controller extends BaseController
             DB::raw('study_s_r_s.study_name AS ProgrammeName'),
             DB::raw('study_s_r_s.study_id AS StudyID'),
             DB::raw('schools_s_r_s.school_name AS School'),
-            // Remove course related fields
             DB::raw("
                 CASE 
                     WHEN `basic_information_s_r_s`.StudentID LIKE '250%' THEN 'NEWLY ADMITTED'
@@ -2545,7 +2545,19 @@ class Controller extends BaseController
                 ->where('course_registration.created_at', '>', '2024-10-01');
         })
         ->whereRaw('LENGTH(`basic_information_s_r_s`.StudentID) > 7')
-        ->groupBy('basic_information_s_r_s.StudentID');
+        ->groupBy(
+            'basic_information_s_r_s.StudentID',
+            'basic_information_s_r_s.FirstName',
+            'basic_information_s_r_s.MiddleName',
+            'basic_information_s_r_s.Surname',
+            'basic_information_s_r_s.GovernmentID',
+            'basic_information_s_r_s.Sex',
+            'basic_information_s_r_s.PrivateEmail',
+            'basic_information_s_r_s.StudyType',
+            'study_s_r_s.study_name',
+            'study_s_r_s.study_id',
+            'schools_s_r_s.school_name'
+        );
         
         return $results;
     }
