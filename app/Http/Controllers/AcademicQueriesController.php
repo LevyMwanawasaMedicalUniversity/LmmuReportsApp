@@ -51,7 +51,8 @@ class AcademicQueriesController extends Controller
             'Mode Of Study',
             'Programme Name',
             'Year Of Study',
-            'School Name'
+            'School Name',
+            'Registration Date'
         ];
         
         $rowData = [
@@ -64,7 +65,8 @@ class AcademicQueriesController extends Controller
             'StudyType',
             'ProgrammeName',
             'YearOfStudy',
-            'SchoolName'
+            'SchoolName',
+            'RegistrationDate'
         ];        
         $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->get();        
         $filename = 'AllStudentsRegisteredInASpecificAcademicYear' . $academicYear;

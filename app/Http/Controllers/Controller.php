@@ -1582,6 +1582,7 @@ class Controller extends BaseController
                     's.Name AS ProgrammeName',
                     'p.Year AS YearOfStudy',
                     'schools.Name AS SchoolName',
+                    'ce.EnrolmentDate AS RegistrationDate', 
                 )
                 ->join('course-electives AS ce', 'ce.StudentID', '=', 'basic-information.ID')
                 ->join('student-study-link AS ssl', 'ssl.StudentID', '=', 'basic-information.ID')
