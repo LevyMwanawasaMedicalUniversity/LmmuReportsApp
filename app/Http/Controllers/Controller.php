@@ -1552,9 +1552,19 @@ class Controller extends BaseController
                     'basic-information.MiddleName',
                     'basic-information.Surname',
                     'basic-information.PrivateEmail',
-                    'basic-information.ID'
+                    'basic-information.ID',
+                    'basic-information.GovernmentID',
+                    'basic-information.StudyType',
+                    's.Name AS ProgrammeName',
+                    'p.Year AS YearOfStudy',
+                    'schools.Name AS SchoolName',
                 )
                 ->join('course-electives AS ce', 'ce.StudentID', '=', 'basic-information.ID')
+                ->join('student-study-link AS ssl', 'ssl.StudentID', '=', 'basic-information.ID')
+                ->join('study AS s', 'ssl.StudyID', '=', 's.ID')
+                ->join('schools AS schools', 's.ParentID', '=', 'schools.ID')
+                ->join('program-course-link AS pcl', 'pcl.CourseID', '=', 'ce.CourseID')
+                ->join('programmes AS p', 'p.ID', '=', 'pcl.ProgramID')
                 ->whereRaw('LENGTH(`basic-information`.`ID`) > 7')
                 ->where(function ($query) {
                     $query->where('basic-information.StudyType', '=', 'Fulltime')

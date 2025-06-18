@@ -28,6 +28,7 @@
                                     <option value="2022" {{ $academicYear == '2022' ? 'selected' : '' }}>2022</option>
                                     <option value="2023" {{ $academicYear == '2023' ? 'selected' : '' }}>2023</option>
                                     <option value="2024" {{ $academicYear == '2024' ? 'selected' : '' }}>2024</option>
+                                    <option value="2024" {{ $academicYear == '2025' ? 'selected' : '' }}>2025</option>
                                 </select>
                             </div>
                         </div>
@@ -56,6 +57,11 @@
                                     <th>Middle Namee</th>
                                     <th>Surname</th>
                                     <th>Student Number</th>
+                                    <th>NRC</th>
+                                    <th>Mode Of Study</th>
+                                    <th>Programme Name</th>
+                                    <th>Year Of Study</th>
+                                    <th>School</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -65,6 +71,11 @@
                                     <td>{{$result->MiddleName}}</td>
                                     <td>{{$result->Surname}}</td>
                                     <td>{{$result->ID}}</td>
+                                    <td>{{$result->GovernmentID}}</td>
+                                    <td>{{$result->StudyType}}</td>
+                                    <td>{{$result->ProgrammeName}}</td>
+                                    <td>{{$result->YearOfStudy}}</td>
+                                    <td>{{$result->SchoolName}}</td>
                                 </tr>
                                 @endforeach
                             </tbody>

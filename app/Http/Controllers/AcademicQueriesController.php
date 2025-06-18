@@ -31,10 +31,11 @@ class AcademicQueriesController extends Controller
         $academicYear = $request->input('academicYear');
 
         if ($academicYear === null) {
-            $results = [];
-        } else {
+            $academicYear = 2025;        
             $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->paginate('20');
         }        
+
+        // return $results;
         return view('academics.reports.viewAllStudentsRegisteredInASpecificAcademicYear',compact('results','academicYear'));
     }      
 
@@ -45,7 +46,12 @@ class AcademicQueriesController extends Controller
             'Middle Name',
             'Surname',
             'Email',
-            'Student Number'
+            'Student Number',
+            'NRC',
+            'Mode Of Study',
+            'Programme Name',
+            'Year Of Study',
+            'School Name'
         ];
         
         $rowData = [
@@ -54,6 +60,11 @@ class AcademicQueriesController extends Controller
             'Surname',
             'PrivateEmail',
             'ID',
+            'GovernmentID',
+            'StudyType',
+            'ProgrammeName',
+            'YearOfStudy',
+            'SchoolName'
         ];        
         $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->get();        
         $filename = 'AllStudentsRegisteredInASpecificAcademicYear' . $academicYear;
@@ -78,7 +89,7 @@ class AcademicQueriesController extends Controller
         $courseCode = $request->input('courseCode');
 
         if ($academicYear === null) {            
-            $academicYear = 2024;
+            $academicYear = 2025;
         }
 
         $results = $this->getStudentsUnderNaturalScienceSchool($academicYear,$courseCode);
