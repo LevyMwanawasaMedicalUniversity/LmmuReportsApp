@@ -30,5 +30,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    
+    'library_api' => [
+        'url' => env('ASTRIA_BASE_URL'),
+        'key' => env('ASTRIA_API_KEY'),
+        'timeout' => env('ASTRIA_API_TIMEOUT', 30),
+    ],
 
 ];
