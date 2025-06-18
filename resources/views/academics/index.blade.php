@@ -27,6 +27,15 @@
                     </thead>
                     <tbody>
                       <tr>
+                        <td><a href="{{ route('viewRegisteredStudentsAccordingToProgramme') }}">Registered students in a specific Program</a></td>
+                        <td>For example, if your goal is to pull all registered  students taking a SPECIFIC PROGRAMME</td>
+                      </tr> 
+                      <tr>
+                        <td><a href="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}">Registered students in a specific programme and their year of study</a></td>
+                        <td>For example, if your goal is to pull all registered Fourth YEAR students taking MBCHB</td>
+                      </tr>
+                      
+                      <tr>
                         <td><a href="{{ route('viewStudentsUnderNaturalScienceSchool') }}">Natural Sciences Classlists</a></td>
                         <td>View Students Registered under the School Of Natural Sciences. You can go further and view students registered under a specific course be it MAT101, PHY101, CHM101 or BIO101. </td>
                       </tr>
@@ -61,15 +70,7 @@
                       <tr>
                         <td><a href="{{ route('viewRegisteredStudentsPerYearInYearOfStudy') }}">Registered Students per year in year of study</a></td>
                         <td>This is a report of students registered in a specific academic and in a specific year of study. For example, if you want to see a list of first-year students that registered in 2022</td>
-                      </tr>
-                      <tr>
-                        <td><a href="{{ route('viewRegisteredStudentsAccordingToProgrammeAndYearOfStudy') }}">Registered students in a specific programme and their year of study</a></td>
-                        <td>For example, if your goal is to pull all registered Fourth YEAR students taking MBCHB</td>
-                      </tr>
-                      <tr>
-                        <td><a href="{{ route('viewRegisteredStudentsAccordingToProgramme') }}">Registered students in a specific Program</a></td>
-                        <td>For example, if your goal is to pull all registered  students taking a SPECIFIC PROGRAMME</td>
-                      </tr>                      
+                      </tr>                                           
                       <tr>
                         <td><a href="{{ route('viewRegisteredAndUnregisteredPerYear') }}">Registered and Unregistered Students per Year</a></td>
                         <td>Generate a list of students with and without a registration in a specified academic year.</td>
