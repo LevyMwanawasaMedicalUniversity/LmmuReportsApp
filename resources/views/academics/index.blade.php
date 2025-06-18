@@ -67,6 +67,10 @@
                         <td>For example, if your goal is to pull all registered Fourth YEAR students taking MBCHB</td>
                       </tr>
                       <tr>
+                        <td><a href="{{ route('viewRegisteredStudentsAccordingToProgramme') }}">Registered students in a specific Program</a></td>
+                        <td>For example, if your goal is to pull all registered  students taking a SPECIFIC PROGRAMME</td>
+                      </tr>                      
+                      <tr>
                         <td><a href="{{ route('viewRegisteredAndUnregisteredPerYear') }}">Registered and Unregistered Students per Year</a></td>
                         <td>Generate a list of students with and without a registration in a specified academic year.</td>
                       </tr>

@@ -441,7 +441,8 @@ class AcademicQueriesController extends Controller
             'STUDY MODE',
             'GENDER',
             'NRC',            
-            'SCHOOL'
+            'SCHOOL',
+            'YEAR OF STUDY'
         ];
 
         $rowData = [
@@ -453,7 +454,8 @@ class AcademicQueriesController extends Controller
             'StudyType',
             'Sex',
             'GovernmentID',
-            'School'
+            'School',
+            'YearOfStudy'
         ];
 
         $results = $this->getRegisteredStudentsAccordingToProgrammeAndYearOfStudy($academicYear, $yearOfStudy,$programmeName)->get();
@@ -557,6 +559,24 @@ class AcademicQueriesController extends Controller
         
     }
 
+    public function viewRegisteredStudentsAccordingToProgramme(Request $request){
+        
+        $academicYear = $request->input('academicYear');      
+        $programmeName = $request->input('programmeName');
+        $schoolName = $request->input('schoolName');
+
+        if ($academicYear === null) {
+            $results = [];
+        } else {
+            $results = $this->getRegisteredStudentsAccordingToProgramme($academicYear,$programmeName)->paginate('20');
+        }    
+        
+        return view('academics.reports.viewRegisteredStudentsAccordingToProgramme',compact('results','academicYear','programmeName','schoolName'));
+        
+    }
+
+    
+
     public function emailAnnouncement(){
         return view('academics.emailAnnouncement');
     }
@@ -578,5 +598,40 @@ class AcademicQueriesController extends Controller
 
 
         return view('academics.reports.viewUnregisteredStudentsEligibleForRegistration');
+    }
+
+    
+
+    public function exportRegisteredStudentsAccordingToProgramme($academicYear,$programmeName){
+
+        $headers = [
+            'FIRSTNAME',
+            'MIDDLENAME',
+            'SURNAME',
+            'STUDENT NUMBER',
+            'PROGRAMME NAME',
+            'STUDY MODE',
+            'GENDER',
+            'NRC',            
+            'SCHOOL',
+            'YEAR OF STUDY'
+        ];
+
+        $rowData = [
+            'FirstName',
+            'MiddleName',
+            'Surname',
+            'ID',            
+            'ProgrammeName',
+            'StudyType',
+            'Sex',
+            'GovernmentID',
+            'School',
+            'YearOfStudy'
+        ];
+
+        $results = $this->getRegisteredStudentsAccordingToProgramme($academicYear, $programmeName)->get();
+        $filename = 'AllRegisteredStudentsAccordingToProgramme' . $academicYear .' '.$programmeName;
+        return $this->exportData($headers, $rowData, $results, $filename);
     }
 }

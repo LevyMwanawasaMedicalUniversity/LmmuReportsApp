@@ -166,6 +166,14 @@ class Controller extends BaseController
         return $results;
     }
 
+    public function getRegisteredStudentsAccordingToProgramme($academicYear,$programmeName){
+        $results = $this->queryRegisteredStudentsAccordingToProgramme($academicYear, $programmeName);
+        return $results;
+    }
+
+
+    
+
     public function getRegisteredAndUnregisteredPerYear($academicYear){
         $results= $this->queryRegisteredAndUnregisteredPerYear($academicYear);
         return $results;
@@ -1507,6 +1515,22 @@ class Controller extends BaseController
         // $results = $resultsSisReports->merge($resultsEdurole);
         // return $results;
     }
+
+    private function queryRegisteredStudentsAccordingToProgramme($academicYear, $programmeName){
+        $queryEdurole = $this->queryRegistrationsFromeEduroleBasedOnReturningAndNewlyAdmittedStudents($academicYear);
+        $querySisReports = $this->queryRegistrationsFromSisReportsBasedOnReturningAndNewlyAdmittedStudents($academicYear);
+        $resultsSisReports = $querySisReports->where('study_s_r_s.study_shortname', '=',$programmeName);
+        $resultsEdurole = $queryEdurole->where('study.ShortName', '=',$programmeName);
+
+        $combinedResults = $resultsSisReports->unionAll($resultsEdurole);
+
+        return $resultsEdurole;
+        // $results = $resultsSisReports->merge($resultsEdurole);
+        // return $results;
+    }
+
+
+    
     
 
     private function queryRegisteredStudentsPerYearInYearOfStudy($academicYear){
