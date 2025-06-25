@@ -18,7 +18,7 @@ SELECT
         WHEN bi.ID LIKE '230%' THEN '2022'
         WHEN bi.ID LIKE '240%' THEN '2023'
         ELSE '2024'
-    END AS Year,    
+    END AS Year   
 FROM 
     `basic-information` bi
 JOIN `student-study-link` ssl3 ON ssl3.StudentID = bi.ID
