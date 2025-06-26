@@ -35,6 +35,8 @@ return [
         'url' => env('ASTRIA_BASE_URL'),
         'key' => env('ASTRIA_API_KEY'),
         'timeout' => env('ASTRIA_API_TIMEOUT', 30),
+        'max_retries' => env('ASTRIA_API_MAX_RETRIES', 3),
+        'retry_delay' => env('ASTRIA_API_RETRY_DELAY', 1000), // milliseconds
     ],
 
 ];

@@ -20,15 +20,16 @@ class MoodleController extends Controller
         return $homeController->index();
     }
 
+   
     public function addStudentsToMoodleAndEnrollInCourses($studentIds){   
         set_time_limit(12000000);    
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]); 
             
-            $studentsController = new StudentsController();
+        $studentsController = new StudentsController();
         foreach($studentIds as $studentId){            
-            
-            $studentsController->syncSingleStudentWithLibrary($studentId);
+            // Use the new helper method
+            // $this->syncStudentWithLibrary($studentId);
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistration($studentId);
             $courseIds = $courses->pluck('CourseID');
@@ -40,14 +41,50 @@ class MoodleController extends Controller
         }
     }
 
+    /**
+     * Sync a student with the library system using StudentsController
+     *
+     * @param string $studentId The student ID to sync
+     * @return \Illuminate\Http\JsonResponse
+     */
+    private function syncStudentWithLibrary($studentId)
+    {
+        try {
+            // Log the sync operation
+            Log::info('MoodleController initiating library sync', ['studentId' => $studentId]);
+            
+            // Create a mock request object
+            $request = new Request();
+            
+            // Get the StudentsController instance
+            $studentsController = new StudentsController();
+            
+            // Call the syncStudentsWithLibrary method with the request and studentId
+            return $studentsController->syncStudentsWithLibrary($request, $studentId, false);
+        } catch (\Exception $e) {
+            // Log the error but continue with other operations
+            Log::error('Error during library sync from MoodleController', [
+                'studentId' => $studentId,
+                'error' => $e->getMessage()
+            ]);
+            
+            // Return a generic response to avoid breaking the flow
+            return response()->json([
+                'success' => false,
+                'message' => 'Library sync failed but Moodle operation continues',
+                'error' => app()->environment('production') ? 'Internal server error' : $e->getMessage()
+            ]);
+        }
+    }
+
     public function addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds){   
         set_time_limit(12000000);
         MoodleUserEnrolments::where('timeend', '>', 0)        
             ->update(['timeend' => strtotime('2025-12-31')]); 
             
-            $studentsController = new StudentsController();   
         foreach($studentIds as $studentId){
-            $studentsController->syncSingleStudentWithLibrary($studentId); 
+            // Use the new helper method
+            // $this->syncStudentWithLibrary($studentId);
             // $studentsController->createSingleActiveDirectoryAccount($studentId);       
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
@@ -55,28 +92,6 @@ class MoodleController extends Controller
             //Appending ODL_2025 for Distance students 
             if($student->StudyType == 'Distance'){
                 $courseIds->push('ODL_2025');
-
-                //CORRECTING THE STUDENT ROLE ASSIGNMENT FOR DISTANCE STUDENTS
-
-                // INSERT INTO mdl_role_assignments (roleid, contextid, userid, timemodified)
-                //     SELECT 
-                //         5, -- Replace with your student role ID if different
-                //         ctx.id,
-                //         ue.userid,
-                //         UNIX_TIMESTAMP()
-                //     FROM 
-                //         mdl_user_enrolments ue
-                //     JOIN 
-                //         mdl_enrol e ON e.id = ue.enrolid
-                //     JOIN 
-                //         mdl_context ctx ON ctx.instanceid = e.courseid AND ctx.contextlevel = 50
-                //     WHERE 
-                //         e.courseid = 4026 -- Specifically targeting course ID 4026
-                //         AND NOT EXISTS (
-                //             SELECT 1 
-                //             FROM mdl_role_assignments ra 
-                //             WHERE ra.contextid = ctx.id AND ra.userid = ue.userid
-                //         );
             }
             $user = $this->createUserAccountIfDoesNotExist($student);
             if ($user) {
