@@ -1513,32 +1513,43 @@ class StudentsController extends Controller
      * @param bool $isBulk Whether to sync multiple students or a single student
      * @return \Illuminate\Http\JsonResponse
      */
+
+    // Removed duplicate isAlreadyExistsError method - using checkForAlreadyExistsError instead
+
+/**
+ * Sync student data with the LMMU library API
+ *
+ * @param Request $request
+ * @param string|null $studentId
+ * @param bool $isBulk Whether to sync multiple students or a single student
+ * @return \Illuminate\Http\JsonResponse
+ */
     public function syncStudentsWithLibrary(Request $request, $studentId = null, $isBulk = false)
     {
         set_time_limit(12000000); // Set a long timeout for bulk operations
         
+        Log::info('Starting library sync operation', [
+            'bulk' => $isBulk,
+            'studentId' => $studentId ?: 'bulk operation'
+        ]);
+        
         try {
-            // Validate student ID if provided
-            if ($studentId && !preg_match('/^[0-9]{7,15}$/', $studentId)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid student ID format'
-                ], 400);
-            }
+            // API configuration from services.php
+            $baseUrl = config('services.library_api.url');
+            $accessKey = config('services.library_api.key');
+            $timeout = config('services.library_api.timeout', 30);
             
-            // Implement rate limiting for bulk operations
-            if ($isBulk && $this->isRateLimited('library_sync_bulk')) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Rate limit exceeded for bulk operations. Please try again later.'
-                ], 429);
-            }
+            // Parse the base URL to ensure we handle the endpoint correctly
+            // Remove any trailing "/student" if present in the base URL from .env
+            $baseUrl = rtrim(str_replace('/student', '', $baseUrl), '/');
+            $endpoint = $isBulk ? '/students' : '/student';
+            $academicYear = config('app.academic_year', 2025); // Use config or fallback to 2025
             
-            // API configuration - use config instead of direct env calls
-            $baseUrl = config('services.library_api.url', env('ASTRIA_BASE_URL'));
-            $accessKey = config('services.library_api.key', env('ASTRIA_API_KEY'));
-            $endpoint = $isBulk ? 'students' : 'student';
-            $academicYear = 2025; // Current academic year
+            Log::info('Using library API endpoint', [
+                'baseUrl' => $baseUrl,
+                'endpoint' => $endpoint,
+                'fullUrl' => $baseUrl . $endpoint
+            ]);
             
             // Data preparation
             if ($isBulk) {
@@ -1546,6 +1557,7 @@ class StudentsController extends Controller
                 $registeredStudents = $this->getStudentNumbersForRegisteredStudents();
                 
                 if (empty($registeredStudents)) {
+                    Log::warning('No registered students found for library sync', ['academicYear' => $academicYear]);
                     return response()->json([
                         'success' => false,
                         'message' => 'No registered students found for the current academic year'
@@ -1555,7 +1567,7 @@ class StudentsController extends Controller
                 // Build the students array from database records
                 $students = [];
                 
-                // Log the total number of students to process - avoid logging sensitive data
+                // Log the total number of students to process
                 Log::info('Starting library sync for ' . count($registeredStudents) . ' students');
                 
                 foreach ($registeredStudents as $studentId) {
@@ -1567,12 +1579,12 @@ class StudentsController extends Controller
                         continue;
                     }
                     
-                    // Extract required fields and format them for the API with proper sanitization
+                    // Extract required fields and format them for the API
                     $student = [
-                        'admission_no' => filter_var($studentDetails->StudentID, FILTER_SANITIZE_STRING),
-                        'email' => filter_var($studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm", FILTER_SANITIZE_EMAIL),
-                        'first_name' => filter_var($studentDetails->FirstName, FILTER_SANITIZE_STRING),
-                        'last_name' => filter_var($studentDetails->Surname, FILTER_SANITIZE_STRING)
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
                     ];
                     
                     // Add optional fields if available
@@ -1584,50 +1596,23 @@ class StudentsController extends Controller
                     
                     // Log progress for every 50 students
                     if (count($students) % 50 === 0) {
-                        Log::info("Processed student batch, total so far: " . count($students));
+                        Log::info("Processed student batch", ['count' => count($students)]);
                     }
                 }
                 
                 if (empty($students)) {
+                    Log::warning('No valid student data found for library sync');
                     return response()->json([
                         'success' => false,
                         'message' => 'No valid student data found to sync'
                     ], 404);
                 }
                 
-                // Process in chunks to avoid overwhelming the API
-                $chunkSize = 50;
-                $chunkedStudents = array_chunk($students, $chunkSize);
+                $data = [
+                    'students' => $students
+                ];
                 
-                $successCount = 0;
-                $failCount = 0;
-                
-                foreach ($chunkedStudents as $index => $chunk) {
-                    $chunkData = ['students' => $chunk];
-                    
-                    // Add a small delay between chunks
-                    if ($index > 0) {
-                        sleep(1);
-                    }
-                    
-                    // Make API request with proper timeouts and security
-                    $success = $this->makeSecureApiRequest($baseUrl, $endpoint, $accessKey, $chunkData);
-                    
-                    if ($success) {
-                        $successCount += count($chunk);
-                    } else {
-                        $failCount += count($chunk);
-                        Log::warning("Chunk {$index} failed");
-                    }
-                }
-                
-                return response()->json([
-                    'success' => $successCount > 0,
-                    'message' => "Processed {$successCount} students successfully, {$failCount} failed",
-                    'success_count' => $successCount,
-                    'failure_count' => $failCount
-                ]);
-                
+                Log::info('Prepared data for ' . count($students) . ' students');
             } else {
                 // For single student, get data from database using the studentId
                 if (!$studentId) {
@@ -1646,13 +1631,14 @@ class StudentsController extends Controller
                     ], 404);
                 }
                 
-                // Sanitize and prepare student data
+                Log::info("Processing single student", ['studentId' => $studentId]);
+                
                 $data = [
                     'student' => [
-                        'admission_no' => filter_var($studentDetails->StudentID, FILTER_SANITIZE_STRING),
-                        'email' => filter_var($studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm", FILTER_SANITIZE_EMAIL),
-                        'first_name' => filter_var($studentDetails->FirstName, FILTER_SANITIZE_STRING),
-                        'last_name' => filter_var($studentDetails->Surname, FILTER_SANITIZE_STRING)
+                        'admission_no' => $studentDetails->StudentID,
+                        'email' => $studentDetails->PrivateEmail ?: "{$studentDetails->StudentID}@lmmu.ac.zm",
+                        'first_name' => $studentDetails->FirstName,
+                        'last_name' => $studentDetails->Surname
                     ]
                 ];
                 
@@ -1660,20 +1646,131 @@ class StudentsController extends Controller
                 if ($studentDetails->Sex) {
                     $data['student']['gender'] = strtolower(substr($studentDetails->Sex, 0, 1)); // Convert to 'm' or 'f'
                 }
+            }
+            
+            // Make API request with timeout, retry logic, and proper headers
+            $maxRetries = 3;
+            $retryDelay = 1000; // 1 second in milliseconds
+            
+            // Initialize response variable
+            $response = null;
+            $attempt = 0;
+            $lastException = null;
+            
+            // Construct the full URL
+            $apiUrl = $baseUrl . $endpoint;
+            
+            // Log the request details
+            Log::info('Making library API request', [
+                'url' => $apiUrl,
+                'method' => 'POST',
+                'isBulk' => $isBulk,
+                'dataKeys' => array_keys($data)
+            ]);
+            
+            // Retry loop
+            while ($attempt < $maxRetries) {
+                $attempt++;
                 
-                // Make API request with enhanced security
-                $response = $this->makeSecureApiRequest($baseUrl, $endpoint, $accessKey, $data, false);
+                try {
+                    // Make the API call with appropriate timeout and headers
+                    $response = Http::timeout($timeout)
+                        ->withHeaders([
+                            'access-key' => $accessKey,
+                            'Accept' => 'application/json',
+                            'Content-Type' => 'application/json'
+                        ])
+                        ->post($apiUrl, $data);
+                    
+                    // If successful or it's a "already exists" error, break the retry loop
+                    if ($response->successful() || $this->checkForAlreadyExistsError($response)) {
+                        break;
+                    }
+                    
+                    // Log retry attempt
+                    Log::warning("Library API request failed, attempt {$attempt}/{$maxRetries}", [
+                        'status' => $response->status(),
+                        'endpoint' => $endpoint,
+                        'student_id' => $isBulk ? 'bulk' : $studentId
+                    ]);
+                    
+                    // Wait before retrying
+                    if ($attempt < $maxRetries) {
+                        usleep($retryDelay * 1000 * $attempt); // Exponential backoff
+                    }
+                } catch (\Exception $e) {
+                    $lastException = $e;
+                    
+                    Log::warning("Library API request exception, attempt {$attempt}/{$maxRetries}", [
+                        'exception' => $e->getMessage(),
+                        'endpoint' => $endpoint,
+                        'student_id' => $isBulk ? 'bulk' : $studentId
+                    ]);
+                    
+                    // Wait before retrying
+                    if ($attempt < $maxRetries) {
+                        usleep($retryDelay * 1000 * $attempt); // Exponential backoff
+                    }
+                }
+            }
+            
+            // If all retries failed with exceptions and no response was obtained
+            if (!$response && $lastException) {
+                throw $lastException;
+            }
+            
+            // Log the final response status and details for better debugging
+            if (!$response->successful()) {
+                Log::error('Library API Error Response', [
+                    'status' => $response->status(),
+                    'error' => $response->json(),
+                    'url' => $apiUrl,
+                    'endpoint' => $endpoint,
+                    'student_id' => $isBulk ? 'bulk' : $studentId,
+                    'attempts' => $attempt,
+                    'response_body' => $response->body()
+                ]);
+            } else {
+                Log::info('Library API Success Response', [
+                    'status' => $response->status(),
+                    'url' => $apiUrl,
+                    'endpoint' => $endpoint,
+                    'student_id' => $isBulk ? 'bulk' : $studentId,
+                    'attempts' => $attempt
+                ]);
+            }
+            
+            // Check if the request was successful or if it's just an 'already exists' error
+            $alreadyExists = $this->checkForAlreadyExistsError($response);
+            if ($response->successful() || $alreadyExists) {
+                // If it was a student-already-exists error, log it but treat as success
+                if ($alreadyExists) {
+                    Log::info('Student already exists in library system - treating as success', [
+                        'student_id' => $isBulk ? 'bulk' : $studentId,
+                        'status' => $response->status(),
+                        'response' => $response->json()
+                    ]);
+                }
                 
                 return response()->json([
-                    'success' => $response !== false,
-                    'message' => $response !== false ? 'Student synced successfully' : 'Failed to sync student',
-                    'count' => 1,
+                    'success' => true,
+                    'message' => $isBulk ? 'Students synced successfully' : 'Student synced successfully',
+                    'count' => $isBulk ? count($data['students']) : 1,
+                    'already_exists' => $alreadyExists,
+                    'data' => $response->json()
                 ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to sync with library API',
+                    'error' => $response->json(),
+                    'status' => $response->status()
+                ], $response->status());
             }
         } catch (\Exception $e) {
             Log::error('Library API Sync Error', [
                 'message' => $e->getMessage(),
-                'trace' => $this->getSecureStackTrace($e)
+                'student_id' => $studentId ?: 'bulk operation'
             ]);
             
             return response()->json([
@@ -1683,116 +1780,106 @@ class StudentsController extends Controller
             ], 500);
         }
     }
-    
+
+/**
+ * Check if an API response indicates that the student already exists
+ *
+ * @param \Illuminate\Http\Client\Response $response The HTTP response
+ * @return bool True if the error is due to the student already existing
+ */
     /**
-     * Make a secure API request with retries and proper error handling
-     * 
-     * @param string $baseUrl The base URL for the API
-     * @param string $endpoint The API endpoint
-     * @param string $accessKey The API access key
-     * @param array $data The data to send
-     * @param bool $returnResponse Whether to return the full response object or just success boolean
-     * @return mixed Response object or boolean success indicator
+     * Check if an API response indicates that the student already exists
+     *
+     * @param \Illuminate\Http\Client\Response|null $response The HTTP response
+     * @return bool True if the error is due to the student already existing
      */
-    private function makeSecureApiRequest($baseUrl, $endpoint, $accessKey, $data, $returnResponse = true)
+    protected function checkForAlreadyExistsError($response)
     {
-        $maxRetries = 3;
-        $attempt = 0;
+        // If response is null, can't determine if it's an "already exists" error
+        if (!$response) {
+            return false;
+        }
         
-        do {
-            try {
-                $attempt++;
-                
-                $response = Http::timeout(30) // Add a reasonable timeout
-                    ->withOptions([
-                        'verify' => true  // Verify SSL certificates
-                    ])
-                    ->withHeaders([
-                        'access-key' => $accessKey,
-                        'Accept' => 'application/json',
-                        'Content-Type' => 'application/json'
-                    ])
-                    ->post($baseUrl . $endpoint, $data);
-                    
-                // If successful, break the retry loop
-                if ($response->successful() || $this->isAlreadyExistsError($response)) {
-                    return $returnResponse ? $response : true;
-                }
-                
-                // Log the error with sensitive data masked
-                Log::warning('Library API request failed, attempt ' . $attempt, [
-                    'status' => $response->status(),
-                    'error' => $this->maskSensitiveData($response->json())
-                ]);
-                
-                // Wait longer between each retry
-                sleep($attempt * 2);
-                
-            } catch (\Illuminate\Http\Client\RequestException $e) {
-                if ($attempt >= $maxRetries) {
-                    throw $e;
-                }
-                
-                Log::warning("API request failed, retrying ({$attempt}/{$maxRetries})", [
-                    'error' => $e->getMessage()
-                ]);
-                
-                sleep($attempt * 2);
-            }
-        } while ($attempt < $maxRetries);
+        // Check if the response is an error
+        if ($response->successful()) {
+            return false;
+        }
         
-        return $returnResponse ? $response : false;
-    }
-    
-    /**
-     * Check if we're being rate limited for a specific operation
-     * 
-     * @param string $key The rate limit key
-     * @param int $limit Number of allowed attempts
-     * @param int $minutes Time window in minutes
-     * @return bool Whether the operation is rate limited
-     */
-    private function isRateLimited($key, $limit = 1, $minutes = 5)
-    {
-        $limiter = app(\Illuminate\Cache\RateLimiter::class);
-        if ($limiter->tooManyAttempts($key, $limit)) {
+        // Get the response data - handle potential JSON parsing failures
+        try {
+            $responseData = $response->json();
+        } catch (\Exception $e) {
+            Log::warning('Failed to parse JSON from library API response', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+            return false;
+        }
+        
+        // HTTP 409 Conflict status is commonly used for duplicates/already exists
+        if ($response->status() === 409) {
             return true;
         }
-        $limiter->hit($key, $minutes * 60);
+        
+        // Check for specific error messages that indicate the student already exists
+        if (isset($responseData['error']) && is_string($responseData['error'])) {
+            $errorMessage = strtolower($responseData['error']);
+            
+            return str_contains($errorMessage, 'already exists') || 
+                str_contains($errorMessage, 'duplicate') || 
+                str_contains($errorMessage, 'exists') ||
+                str_contains($errorMessage, 'previously registered');
+        }
+        
+        // Check for error message in other common response formats
+        if (isset($responseData['message']) && is_string($responseData['message'])) {
+            $errorMessage = strtolower($responseData['message']);
+            
+            return str_contains($errorMessage, 'already exists') || 
+                str_contains($errorMessage, 'duplicate') || 
+                str_contains($errorMessage, 'exists') ||
+                str_contains($errorMessage, 'previously registered');
+        }
+        
         return false;
     }
     
     /**
-     * Mask sensitive data in logs
-     * 
-     * @param mixed $data The data to mask
-     * @return mixed The masked data
+     * Sync a single student with the LMMU library API
+     *
+     * @param mixed $requestOrStudentId Request object or student ID string
+     * @param string|null $studentId Student ID to sync if first param is Request
+     * @return \Illuminate\Http\JsonResponse
      */
-    private function maskSensitiveData($data)
+    public function syncSingleStudentWithLibrary($requestOrStudentId, $studentId = null)
     {
-        if (is_array($data)) {
-            foreach ($data as $key => $value) {
-                if (in_array($key, ['email', 'admission_no']) && is_string($value)) {
-                    $data[$key] = substr($value, 0, 3) . '***' . substr($value, -3);
-                } elseif (is_array($value)) {
-                    $data[$key] = $this->maskSensitiveData($value);
-                }
+        // Check if first parameter is a Request object or a student ID
+        if ($requestOrStudentId instanceof Request) {
+            $request = $requestOrStudentId;
+            
+            // If studentId is not provided as second param, check if it's in the request body
+            if (!$studentId && $request->has('student_id')) {
+                $studentId = $request->student_id;
             }
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
+        } else {
+            // First parameter is the student ID
+            $studentId = $requestOrStudentId;
+            $request = new Request();
+            
+            return $this->syncStudentsWithLibrary($request, $studentId, false);
         }
-        return $data;
     }
     
     /**
-     * Get a sanitized stack trace
-     * 
-     * @param \Exception $e The exception
-     * @return array Sanitized stack trace
+     * Sync multiple students with the LMMU library API
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    private function getSecureStackTrace(\Exception $e)
+    public function syncMultipleStudentsWithLibrary(Request $request)
     {
-        $trace = $e->getTraceAsString();
-        // Remove potentially sensitive information like full paths
-        $trace = preg_replace('/(\/home\/\w+|C:\\\\Users\\\\[^\\\\]+)/', '[REDACTED]', $trace);
-        return $trace;
+        return $this->syncStudentsWithLibrary($request, null, true);
     }
 }
