@@ -68,10 +68,9 @@ class SisReportsEduroleDataManagementController extends Controller
         $moodleController = new MoodleController();
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
-        
-        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
-
         $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
+        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+        
         // $studentsController = new StudentsController();
         // $studentsController->importStudentsFromLMMAX();
         // $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdSisReports);
