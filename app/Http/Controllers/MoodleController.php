@@ -29,7 +29,7 @@ class MoodleController extends Controller
         $studentsController = new StudentsController();
         foreach($studentIds as $studentId){            
             // Use the new helper method
-            $this->syncStudentWithLibrary($studentId);
+            // $this->syncStudentWithLibrary($studentId);
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistration($studentId);
             $courseIds = $courses->pluck('CourseID');
@@ -84,7 +84,7 @@ class MoodleController extends Controller
             
         foreach($studentIds as $studentId){
             // Use the new helper method
-            $this->syncStudentWithLibrary($studentId);
+            // $this->syncStudentWithLibrary($studentId);
             // $studentsController->createSingleActiveDirectoryAccount($studentId);       
             $student = BasicInformation::where('ID', $studentId)->first();
             $courses = $this->getStudentRegistrationFromEdurole($studentId);
