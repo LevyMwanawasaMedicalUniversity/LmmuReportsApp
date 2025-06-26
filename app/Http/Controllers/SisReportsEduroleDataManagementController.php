@@ -15,6 +15,7 @@ use App\Models\SchoolsSR;
 use App\Models\StudentStudyLinkSR;
 use App\Models\StudySR;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SisReportsEduroleDataManagementController extends Controller
@@ -68,6 +69,7 @@ class SisReportsEduroleDataManagementController extends Controller
         $moodleController = new MoodleController();
         // $sisReportsEduroleDataManagementController = new SisReportsEduroleDataManagementController();
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
+
         $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
         $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
         
@@ -78,8 +80,9 @@ class SisReportsEduroleDataManagementController extends Controller
         //     ->update(['timeend' => strtotime('2025-12-31')]);
 
         // Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());     
-        $this->info('Students enrolled successfully.');
+        // $this->info('Students enrolled successfully.');
         // Log::info('Students enrolled successfully.');
+        return redirect()->back()->with('success', 'Moodle updated successfully with Edurole data');
     }
     
     private function importCoursesFromEdurole(){
