@@ -81,8 +81,8 @@ class Controller extends BaseController
         return $results;
     }
 
-    public function getAllStudentsRegisteredInASpecificAcademicYear($academicYear){
-        $results = $this->queryAllStudentsRegisteredInASpecificAcademicYear($academicYear);
+    public function getAllStudentsRegisteredInASpecificAcademicYear($academicYear, $enrollmentDate = null){
+        $results = $this->queryAllStudentsRegisteredInASpecificAcademicYear($academicYear, $enrollmentDate);
         return $results;            
     }
 
@@ -1570,7 +1570,7 @@ class Controller extends BaseController
         return $results;
     }
 
-    private function queryAllStudentsRegisteredInASpecificAcademicYear($academicYear){
+    private function queryAllStudentsRegisteredInASpecificAcademicYear($academicYear, $enrollmentDate = null){
         $results = BasicInformation::select(
                     'basic-information.FirstName',
                     'basic-information.MiddleName',
@@ -1595,9 +1595,15 @@ class Controller extends BaseController
                     $query->where('basic-information.StudyType', '=', 'Fulltime')
                         ->orWhere('basic-information.StudyType', '=', 'Distance');
                 })
-                ->where('ce.Year', '=', $academicYear)
-                ->groupBy('ce.StudentID');      
-            return $results;
+                ->where('ce.Year', '=', $academicYear);
+                
+        // Add enrollment date filter if provided
+        if ($enrollmentDate) {
+            $results = $results->whereDate('ce.EnrolmentDate', '>', $enrollmentDate);
+        }
+        
+        $results = $results->groupBy('ce.StudentID');      
+        return $results;
     }
 
     private function queryAllProgrammesPerSchool($schoolName){
