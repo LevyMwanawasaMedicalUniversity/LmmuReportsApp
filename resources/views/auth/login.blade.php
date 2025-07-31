@@ -64,6 +64,15 @@
                 </div>
                 <div class="card-footer ">
                 <button  type = "submit" class="btn btn-primary btn-round btn-lg btn-block mb-3">{{ __('Login') }}</button>
+                
+                <!-- Microsoft Login Button -->
+                <div class="text-center mb-3">
+                    <p class="text-muted">- OR -</p>
+                </div>
+                <a href="{{ route('login.microsoft') }}" class="btn btn-info btn-round btn-lg btn-block mb-3">
+                    <i class="fab fa-microsoft"></i> Login with Microsoft 365
+                </a>
+                
                 {{-- <div class="pull-left">
                     <h6>
                     <a href="{{ route('register') }}" class="link footer-link">{{ __('Create Account') }}</a>

@@ -15,9 +15,11 @@
         "laravel-frontend-presets/now-ui-dashboard": "^1.0",
         "laravel/framework": "^10.10",
         "laravel/sanctum": "^3.2",
+        "laravel/socialite": "^5.23",
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.2",
         "simplesoftwareio/simple-qrcode": "^4.2",
+        "socialiteproviders/microsoft": "^4.7",
         "spatie/laravel-permission": "^5.10"
     },
     "require-dev": {
