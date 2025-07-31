@@ -912,7 +912,7 @@ class StudentsController extends Controller
         }
     
         $todaysDate = date('Y-m-d');
-        $deadLine = '2025-05-31';
+        $deadLine = '2025-08-09';
     
         // Check if the student has status 4 instead of fetching the whole registration data if not necessary
         $isStudentsStatus4 = Student::query()->where('student_number', $studentId)->where('status', 4)->exists();
