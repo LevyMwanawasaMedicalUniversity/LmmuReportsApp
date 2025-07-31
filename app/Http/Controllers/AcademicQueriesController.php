@@ -29,17 +29,21 @@ class AcademicQueriesController extends Controller
     //All students registered in a specific academic Year, regardless of programme
     public function viewAllStudentsRegisteredInASpecificAcademicYear(Request $request){
         $academicYear = $request->input('academicYear');
+        $enrollmentDate = $request->input('enrollmentDate');
 
-        if ($academicYear === null) {
+        if ($academicYear === null || $academicYear === '') {
             $academicYear = 2025;        
-            $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->paginate('20');
-        }        
+        }
+        
+        $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear, $enrollmentDate)->paginate('20');
 
         // return $results;
-        return view('academics.reports.viewAllStudentsRegisteredInASpecificAcademicYear',compact('results','academicYear'));
+        return view('academics.reports.viewAllStudentsRegisteredInASpecificAcademicYear',compact('results','academicYear','enrollmentDate'));
     }      
 
-    public function exportAllStudentsRegisteredInASpecificAcademicYear($academicYear){
+    public function exportAllStudentsRegisteredInASpecificAcademicYear(Request $request){
+        $academicYear = $request->input('academicYear');
+        $enrollmentDate = $request->input('enrollmentDate');
 
         $headers = [
             'First Name',
@@ -68,8 +72,8 @@ class AcademicQueriesController extends Controller
             'SchoolName',
             'RegistrationDate'
         ];        
-        $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear)->get();        
-        $filename = 'AllStudentsRegisteredInASpecificAcademicYear' . $academicYear;
+        $results = $this->getAllStudentsRegisteredInASpecificAcademicYear($academicYear, $enrollmentDate)->get();        
+        $filename = 'AllStudentsRegisteredInASpecificAcademicYear' . $academicYear . ($enrollmentDate ? '_From_' . $enrollmentDate : '');
         
         return $this->exportData($headers, $rowData, $results, $filename);
     }

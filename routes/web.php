@@ -184,7 +184,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/exportAllCoursesWithResults', [AcademicQueriesController::class, 'exportAllCoursesWithResults'])->name('exportAllCoursesWithResults');
                 Route::get('/manageAdmissions', [AcademicQueriesController::class, 'manageAdmissions'])->name('academics.ManageAdmissions');
                 Route::get('/viewAllStudentsRegisteredInASpecificAcademicYear', [AcademicQueriesController::class, 'viewAllStudentsRegisteredInASpecificAcademicYear'])->name('viewAllStudentsRegisteredInASpecificAcademicYear');
-                Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear/{academicYear}', [AcademicQueriesController::class, 'exportAllStudentsRegisteredInASpecificAcademicYear'])->name('exportAllStudentsRegisteredInASpecificAcademicYear');
+                Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear', [AcademicQueriesController::class, 'exportAllStudentsRegisteredInASpecificAcademicYear'])->name('exportAllStudentsRegisteredInASpecificAcademicYear');
                 Route::get('/academicsEmailAnnouncement', [AcademicQueriesController::class, 'emailAnnouncement'])->name('academics.EmailAnnouncement');
                 Route::get('/viewAllProgrammesPerSchool', [AcademicQueriesController::class, 'viewAllProgrammesPerSchool'])->name('viewAllProgrammesPerSchool');
                 Route::get('/exportAllProgrammesPerSchool/{schoolName}', [AcademicQueriesController::class, 'exportAllProgrammesPerSchool'])->name('exportAllProgrammesPerSchool');

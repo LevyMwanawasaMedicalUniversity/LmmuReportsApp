@@ -46,15 +46,23 @@
 
 						<div class="date" style=" font-family: arial;  color:black; float:left; font-size: 12pt; width: 40pt; text-align: left;  height: 18pt;"> <b>Prog</b>  </div>.
 						<div style="width: 20pt; float: left;  height: 18pt;">:</div>
+						@if($studentInformation->ShortName == 'DipEHBridging')
+						<div class="studentid" style=" font-size: 12pt; color:black;  font-family: arial; font-weight: bold;  float:left; width: 200px; text-align: left;  height: 18pt;">DIPLOMA IN ENVIRONMENTAL HEALTH </div>
+						@else
 						<div class="studentid" style=" font-size: 12pt; color:black;  font-family: arial; font-weight: bold;  float:left; width: 200px; text-align: left;  height: 18pt;">{{ $studentInformation->Name }} </div>
-						
-
+						@endif
 				</div>
 				
 				<!-- BOTTOM BAR -->
+				@if($studentInformation->ShortName == 'DipEHBridging')
+				<div class="university" style="position: relative; margin-top: 5px; font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
+					2025
+				</div>
+				@else
 				<div class="university" style="position: relative; margin-top: 5px; font-size: 16pt; margin-right:0px; margin-bottom: 5px;  padding: 2pt; text-align: center; font-weight:bold; color: #FFF; font-family: arial; background-color: #58121a;"> 
 					2025 (Temporary Registration)
 				</div>
+				@endif
 				
 			</div>
 			<div style="page-break-before: always; color:#2e164e; text-align: center; width: 350pt; padding-top: 5px;">
