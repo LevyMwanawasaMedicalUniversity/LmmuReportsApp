@@ -52,7 +52,14 @@ class MicrosoftController extends Controller
                 return redirect()->intended('/home');
             }
             
-            // Create new user
+            // OPTION: Uncomment this block to restrict access to pre-approved users only
+            /*
+            return redirect('/login')->withErrors([
+                'error' => 'Access denied. Please contact your administrator to request access to this system.'
+            ]);
+            */
+            
+            // Create new user (auto-registration for organization members)
             $user = User::create([
                 'name' => $microsoftUser->getName(),
                 'email' => $microsoftUser->getEmail(),
