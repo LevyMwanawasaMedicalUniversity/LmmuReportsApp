@@ -28,8 +28,15 @@
                                     <option value="2022" {{ $academicYear == '2022' ? 'selected' : '' }}>2022</option>
                                     <option value="2023" {{ $academicYear == '2023' ? 'selected' : '' }}>2023</option>
                                     <option value="2024" {{ $academicYear == '2024' ? 'selected' : '' }}>2024</option>
-                                    <option value="2024" {{ $academicYear == '2025' ? 'selected' : '' }}>2025</option>
+                                    <option value="2025" {{ $academicYear == '2025' ? 'selected' : '' }}>2025</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3 ml-3">
+                            <div class="form-group">
+                                <label for="enrollmentDate"><h6><b>Enrollment Date (From):</b></h6></label>
+                                <input type="date" name="enrollmentDate" id="enrollmentDate" class="form-control" value="{{ $enrollmentDate ?? '' }}">
+                                <small class="form-text text-muted">Optional: Filter students enrolled after this date</small>
                             </div>
                         </div>
                     </div>
@@ -42,7 +49,7 @@
                         <div class="col-md-6">
                             @if(!empty($results))
                             <h4>Total Number Of Results {{ $results->total() }}</h4>
-                            <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('exportAllStudentsRegisteredInASpecificAcademicYear',$academicYear) }}">Export Data</a>
+                            <a class="btn btn-success float-right mt-3 mr-2" href="{{ route('exportAllStudentsRegisteredInASpecificAcademicYear',['academicYear' => $academicYear, 'enrollmentDate' => $enrollmentDate ?? '']) }}">Export Data</a>
                             @endif
                         </div>
                     </div>

@@ -50,10 +50,10 @@ class SisReportsEduroleDataManagementController extends Controller
         // MoodleUserEnrolments::where('timeend', '>', 0)        
         //     ->update(['timeend' => strtotime('2025-12-31')]);
         // Mail::to('ict.lmmu@lmmu.ac.zm')->send(new CronJobEmail());
-        $studentIds = CourseElectives::where('course-electives.Year', 2025)
-                        ->pluck('StudentID')
-                        ->unique()
-                        ->toArray();
+        // $studentIds = CourseElectives::where('course-electives.Year', 2025)
+        //                 ->pluck('StudentID')
+        //                 ->unique()
+        //                 ->toArray();
 
         $studentIdsFromSisReports = CourseRegistration::query()
                     ->join('student_study_link_s_r_s', 'course_registration.StudentID', '=', 'student_study_link_s_r_s.student_id')
@@ -71,7 +71,7 @@ class SisReportsEduroleDataManagementController extends Controller
         // $sisReportsEduroleDataManagementController->importOrUpdateSisReportsEduroleData();
 
         $moodleController->addStudentsToMoodleAndEnrollInCourses($studentIdsFromSisReports);
-        $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
+        // $moodleController->addStudentsFromEduroleToMoodleAndEnrollInCourses($studentIds); 
         
         // $studentsController = new StudentsController();
         // $studentsController->importStudentsFromLMMAX();

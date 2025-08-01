@@ -16,6 +16,7 @@ use App\Http\Controllers\NursingAndMidwiferyController;
 use App\Http\Controllers\FinanceQueriesController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\MoodleStatusController;
+use App\Http\Controllers\Auth\MicrosoftController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,11 @@ Route::get('/', function () {
 
 Route::get('/testsAssess', [DocketController::class, 'testAssess']);
 Auth::routes(['register' => false]);
+
+// Microsoft OAuth Routes
+Route::get('login/microsoft', [MicrosoftController::class, 'redirectToMicrosoft'])->name('login.microsoft');
+Route::get('login/microsoft/callback', [MicrosoftController::class, 'handleMicrosoftCallback']);
+
 Route::get('/verify/{studentNumber}', [DocketController::class, 'verifyStudent'])->name('docket.verify');
 Route::get('/verifyNmcz/{studentNumber}', [DocketController::class, 'verifyStudentNmcz'])->name('docket.verifyNmcz');
 Route::get('/home', [HomeController::class, 'index'])->name('home');
@@ -184,7 +190,7 @@ Route::group(['middleware' => 'auth'], function () {
                 Route::get('/exportAllCoursesWithResults', [AcademicQueriesController::class, 'exportAllCoursesWithResults'])->name('exportAllCoursesWithResults');
                 Route::get('/manageAdmissions', [AcademicQueriesController::class, 'manageAdmissions'])->name('academics.ManageAdmissions');
                 Route::get('/viewAllStudentsRegisteredInASpecificAcademicYear', [AcademicQueriesController::class, 'viewAllStudentsRegisteredInASpecificAcademicYear'])->name('viewAllStudentsRegisteredInASpecificAcademicYear');
-                Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear/{academicYear}', [AcademicQueriesController::class, 'exportAllStudentsRegisteredInASpecificAcademicYear'])->name('exportAllStudentsRegisteredInASpecificAcademicYear');
+                Route::get('/exportAllStudentsRegisteredInASpecificAcademicYear', [AcademicQueriesController::class, 'exportAllStudentsRegisteredInASpecificAcademicYear'])->name('exportAllStudentsRegisteredInASpecificAcademicYear');
                 Route::get('/academicsEmailAnnouncement', [AcademicQueriesController::class, 'emailAnnouncement'])->name('academics.EmailAnnouncement');
                 Route::get('/viewAllProgrammesPerSchool', [AcademicQueriesController::class, 'viewAllProgrammesPerSchool'])->name('viewAllProgrammesPerSchool');
                 Route::get('/exportAllProgrammesPerSchool/{schoolName}', [AcademicQueriesController::class, 'exportAllProgrammesPerSchool'])->name('exportAllProgrammesPerSchool');
