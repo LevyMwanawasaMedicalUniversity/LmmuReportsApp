@@ -51,7 +51,7 @@ docker-compose exec app chown -R www-data:www-data /var/www/storage /var/www/boo
 
 This setup includes the following containers:
 
-- **app**: PHP 8.1 FPM with all required extensions (zip, gd, curl) installed
+- **app**: PHP 8.2 FPM with all required extensions (zip, gd, curl) installed
 - **webserver**: Nginx web server
 - **db**: MySQL 8.0 database server
 
