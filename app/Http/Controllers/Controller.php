@@ -2186,15 +2186,7 @@ class Controller extends BaseController
             'inv2022.InvoiceDate2022', 'inv2022.InvoiceAmount2022',
             'inv2023.InvoiceDate2023', 'inv2023.InvoiceAmount2023',
             'inv2024.InvoiceDate2024', 'inv2024.InvoiceAmount2024',
-            'inv2025.InvoiceDate2025', 'inv2025.InvoiceAmount2025',
-            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2019.InvoiceDate2019, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2020.InvoiceDate2020, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2021.InvoiceDate2021, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2022.InvoiceDate2022, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\')')
+            'inv2025.InvoiceDate2025', 'inv2025.InvoiceAmount2025'
         );
         return $results;
     }
@@ -2546,15 +2538,7 @@ class Controller extends BaseController
             'inv2022.InvoiceDate2022', 'inv2022.InvoiceAmount2022',
             'inv2023.InvoiceDate2023', 'inv2023.InvoiceAmount2023',
             'inv2024.InvoiceDate2024', 'inv2024.InvoiceAmount2024',
-            'inv2025.InvoiceDate2025', 'inv2025.InvoiceAmount2025',
-            DB::raw('FORMAT(lid.LatestTxDate, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2019.InvoiceDate2019, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2020.InvoiceDate2020, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2021.InvoiceDate2021, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2022.InvoiceDate2022, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2023.InvoiceDate2023, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2024.InvoiceDate2024, \'yyyy-MM-dd\')'),
-            DB::raw('FORMAT(inv2025.InvoiceDate2025, \'yyyy-MM-dd\')')
+            'inv2025.InvoiceDate2025', 'inv2025.InvoiceAmount2025'
         )
         ->get();
 
