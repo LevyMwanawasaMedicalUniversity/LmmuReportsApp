@@ -1954,99 +1954,106 @@ class Controller extends BaseController
     }
 
     private function queryStudentsPayments($studentId){
-        $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
+        // $studentIds = $this->getStudentsFromLMMAX()->pluck('student_id')->toArray();
         
-        // Get latest invoice date for each year separately with explicit date ranges
-        $invoice2019 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2019', DB::raw('MAX(TxDate) AS InvoiceDate2019'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2019')
-                      ->orWhereBetween('TxDate', ['2019-01-01 00:00:00.000', '2019-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        // Get latest invoice date for each year separately using window functions to get Debit from latest TxDate
+        $invoice2019 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2019, 
+                TxDate AS InvoiceDate2019,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2019 OR TxDate BETWEEN \'2019-01-01 00:00:00.000\' AND \'2019-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2019', 'InvoiceDate2019')
+        ->where('rn', 1);
 
-        $invoice2020 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2020', DB::raw('MAX(TxDate) AS InvoiceDate2020'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2020')
-                      ->orWhereBetween('TxDate', ['2020-01-01 00:00:00.000', '2020-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2020 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2020, 
+                TxDate AS InvoiceDate2020,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2020 OR TxDate BETWEEN \'2020-01-01 00:00:00.000\' AND \'2020-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2020', 'InvoiceDate2020')
+        ->where('rn', 1);
 
-        $invoice2021 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2021', DB::raw('MAX(TxDate) AS InvoiceDate2021'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2021')
-                      ->orWhereBetween('TxDate', ['2021-01-01 00:00:00.000', '2021-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2021 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2021, 
+                TxDate AS InvoiceDate2021,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2021 OR TxDate BETWEEN \'2021-01-01 00:00:00.000\' AND \'2021-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2021', 'InvoiceDate2021')
+        ->where('rn', 1);
 
-        $invoice2022 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2022', DB::raw('MAX(TxDate) AS InvoiceDate2022'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2022')
-                      ->orWhereBetween('TxDate', ['2022-01-01 00:00:00.000', '2022-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2022 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2022, 
+                TxDate AS InvoiceDate2022,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2022 OR TxDate BETWEEN \'2022-01-01 00:00:00.000\' AND \'2022-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2022', 'InvoiceDate2022')
+        ->where('rn', 1);
 
-        $invoice2023 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2023', DB::raw('MAX(TxDate) AS InvoiceDate2023'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2023')
-                      ->orWhereBetween('TxDate', ['2023-01-01 00:00:00.000', '2023-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2023 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2023, 
+                TxDate AS InvoiceDate2023,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2023 OR TxDate BETWEEN \'2023-01-01 00:00:00.000\' AND \'2023-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2023', 'InvoiceDate2023')
+        ->where('rn', 1);
 
-        $invoice2024 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2024', DB::raw('MAX(TxDate) AS InvoiceDate2024'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2024')
-                      ->orWhereBetween('TxDate', ['2024-01-01 00:00:00.000', '2024-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2024 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2024, 
+                TxDate AS InvoiceDate2024,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2024 OR TxDate BETWEEN \'2024-01-01 00:00:00.000\' AND \'2024-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2024', 'InvoiceDate2024')
+        ->where('rn', 1);
 
-        $invoice2025 = SagePostAR::select('AccountLink','Debit AS InvoiceAmount2025', DB::raw('MAX(TxDate) AS InvoiceDate2025'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2025')
-                      ->orWhereBetween('TxDate', ['2025-01-01 00:00:00.000', '2025-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2025 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2025, 
+                TxDate AS InvoiceDate2025,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2025 OR TxDate BETWEEN \'2025-01-01 00:00:00.000\' AND \'2025-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2025', 'InvoiceDate2025')
+        ->where('rn', 1);
             
         // Also keep the latest invoice date across all years for compatibility
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
@@ -2074,6 +2081,7 @@ class Controller extends BaseController
                 WHEN pa.Description LIKE \'%DE%\' THEN 0  
                 WHEN pa.Description LIKE \'%[A-Za-z]+-[A-Za-z]+-[0-9][0-9][0-9][0-9]-[A-Za-z][0-9]%\' THEN 0    
                 WHEN pa.TxDate < \'2024-01-01\' THEN 0 
+                WHEN pa.TxDate > \'2024-12-31\' THEN 0
                 ELSE pa.Credit 
                 END) AS TotalPayment2024'),  
             DB::raw('SUM(CASE 
@@ -2192,97 +2200,104 @@ class Controller extends BaseController
     }
 
     private function querySumOfAllTransactionsOfEachStudent(){
-        // Create separate queries for invoice dates by year
-        $invoice2019 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2019'), DB::raw('MAX(TxDate) AS InvoiceDate2019'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2019')
-                      ->orWhereBetween('TxDate', ['2019-01-01 00:00:00.000', '2019-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        // Create separate queries for invoice dates by year using window functions to get Debit from latest TxDate
+        $invoice2019 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2019, 
+                TxDate AS InvoiceDate2019,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2019 OR TxDate BETWEEN \'2019-01-01 00:00:00.000\' AND \'2019-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2019', 'InvoiceDate2019')
+        ->where('rn', 1);
 
-        $invoice2020 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2020'), DB::raw('MAX(TxDate) AS InvoiceDate2020'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2020')
-                      ->orWhereBetween('TxDate', ['2020-01-01 00:00:00.000', '2020-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2020 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2020, 
+                TxDate AS InvoiceDate2020,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2020 OR TxDate BETWEEN \'2020-01-01 00:00:00.000\' AND \'2020-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2020', 'InvoiceDate2020')
+        ->where('rn', 1);
 
-        $invoice2021 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2021'), DB::raw('MAX(TxDate) AS InvoiceDate2021'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2021')
-                      ->orWhereBetween('TxDate', ['2021-01-01 00:00:00.000', '2021-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2021 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2021, 
+                TxDate AS InvoiceDate2021,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2021 OR TxDate BETWEEN \'2021-01-01 00:00:00.000\' AND \'2021-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2021', 'InvoiceDate2021')
+        ->where('rn', 1);
 
-        $invoice2022 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2022'), DB::raw('MAX(TxDate) AS InvoiceDate2022'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2022')
-                      ->orWhereBetween('TxDate', ['2022-01-01 00:00:00.000', '2022-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2022 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2022, 
+                TxDate AS InvoiceDate2022,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2022 OR TxDate BETWEEN \'2022-01-01 00:00:00.000\' AND \'2022-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2022', 'InvoiceDate2022')
+        ->where('rn', 1);
             
-        $invoice2023 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2023'), DB::raw('MAX(TxDate) AS InvoiceDate2023'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2023')
-                      ->orWhereBetween('TxDate', ['2023-01-01 00:00:00.000', '2023-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2023 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2023, 
+                TxDate AS InvoiceDate2023,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2023 OR TxDate BETWEEN \'2023-01-01 00:00:00.000\' AND \'2023-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2023', 'InvoiceDate2023')
+        ->where('rn', 1);
             
-        $invoice2024 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2024'), DB::raw('MAX(TxDate) AS InvoiceDate2024'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2024')
-                      ->orWhereBetween('TxDate', ['2024-01-01 00:00:00.000', '2024-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2024 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2024, 
+                TxDate AS InvoiceDate2024,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2024 OR TxDate BETWEEN \'2024-01-01 00:00:00.000\' AND \'2024-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2024', 'InvoiceDate2024')
+        ->where('rn', 1);
             
-        $invoice2025 = SagePostAR::select('AccountLink', DB::raw('MAX(Debit) AS InvoiceAmount2025'), DB::raw('MAX(TxDate) AS InvoiceDate2025'))
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2025')
-                      ->orWhereBetween('TxDate', ['2025-01-01 00:00:00.000', '2025-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+        $invoice2025 = DB::table(DB::raw('(
+            SELECT 
+                AccountLink, 
+                Debit AS InvoiceAmount2025, 
+                TxDate AS InvoiceDate2025,
+                ROW_NUMBER() OVER (PARTITION BY AccountLink ORDER BY TxDate DESC) as rn
+            FROM LMMU_Live.dbo.PostAR 
+            WHERE (Description like \'%-%-%\' OR Reference like \'INV%\')
+                AND Debit > 0
+                AND (YEAR(TxDate) = 2025 OR TxDate BETWEEN \'2025-01-01 00:00:00.000\' AND \'2025-12-31 23:59:59.999\')
+        ) ranked'))
+        ->select('AccountLink', 'InvoiceAmount2025', 'InvoiceDate2025')
+        ->where('rn', 1);
             
         // Also keep the latest invoice date across all years for compatibility
         $latestInvoiceDates = SagePostAR::select('AccountLink', DB::raw('MAX(TxDate) AS LatestTxDate'))
