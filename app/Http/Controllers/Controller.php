@@ -1960,139 +1960,256 @@ class Controller extends BaseController
         // Use DTStamp to get the latest invoice date and its related debit amount
         $invoice2019 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2019, TxDate AS InvoiceDate2019')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2019')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2019
             )');
 
         $invoice2020 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2020, TxDate AS InvoiceDate2020')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2020')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2020
             )');
 
         $invoice2021 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2021, TxDate AS InvoiceDate2021')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2021')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2021
             )');
 
         $invoice2022 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2022, TxDate AS InvoiceDate2022')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2022')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2022
             )');
 
         $invoice2023 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2023, TxDate AS InvoiceDate2023')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2023')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2023
             )');
 
         $invoice2024 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2024, TxDate AS InvoiceDate2024')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2024')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2024
             )');
 
         $invoice2025 = SagePostAR::selectRaw('AccountLink, Debit AS InvoiceAmount2025, TxDate AS InvoiceDate2025')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('YEAR(TxDate) = 2025')
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
                 AND YEAR(p2.TxDate) = 2025
-            )')
-            ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
-            })
-            ->where('Debit', '>', 0)
-            ->where(function($query) {
-                // Use either year function or explicit date range as a contingency
-                $query->whereRaw('YEAR(TxDate) = 2025')
-                      ->orWhereBetween('TxDate', ['2025-01-01 00:00:00.000', '2025-12-31 23:59:59.999']);
-            })
-            ->groupBy('AccountLink');
+            )');
             
         // Also keep the latest invoice date across all years for compatibility (using DTStamp)
         $latestInvoiceDates = SagePostAR::selectRaw('AccountLink, TxDate AS LatestTxDate')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-FT-%-Y%') // Program-FT-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-DE-%-Y%') // Program-DE-Year-Level pattern
+                    ->orWhere('Description', 'like', '%-Inter-FT-%-Y%') // Program-Inter-FT-Year-Level pattern
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%');
             })
+            ->whereNotIn('Description', [
+                'Grad-IN-ABS-2024', 'Graduating in absentia', 'Graduation Participation Fee', 
+                'Hire of Gown', 'Hire-OF-GOWN-AdvDip-2024', 'Hire-OF-GOWN-Cert-2024', 
+                'Hire-OF-GOWN-Deg-2024', 'Hire-OF-GOWN-Dip-2024', 'Hire-OF-GOWN-Master-2024',
+                'Purchase of Gown', 'Replacement of ID', 'Transcript Fee'
+            ])
+            ->where('Description', 'not like', 'Purc-OF-GOWN-%')
+            ->where('Description', 'not like', '%Participation Fee%')
+            ->where('Description', 'not like', '%Hire%Gown%')
             ->where('Debit', '>', 0)
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-FT-%-Y%\' OR p2.Description LIKE \'%-DE-%-Y%\' OR p2.Description LIKE \'%-Inter-FT-%-Y%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\')
+                AND p2.Description NOT IN (\'Grad-IN-ABS-2024\', \'Graduating in absentia\', \'Graduation Participation Fee\', \'Hire of Gown\', \'Hire-OF-GOWN-AdvDip-2024\', \'Hire-OF-GOWN-Cert-2024\', \'Hire-OF-GOWN-Deg-2024\', \'Hire-OF-GOWN-Dip-2024\', \'Hire-OF-GOWN-Master-2024\', \'Purchase of Gown\', \'Replacement of ID\', \'Transcript Fee\')
+                AND p2.Description NOT LIKE \'Purc-OF-GOWN-%\'
+                AND p2.Description NOT LIKE \'%Participation Fee%\'
+                AND p2.Description NOT LIKE \'%Hire%Gown%\'
                 AND p2.Debit > 0
             )');
         $results = SageClient::select(
@@ -2326,15 +2443,17 @@ class Controller extends BaseController
         // Also keep the latest invoice date across all years for compatibility (using DTStamp)
         $latestInvoiceDates = SagePostAR::selectRaw('AccountLink, TxDate AS LatestTxDate')
             ->where(function($query) {
-                $query->where('Description', 'like', '%-%-%')
-                    ->orWhere('Reference', 'like', 'INV%');
+                $query->where('Description', 'like', '%-%-%-%') // More specific pattern for invoice descriptions
+                    ->orWhere('Reference', 'like', 'INV%')
+                    ->orWhere('Description', 'like', 'Invoice%') // Additional invoice patterns
+                    ->orWhere('Description', 'like', '%invoice%');
             })
             ->where('Debit', '>', 0)
             ->whereRaw('DTStamp = (
                 SELECT MAX(DTStamp) 
                 FROM LMMU_Live.dbo.PostAR p2
                 WHERE p2.AccountLink = PostAR.AccountLink
-                AND (p2.Description LIKE \'%-%-%\' OR p2.Reference LIKE \'INV%\')
+                AND (p2.Description LIKE \'%-%-%-%\' OR p2.Reference LIKE \'INV%\' OR p2.Description LIKE \'Invoice%\' OR p2.Description LIKE \'%invoice%\')
                 AND p2.Debit > 0
             )');
 
